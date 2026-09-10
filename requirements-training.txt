@@ -1,0 +1,7 @@
+# Install torch first from the CPU or CUDA index documented in Training/README.md.
+torch==2.8.0
+numpy==2.2.6
+opencv-python-headless==4.12.0.88
+onnx==1.19.0
+onnxruntime==1.22.1
+pytest==8.4.2

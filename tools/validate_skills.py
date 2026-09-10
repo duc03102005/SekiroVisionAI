@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import os
 import sys
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -57,9 +58,15 @@ def check_skills(root: Path) -> tuple[list[str], dict]:
             errors.append(f"Unfinished scaffold: {p.parent.name}")
 
     link_count = 0
-    for p in sorted(root.rglob("*.md")):
-        if ".git" in p.parts:
-            continue
+    markdown_files = []
+    # Check authored repository docs, not installed dependencies or build output.
+    # The reviewed skill inventory above is always checked separately in full.
+    for directory, children, filenames in os.walk(root):
+        children[:] = [name for name in children if name not in
+                       {".git", "out", "build", "artifacts", "node_modules", "__pycache__", "local-data"}
+                       and not name.startswith(".venv")]
+        markdown_files.extend(Path(directory) / name for name in filenames if name.endswith(".md"))
+    for p in sorted(markdown_files):
         for target in LINK.findall(p.read_text(encoding="utf-8")):
             u = urlsplit(target)
             if u.scheme or not u.path:

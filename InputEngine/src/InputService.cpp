@@ -94,8 +94,10 @@ std::optional<int> input_watchdog_command_line() {
 
 struct InputService::Impl {
     std::shared_ptr<EventLog> log;
+    EventCallback callback;
     mutable std::mutex mutex;
     InputStatus state;
+    std::string detector_reason{"DETECTOR_STARTING"};
     WindowTarget selected;
     std::optional<DodgeRequest> pending;
     std::atomic_bool enabled{}, quit{};
@@ -105,7 +107,7 @@ struct InputService::Impl {
     HANDLE wake{CreateEventW(nullptr,FALSE,FALSE,nullptr)};
     std::thread worker;
 
-    explicit Impl(std::shared_ptr<EventLog> value):log(std::move(value)) {
+    explicit Impl(std::shared_ptr<EventLog> value,EventCallback event):log(std::move(value)),callback(std::move(event)) {
         if(!wake) throw std::runtime_error("Could not create input wake event");
         worker=std::thread([this]{run();});
     }
@@ -114,7 +116,7 @@ struct InputService::Impl {
         const bool was=enabled.exchange(false);
         ++revision;
         { std::lock_guard lock(mutex); pending.reset(); state.reason=reason; }
-        if(was) log->emit("AUTO_DISABLED",reason);
+        if(was) {log->emit("AUTO_DISABLED",reason);if(callback)callback("INPUT_DISABLED: "+reason,0);}
         SetEvent(wake);
     }
     void reject(const std::string& reason,std::uint64_t episode) {
@@ -127,11 +129,17 @@ struct InputService::Impl {
             const bool f8=RegisterHotKey(nullptr,8,MOD_NOREPEAT,VK_F8)!=FALSE;
             const bool f9=RegisterHotKey(nullptr,9,MOD_NOREPEAT,VK_F9)!=FALSE;
             const bool f10=RegisterHotKey(nullptr,10,MOD_NOREPEAT,VK_F10)!=FALSE;
+            const bool f4=RegisterHotKey(nullptr,4,MOD_NOREPEAT,VK_F4)!=FALSE;
+            const bool f5=RegisterHotKey(nullptr,5,MOD_NOREPEAT,VK_F5)!=FALSE;
+            const bool f6=RegisterHotKey(nullptr,6,MOD_NOREPEAT,VK_F6)!=FALSE;
+            const bool f7=RegisterHotKey(nullptr,7,MOD_NOREPEAT,VK_F7)!=FALSE;
             {
                 std::lock_guard lock(mutex); state.hotkeys_ready=f8&&f9&&f10; state.watchdog_ready=watchdog.ready();
                 state.reason=!state.hotkeys_ready?"HOTKEY_CONFLICT":!state.watchdog_ready?"WATCHDOG_UNAVAILABLE":"AUTO_OFF_PRESS_F8_IN_GAME";
             }
             log->emit("INPUT_READY",std::string("F8/F9/F10=")+(f8&&f9&&f10?"ready":"conflict")+" watchdog="+(watchdog.ready()?"ready":"unavailable"));
+            log->emit("RECORD_HOTKEYS",std::string("F4 miss=")+(f4?"ready":"conflict")+" F5 false-positive="+(f5?"ready":"conflict")+
+                " F6 sample="+(f6?"ready":"conflict")+" F7 recording="+(f7?"ready":"conflict"));
             DispatchGuard auto_guard,manual_guard;
             std::uint64_t manual_episode=0;
             double release_at=0;
@@ -144,18 +152,28 @@ struct InputService::Impl {
                     else if(msg.wParam==8) {
                         if(enabled) disable("F8_TOGGLE_OFF");
                         else {
-                            bool allowed=false;
+                            bool allowed=false;std::string blocked;
                             { std::lock_guard lock(mutex);
-                              allowed=state.hotkeys_ready&&watchdog.ready()&&!watchdog_reported&&state.capture_running&&selected.hwnd==GetForegroundWindow()&&
-                                target_is_current(selected)&&latest_source>0&&qpc_ms()-latest_source<120;
+                              if(!state.hotkeys_ready)blocked="HOTKEY_CONFLICT";
+                              else if(!watchdog.ready()||watchdog_reported)blocked="WATCHDOG_UNAVAILABLE";
+                              else if(!state.capture_running)blocked="START_CAPTURE_FIRST";
+                              else if(selected.hwnd!=GetForegroundWindow()||!target_is_current(selected))blocked="RETURN_TO_SEKIRO_THEN_F8";
+                              else if(latest_source<=0||qpc_ms()-latest_source>=120)blocked="CAPTURE_TOO_OLD_FOR_F8";
+                              else if(!state.detector_ready)blocked=detector_reason;
+                              allowed=blocked.empty();
                               if(allowed) { ++revision; pending.reset(); state.reason="AUTO_ON"; enabled=true; }
                             }
                             if(allowed) { log->emit("AUTO_ENABLED","F8; temporal history restarts; wait for quiet before attack arming"); MessageBeep(MB_OK); }
-                            else reject("F8_REQUIRES_FOREGROUND_SEKIRO_FRESH_CAPTURE_AND_HOTKEYS",0);
+                            else reject("F8_BLOCKED: "+blocked,0);
                         }
                     } else if(msg.wParam==10) {
                         std::lock_guard lock(mutex);
                         pending=DodgeRequest{revision.load(),++manual_episode,latest_source,true};
+                    } else if(msg.wParam>=4&&msg.wParam<=7&&callback) {
+                        bool foreground=false;
+                        {std::lock_guard lock(mutex);foreground=state.capture_running&&selected.hwnd==GetForegroundWindow()&&target_is_current(selected);}
+                        if(foreground)callback(msg.wParam==4?"MISSED_ATTACK_REVIEW":msg.wParam==5?"FALSE_POSITIVE_REVIEW":
+                            msg.wParam==6?"MANUAL_SAMPLE":"TOGGLE_RECORDING",0);
                     }
                 }
                 bool capture=false,focus=false; double source=0;
@@ -185,6 +203,10 @@ struct InputService::Impl {
                     const char* reason=context.now_ms-last_submission<minimum?"GLOBAL_COOLDOWN":
                         (request->manual?manual_guard:auto_guard).reserve(context);
                     if(reason) { reject(reason,request->episode); continue; }
+                    if(!request->manual&&request->latest_send_ms>0&&
+                       (qpc_ms()<request->earliest_send_ms||qpc_ms()>request->latest_send_ms)) {
+                        reject("TTI_WINDOW_EXPIRED_BEFORE_SEND",request->episode);continue;
+                    }
                     // Check cancellation and focus again directly before actual submission.
                     if(!enabled||request->revision!=revision||GetForegroundWindow()!=target.hwnd) {reject("CANCELLED_BEFORE_SEND",request->episode);continue;}
                     std::array<INPUT,2> events{}; UINT count=0; LONG mask=1;
@@ -194,11 +216,13 @@ struct InputService::Impl {
                         mask|=1<<dir;
                     }
                     events[count].type=INPUT_KEYBOARD;events[count].ki.wScan=scans[0];events[count++].ki.dwFlags=KEYEVENTF_SCANCODE;
-                    log->emit(request->manual?"MANUAL_DODGE_REQUEST":"DODGE_REQUEST","source_age_ms="+std::to_string(context.now_ms-request->source_ms)+" owned_mask="+std::to_string(mask),request->episode);
+                    log->emit(request->manual?"MANUAL_DODGE_REQUEST":"DODGE_REQUEST","source_age_ms="+std::to_string(context.now_ms-request->source_ms)+" owned_mask="+std::to_string(mask)+
+                        " frame="+std::to_string(request->sequence)+" model="+request->model_version+" "+request->prediction_details,request->episode);
                     InterlockedExchange64(&owned->deadline_ms,static_cast<LONG64>(GetTickCount64()+250));
                     release_failures=0;
                     InterlockedExchange(&owned->owned_mask,mask); // Child owns recovery responsibility before key-down.
-                    if(!enabled||request->revision!=revision||GetForegroundWindow()!=target.hwnd) {
+                    if(!enabled||request->revision!=revision||GetForegroundWindow()!=target.hwnd||
+                       (!request->manual&&request->latest_send_ms>0&&qpc_ms()>request->latest_send_ms)) {
                         release_owned(owned);reject("CANCELLED_BEFORE_SEND",request->episode);continue;
                     }
                     SetLastError(ERROR_SUCCESS);
@@ -211,6 +235,7 @@ struct InputService::Impl {
                     } else {
                         {std::lock_guard lock(mutex);++state.sent;state.reason="DODGE_SENT";}
                         log->emit("DODGE_SENT","inserted="+std::to_string(sent)+" hold_ms="+std::to_string(hold)+(player_moving?" player_direction_preserved":" configured_direction"),request->episode);
+                        if(callback)callback(request->manual?"MANUAL_DODGE_SENT":"DODGE_SENT",request->episode);
                     }
                 }
                 MsgWaitForMultipleObjects(1,&wake,FALSE,5,QS_ALLINPUT);
@@ -218,12 +243,13 @@ struct InputService::Impl {
             enabled=false;
             if(watchdog.state()) release_owned(watchdog.state());
             if(f8)UnregisterHotKey(nullptr,8);if(f9)UnregisterHotKey(nullptr,9);if(f10)UnregisterHotKey(nullptr,10);
+            if(f4)UnregisterHotKey(nullptr,4);if(f5)UnregisterHotKey(nullptr,5);if(f6)UnregisterHotKey(nullptr,6);if(f7)UnregisterHotKey(nullptr,7);
         } catch(const std::exception& e) {disable("INPUT_WORKER_FAULT");log->emit("INPUT_FAULT",e.what());}
         catch(...) {disable("INPUT_WORKER_FAULT");}
     }
 };
 
-InputService::InputService(std::shared_ptr<EventLog> log):impl_(std::make_unique<Impl>(std::move(log))){}
+InputService::InputService(std::shared_ptr<EventLog> log,EventCallback callback):impl_(std::make_unique<Impl>(std::move(log),std::move(callback))){}
 InputService::~InputService()=default;
 void InputService::target(const WindowTarget& target) {
     impl_->disable("NEW_CAPTURE_TARGET");
@@ -237,5 +263,10 @@ void InputService::configure(int direction,int hold_ms,double cooldown_ms){
     impl_->direction=std::clamp(direction,0,4);impl_->hold_ms=std::clamp(hold_ms,30,90);impl_->cooldown=std::clamp(cooldown_ms,250.0,2000.0);
 }
 void InputService::request(DodgeRequest request){std::lock_guard lock(impl_->mutex);if(!impl_->pending)impl_->pending=request;SetEvent(impl_->wake);}
+void InputService::detector_ready(bool ready,const std::string& reason){
+    bool was_ready=false;
+    {std::lock_guard lock(impl_->mutex);was_ready=impl_->state.detector_ready;impl_->state.detector_ready=ready;impl_->detector_reason=reason;}
+    if(!ready&&(was_ready||impl_->enabled))impl_->disable(reason);
+}
 InputStatus InputService::status()const{std::lock_guard lock(impl_->mutex);auto result=impl_->state;result.enabled=impl_->enabled;result.revision=impl_->revision;return result;}
 }

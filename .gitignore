@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .venv/
+.venv-*/
 .vs/
 .idea/
 .vscode/
@@ -10,6 +11,8 @@ bin/
 obj/
 data/
 datasets/
+!Training/datasets/
+!Training/datasets/*.py
 recordings/
 logs/
 traces/
@@ -27,3 +30,14 @@ checkpoints/
 .env.*
 !.env.example
 *.user
+Dataset/raw/
+Dataset/clips/
+Dataset/processed/
+DatasetTools/AnnotationApp/.cache/
+*.avi
+*.mov
+*.webm
+*.npz
+*.npy
+artifacts/
+local-data/

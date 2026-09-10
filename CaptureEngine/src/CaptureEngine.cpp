@@ -14,6 +14,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <locale>
@@ -113,8 +114,8 @@ struct Row {
 struct Slot {
     winrt::com_ptr<ID3D11Texture2D> texture;
     winrt::com_ptr<ID3D11ShaderResourceView> view;
-    winrt::com_ptr<ID3D11Texture2D> reduced, staging;
-    winrt::com_ptr<ID3D11RenderTargetView> small_target;
+    winrt::com_ptr<ID3D11Texture2D> color_texture, color_staging;
+    winrt::com_ptr<ID3D11RenderTargetView> color_target;
     winrt::com_ptr<ID3D11Query> event, disjoint, begin, end;
     FrameLease source;
     Row row;
@@ -131,7 +132,7 @@ struct Runtime {
     wgc::GraphicsCaptureSession session{nullptr};
     winrt::event_token arrived{}, closed{};
     bool arrived_registered{}, closed_registered{};
-    Size size{};
+    Size size{}, readback_size{};
     bool readback{};
     winrt::com_ptr<ID3D11VertexShader> resize_vertex;
     winrt::com_ptr<ID3D11PixelShader> resize_pixel;
@@ -148,15 +149,16 @@ Vertex vs(uint id : SV_VertexID) {
     v.position = float4(v.uv * float2(2,-2) + float2(-1,1),0,1); return v;
 }
 float4 ps(Vertex v) : SV_Target {
-    float g = dot(source.Sample(linearSampler,v.uv).rgb,float3(0.299,0.587,0.114));
-    return float4(g,g,g,1);
+    // Both views use BGRA8_UNORM. Shader values use semantic RGBA channels;
+    // the render-target format performs the physical BGRA byte packing.
+    return float4(source.Sample(linearSampler,v.uv).rgb,1);
 }
 )hlsl";
         winrt::com_ptr<ID3DBlob> vs, ps, errors;
-        winrt::check_hresult(D3DCompile(shader, sizeof(shader)-1, "MVP_downsample", nullptr, nullptr,
+        winrt::check_hresult(D3DCompile(shader, sizeof(shader)-1, "Color_readback", nullptr, nullptr,
             "vs", "vs_5_0", D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, vs.put(), errors.put()));
         errors = nullptr;
-        winrt::check_hresult(D3DCompile(shader, sizeof(shader)-1, "MVP_downsample", nullptr, nullptr,
+        winrt::check_hresult(D3DCompile(shader, sizeof(shader)-1, "Color_readback", nullptr, nullptr,
             "ps", "ps_5_0", D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, ps.put(), errors.put()));
         winrt::check_hresult(device->CreateVertexShader(vs->GetBufferPointer(), vs->GetBufferSize(), nullptr, resize_vertex.put()));
         winrt::check_hresult(device->CreatePixelShader(ps->GetBufferPointer(), ps->GetBufferSize(), nullptr, resize_pixel.put()));
@@ -167,10 +169,10 @@ float4 ps(Vertex v) : SV_Target {
     }
 
     void downsample(Slot& slot) {
-        ID3D11RenderTargetView* target = slot.small_target.get();
+        ID3D11RenderTargetView* target = slot.color_target.get();
         ID3D11ShaderResourceView* input = slot.view.get();
         ID3D11SamplerState* sample = sampler.get();
-        D3D11_VIEWPORT viewport{0,0,static_cast<float>(vision_width),static_cast<float>(vision_height),0,1};
+        D3D11_VIEWPORT viewport{0,0,static_cast<float>(readback_size.Width),static_cast<float>(readback_size.Height),0,1};
         context->RSSetViewports(1, &viewport);
         context->OMSetRenderTargets(1, &target, nullptr);
         context->IASetInputLayout(nullptr);
@@ -183,7 +185,7 @@ float4 ps(Vertex v) : SV_Target {
         input = nullptr;
         context->PSSetShaderResources(0,1,&input);
         context->OMSetRenderTargets(0,nullptr,nullptr);
-        context->CopyResource(slot.staging.get(), slot.reduced.get());
+        context->CopyResource(slot.color_staging.get(), slot.color_texture.get());
     }
 
     void end_capture() noexcept {
@@ -210,6 +212,14 @@ float4 ps(Vertex v) : SV_Target {
         // Release the old generation before allocating a replacement.
         for (auto& slot : slots) slot = Slot{};
         size = next;
+        // Preserve the complete frame's aspect ratio. The color path is capped
+        // for bounded CPU transfer cost, but never enlarged from a small input.
+        const double scale = std::min({1.0,
+            static_cast<double>(color_readback_max_width) / size.Width,
+            static_cast<double>(color_readback_max_height) / size.Height});
+        readback_size = {
+            std::max(1, static_cast<int>(std::lround(size.Width * scale))),
+            std::max(1, static_cast<int>(std::lround(size.Height * scale)))};
         D3D11_TEXTURE2D_DESC desc{};
         desc.Width = static_cast<UINT>(size.Width); desc.Height = static_cast<UINT>(size.Height);
         desc.MipLevels = 1; desc.ArraySize = 1; desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -219,12 +229,14 @@ float4 ps(Vertex v) : SV_Target {
             winrt::check_hresult(device->CreateTexture2D(&desc, nullptr, slot.texture.put()));
             if (readback) {
                 winrt::check_hresult(device->CreateShaderResourceView(slot.texture.get(), nullptr, slot.view.put()));
-                auto small_desc = desc; small_desc.Width = vision_width; small_desc.Height = vision_height;
-                small_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; small_desc.BindFlags = D3D11_BIND_RENDER_TARGET;
-                winrt::check_hresult(device->CreateTexture2D(&small_desc, nullptr, slot.reduced.put()));
-                winrt::check_hresult(device->CreateRenderTargetView(slot.reduced.get(), nullptr, slot.small_target.put()));
-                small_desc.BindFlags = 0; small_desc.Usage = D3D11_USAGE_STAGING; small_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-                winrt::check_hresult(device->CreateTexture2D(&small_desc, nullptr, slot.staging.put()));
+                auto color_desc = desc;
+                color_desc.Width = static_cast<UINT>(readback_size.Width);
+                color_desc.Height = static_cast<UINT>(readback_size.Height);
+                color_desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+                winrt::check_hresult(device->CreateTexture2D(&color_desc, nullptr, slot.color_texture.put()));
+                winrt::check_hresult(device->CreateRenderTargetView(slot.color_texture.get(), nullptr, slot.color_target.put()));
+                color_desc.BindFlags = 0; color_desc.Usage = D3D11_USAGE_STAGING; color_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+                winrt::check_hresult(device->CreateTexture2D(&color_desc, nullptr, slot.color_staging.put()));
             }
             auto query = [&](D3D11_QUERY type, winrt::com_ptr<ID3D11Query>& result) {
                 D3D11_QUERY_DESC q{type, 0};
@@ -236,6 +248,54 @@ float4 ps(Vertex v) : SV_Target {
         }
     }
 };
+
+struct UnmapOnExit {
+    ID3D11DeviceContext* context;
+    ID3D11Resource* resource;
+    ~UnmapOnExit() { context->Unmap(resource, 0); }
+};
+
+SmallFrame copy_color_frame(const Runtime& rt, const Row& row, const D3D11_MAPPED_SUBRESOURCE& mapped) {
+    auto color = std::make_shared<ColorFrame>();
+    color->width = rt.readback_size.Width;
+    color->height = rt.readback_size.Height;
+    color->stride = color->width * 4;
+    if (!mapped.pData || mapped.RowPitch < static_cast<UINT>(color->stride))
+        throw winrt::hresult_error(E_UNEXPECTED, L"Color readback pitch is smaller than one BGRA row.");
+    color->bgra.resize(static_cast<std::size_t>(color->stride) * color->height);
+    for (int y = 0; y < color->height; ++y) {
+        const auto* source = static_cast<const std::uint8_t*>(mapped.pData) + static_cast<std::size_t>(y) * mapped.RowPitch;
+        auto* destination = color->bgra.data() + static_cast<std::size_t>(y) * color->stride;
+        // RowPitch may include driver padding. Publish only tightly packed rows.
+        std::memcpy(destination, source, static_cast<std::size_t>(color->stride));
+    }
+
+    SmallFrame frame;
+    frame.sequence = row.sequence; frame.generation = row.generation;
+    frame.source_width = row.width; frame.source_height = row.height;
+    frame.source_ms = row.source;
+    const auto luminance = [&](int x, int y) {
+        const auto* pixel = color->bgra.data() + static_cast<std::size_t>(y) * color->stride + static_cast<std::size_t>(x) * 4;
+        return 0.114 * pixel[0] + 0.587 * pixel[1] + 0.299 * pixel[2];
+    };
+    // This derivative exists only for the heuristic detector. The temporal
+    // model and UI consume ColorFrame; neither reconstructs color from gray.
+    for (int y = 0; y < vision_height; ++y) {
+        const double sy = std::clamp((y + 0.5) * color->height / vision_height - 0.5, 0.0, static_cast<double>(color->height - 1));
+        const int y0 = static_cast<int>(sy), y1 = std::min(y0 + 1, color->height - 1);
+        const double fy = sy - y0;
+        for (int x = 0; x < vision_width; ++x) {
+            const double sx = std::clamp((x + 0.5) * color->width / vision_width - 0.5, 0.0, static_cast<double>(color->width - 1));
+            const int x0 = static_cast<int>(sx), x1 = std::min(x0 + 1, color->width - 1);
+            const double fx = sx - x0;
+            const double top = luminance(x0, y0) * (1.0 - fx) + luminance(x1, y0) * fx;
+            const double bottom = luminance(x0, y1) * (1.0 - fx) + luminance(x1, y1) * fx;
+            frame.gray[static_cast<std::size_t>(y * vision_width + x)] = static_cast<std::uint8_t>(std::lround(top * (1.0 - fy) + bottom * fy));
+        }
+    }
+    frame.color = std::move(color);
+    return frame;
+}
 
 std::string json_string(const std::wstring& value) {
     std::ostringstream out;
@@ -259,33 +319,80 @@ double qpc_ms() noexcept {
 
 bool gpu_readback_self_test(std::wstring& error) {
     try {
+        error.clear();
         Runtime rt; D3D_FEATURE_LEVEL level{};
         const D3D_FEATURE_LEVEL levels[]{D3D_FEATURE_LEVEL_11_0};
         winrt::check_hresult(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_WARP,nullptr,D3D11_CREATE_DEVICE_BGRA_SUPPORT,
             levels,1,D3D11_SDK_VERSION,rt.device.put(),&level,rt.context.put()));
-        rt.readback=true;rt.initialize_readback();rt.allocate_ring({512,288});
-        std::vector<std::uint32_t> pixels(512*288);
-        for(int y=0;y<288;++y)for(int x=0;x<512;++x)
-            pixels[static_cast<std::size_t>(y*512+x)]=y<144?(x<256?0xffff0000u:0xff00ff00u):(x<256?0xff0000ffu:0xffffffffu);
-        auto& slot=rt.slots[0];rt.context->UpdateSubresource(slot.texture.get(),0,nullptr,pixels.data(),512*4,0);
-        rt.downsample(slot);rt.context->End(slot.event.get());rt.context->Flush();
-        const double deadline=qpc_ms()+3000;
-        BOOL done=FALSE;
-        while(!done) {
-            winrt::check_hresult(rt.context->GetData(slot.event.get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH));
-            if(qpc_ms()>deadline)throw winrt::hresult_error(E_FAIL,L"GPU test completion timeout");
-            if(!done)Sleep(1);
+        rt.readback = true; rt.initialize_readback();
+        struct Case { int source_width, source_height, color_width, color_height; };
+        const Case cases[]{
+            {512, 288, 512, 288},       // Never enlarge a native input.
+            {1920, 1080, 1280, 720},    // Downsize 1080p while retaining color.
+            {1600, 1200, 960, 720},     // Preserve 4:3 aspect rather than stretch.
+            {1080, 1920, 405, 720},    // Preserve portrait aspect.
+            {321, 199, 321, 199}};     // Odd dimensions exercise padded pitches.
+        constexpr std::uint32_t quadrants[]{0xffff0000u, 0xff00ff00u, 0xff0000ffu, 0xffffffffu};
+        constexpr int expected_gray[]{76, 150, 29, 255};
+        for (const auto& test : cases) {
+            rt.allocate_ring({test.source_width, test.source_height});
+            if (rt.readback_size.Width != test.color_width || rt.readback_size.Height != test.color_height) {
+                error = L"Color readback dimensions changed native scale or aspect ratio"; return false;
+            }
+            std::vector<std::uint32_t> pixels(static_cast<std::size_t>(test.source_width) * test.source_height);
+            for (int y = 0; y < test.source_height; ++y)
+                for (int x = 0; x < test.source_width; ++x) {
+                    const int quadrant = (y < test.source_height / 2 ? 0 : 2) + (x < test.source_width / 2 ? 0 : 1);
+                    pixels[static_cast<std::size_t>(y) * test.source_width + x] = quadrants[quadrant];
+                }
+            auto& slot = rt.slots[0];
+            slot.row.width = test.source_width; slot.row.height = test.source_height;
+            slot.row.sequence = 13; slot.row.generation = 7; slot.row.source = 123.5;
+            rt.context->UpdateSubresource(slot.texture.get(), 0, nullptr, pixels.data(), static_cast<UINT>(test.source_width * 4), 0);
+            rt.downsample(slot); rt.context->End(slot.event.get()); rt.context->Flush();
+            const double deadline = qpc_ms() + 3000;
+            BOOL done = FALSE;
+            while (!done) {
+                winrt::check_hresult(rt.context->GetData(slot.event.get(), &done, sizeof(done), D3D11_ASYNC_GETDATA_DONOTFLUSH));
+                if (qpc_ms() > deadline) throw winrt::hresult_error(E_FAIL, L"GPU test completion timeout");
+                if (!done) Sleep(1);
+            }
+            SmallFrame frame;
+            {
+                D3D11_MAPPED_SUBRESOURCE mapped{};
+                winrt::check_hresult(rt.context->Map(slot.color_staging.get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped));
+                const UnmapOnExit unmap{rt.context.get(), slot.color_staging.get()};
+                frame = copy_color_frame(rt, slot.row, mapped);
+            }
+            bool valid = frame.color && frame.source_width == test.source_width && frame.source_height == test.source_height &&
+                frame.sequence == 13 && frame.generation == 7 && frame.source_ms == 123.5;
+            if (!valid) { error = L"Published color frame or source metadata is missing"; return false; }
+            const auto& color = *frame.color;
+            valid = color.width == test.color_width && color.height == test.color_height && color.stride == color.width * 4 &&
+                color.bgra.size() == static_cast<std::size_t>(color.stride) * color.height;
+            for (int i = 0; i < 4; ++i) {
+                const int x = (i % 2 ? 3 : 1) * color.width / 4;
+                const int y = (i / 2 ? 3 : 1) * color.height / 4;
+                const auto* pixel = color.bgra.data() + static_cast<std::size_t>(y) * color.stride + static_cast<std::size_t>(x) * 4;
+                for (int channel = 0; channel < 4; ++channel) {
+                    const auto expected = static_cast<int>((quadrants[i] >> (channel * 8)) & 255u);
+                    valid = valid && std::abs(static_cast<int>(pixel[channel]) - expected) <= 1;
+                }
+                const int gx = (i % 2 ? 3 : 1) * vision_width / 4;
+                const int gy = (i / 2 ? 3 : 1) * vision_height / 4;
+                valid = valid && std::abs(static_cast<int>(frame.gray[static_cast<std::size_t>(gy * vision_width + gx)]) - expected_gray[i]) <= 1;
+            }
+            D3D11_TEXTURE2D_DESC owned_desc{};
+            slot.texture->GetDesc(&owned_desc);
+            valid = valid && owned_desc.Width == static_cast<UINT>(test.source_width) &&
+                owned_desc.Height == static_cast<UINT>(test.source_height) && owned_desc.Format == DXGI_FORMAT_B8G8R8A8_UNORM;
+            const SmallFrame shared_snapshot = frame;
+            valid = valid && shared_snapshot.color.get() == frame.color.get();
+            if (!valid) {
+                error = L"Readback color channels, grayscale derivative, source texture or immutable sharing differ from the reference";
+                return false;
+            }
         }
-        D3D11_MAPPED_SUBRESOURCE mapped{};winrt::check_hresult(rt.context->Map(slot.staging.get(),0,D3D11_MAP_READ,0,&mapped));
-        bool valid=true;
-        const int expected[]{76,150,29,255};
-        for(int i=0;i<4;++i) {
-            const int x=(i%2)?192:64,y=(i/2)?108:36;
-            const auto* p=static_cast<const std::uint8_t*>(mapped.pData)+y*mapped.RowPitch+x*4;
-            for(int c=0;c<3;++c)valid=valid&&std::abs(static_cast<int>(p[c])-expected[i])<=2;
-        }
-        rt.context->Unmap(slot.staging.get(),0);
-        if(!valid){error=L"Readback pixels differ from independently calculated grayscale quadrants";return false;}
         return true;
     }catch(const winrt::hresult_error& e){error=e.message().c_str();return false;}
     catch(...){error=L"GPU readback self-test failed";return false;}
@@ -437,7 +544,7 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
             metrics.width = rt.size.Width; metrics.height = rt.size.Height; metrics.generation = 1;
         }
         rt.session.StartCapture();
-        state(CaptureState::capturing, rt.readback ? L"Capture + GPU downsample feeding the CV detector." : L"SDR BGRA8 capture diagnostics.");
+        state(CaptureState::capturing, rt.readback ? L"Full source GPU capture + aspect-preserving color readback (up to 1280x720)." : L"SDR BGRA8 capture diagnostics.");
     }
 
     void poll_completed(Runtime& rt) {
@@ -461,19 +568,17 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
             if (!disjoint.Disjoint && disjoint.Frequency && end >= begin)
                 slot.row.gpu_ms = static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint.Frequency);
             if (rt.readback) {
-                D3D11_MAPPED_SUBRESOURCE mapped{};
-                auto mapped_hr = rt.context->Map(slot.staging.get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
-                if (mapped_hr == DXGI_ERROR_WAS_STILL_DRAWING) continue;
-                winrt::check_hresult(mapped_hr);
-                SmallFrame reduced;
-                reduced.sequence = slot.row.sequence; reduced.generation = slot.row.generation;
-                reduced.source_ms = slot.row.source; reduced.ready_ms = qpc_ms();
-                for (int y=0; y<vision_height; ++y) {
-                    const auto* pixels = static_cast<const std::uint8_t*>(mapped.pData) + y*mapped.RowPitch;
-                    for (int x=0; x<vision_width; ++x) reduced.gray[static_cast<std::size_t>(y*vision_width+x)] = pixels[x*4];
+                SmallFrame frame;
+                {
+                    D3D11_MAPPED_SUBRESOURCE mapped{};
+                    const auto mapped_hr = rt.context->Map(slot.color_staging.get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
+                    if (mapped_hr == DXGI_ERROR_WAS_STILL_DRAWING) continue;
+                    winrt::check_hresult(mapped_hr);
+                    const UnmapOnExit unmap{rt.context.get(), slot.color_staging.get()};
+                    frame = copy_color_frame(rt, slot.row, mapped);
                 }
-                rt.context->Unmap(slot.staging.get(), 0);
-                frame_sink(reduced);
+                frame.ready_ms = qpc_ms(); // Includes CPU row copy and the heuristic derivative.
+                frame_sink(frame);
             }
             slot.row.outcome = Outcome::copied;
             update_row(slot.trace_index, slot.row);

@@ -2,7 +2,13 @@
 
 Build a Windows native, offline, single-player, vision-led Auto Dodge application for Sekiro. The user supplied the governing brief in `docs/project-brief.md`.
 
-## Current scope: runnable Auto Dodge MVP (user override, 2026-09-10)
+## Current scope: temporal AI integration (user override, 2026-09-10)
+
+The latest user attachment requests parallel capture-quality, multi-boss source collection, clip mining, annotation, three temporal training baselines and native ONNX integration. Continue from the runnable MVP on `feature/temporal-ai-pipeline`. Keep all reviewed skills intact. No milestone PASS/FAIL or dataset-completeness gate blocks these tracks. See `docs/temporal-ai-scope.md` for the implementation and evidence status.
+
+The primary target is now a genuinely trained temporal attack/threat/TTI model. Retain the CV heuristic as an explicitly selected fallback and mining/debug aid. Never relabel synthetic tests, randomly initialized heads, public reference URLs or unreviewed proposals as trained gameplay evidence. Acquire media only with documented lawful usage; keep unobservable contact and dodge-direction safety unknown. A missing trained model must be visible in the app, without fabricated probability or TTI.
+
+### Existing MVP remains available
 
 The user explicitly removed **all milestone PASS/FAIL progress gates**. Build the vertical slice now: Sekiro HWND capture → combat ROI → motion/CV → temporal threat episode → one Dodge → Shift or direction + Shift. Dataset completeness, formal capture benchmarks, trained models, all-boss coverage and a finished UI are not prerequisites. Keep the existing Agent Skills as technical references; their older milestone, M9/M10, model/TTI-only and offline-evaluation prerequisites are superseded by this instruction.
 
