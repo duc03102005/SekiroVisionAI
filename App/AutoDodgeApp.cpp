@@ -121,7 +121,7 @@ public:
                 <<L"\r\nProvider: "<<wide(latest.model.provider)<<L"\r\n"<<wide(latest.prediction.valid?latest.prediction.reason:latest.model.reason)
                 <<L"\r\nHistory: "<<latest.model.history_size<<L" / "<<latest.model.temporal_length<<L"  RGB "<<latest.model.input_size<<L" square";
             if(latest.prediction.valid) {
-                text<<L"\r\nAttack p: "<<fixed(latest.prediction.attack_probability)<<L"  threat p: "
+                text<<L"\r\nAttack p: "<<(latest.prediction.trained&&latest.prediction.attack_supported?fixed(latest.prediction.attack_probability):L"unsupported / test model")<<L"  threat p: "
                     <<(latest.prediction.threat_supported?fixed(latest.prediction.threat_probability):L"unsupported")
                     <<L"\r\nClass: "<<wide(attack_classes[latest.prediction.attack_class])<<L"  "<<wide(movement_states[latest.prediction.state]);
                 if(latest.prediction.tti_supported)text<<L"\r\nTTI at frame: "<<fixed(latest.prediction.tti_ms,0)<<L" +/- "<<fixed(latest.prediction.tti_uncertainty_ms,0)

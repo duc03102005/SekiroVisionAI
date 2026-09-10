@@ -4,12 +4,13 @@ Windows native, offline single-player Auto Dodge for Sekiro: Shadows Die Twice, 
 
 **Current branch: `feature/temporal-ai-pipeline` (0.3).** The existing native app now has clear color capture/preview, a causal RGB ROI history, ONNX Runtime DirectML/CPU inference, model threat/TTI decisions, real Shift or direction+Shift, and opt-in training sample recording. The earlier CV heuristic remains an explicitly selected fallback. Auto Dodge starts OFF; **F8** toggles in game, **F9** disables/releases, **F10** tests input when enabled, **F7** toggles recording, and **F4/F5/F6** mark samples for review.
 
-**No gameplay-trained AI model is bundled yet.** The60-source catalog covers all requested boss families as research links; acquired/reviewed gameplay remains0. Three trainable temporal architectures, clip mining, annotation, supervised/self-supervised training and ONNX export are implemented. Synthetic learning/parity tests are labeled separately and cannot enable model Auto Dodge. This version has not demonstrated reliable model-driven Dodge in the user's Sekiro game.
+**No gameplay-trained AI model is bundled yet.** The 60-source catalog covers all requested boss families as research links; acquired/reviewed gameplay remains 0. Three trainable temporal architectures, clip mining, annotation, supervised/self-supervised training and ONNX export are implemented. Synthetic learning/parity tests are labeled separately and cannot enable model Auto Dodge. This version has not demonstrated reliable model-driven Dodge in the user's Sekiro game.
 
-The user's2026-09-10 instructions removed milestone PASS/FAIL development gates and requested parallel dataset/model/capture work. All eight reviewed Agent Skills are preserved. Dataset completion and formal capture benchmarking do not block implementation or early training on a small authorized reviewed set.
+The user's 2026-09-10 instructions removed milestone PASS/FAIL development gates and requested parallel dataset/model/capture work. All eight reviewed Agent Skills are preserved. Dataset completion and formal capture benchmarking do not block implementation or early training on a small authorized reviewed set.
 
 - [Run this Windows version — Vietnamese guide](docs/TEMPORAL_QUICKSTART_VI.md)
 - [Temporal scope: implemented work and actual limitations](docs/temporal-ai-scope.md)
+- [Executed validation and Windows package](docs/temporal-validation.md)
 - [Dataset tools and annotation](DatasetTools/README.md)
 - [Three temporal baselines, training and ONNX export](Training/README.md)
 - [Video source research and acquisition evidence](Dataset/catalog/source_research.md)

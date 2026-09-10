@@ -20,6 +20,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install video and annotation system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg python3-tk xvfb xauth
       - name: Install offline training dependencies
         run: |
           python3 -m venv .venv
@@ -31,6 +35,9 @@ jobs:
         run: |
           .venv/bin/python -m unittest discover -s Tests -p 'dataset_*.py'
           .venv/bin/python -m unittest discover -s Tests -p 'training_*.py'
+          .venv/bin/python -m unittest DatasetTools.catalog.test_update_coverage
+      - name: Launch actual desktop annotation reviewer under Xvfb
+        run: xvfb-run -a .venv/bin/python -m unittest discover -s Tests -p 'dataset_gui.py'
       - name: Actual synthetic optimization, ONNX parity and three-model CPU comparison
         run: .venv/bin/python -m Training.trainers.smoke artifacts/temporal-synthetic --steps 80
       - name: Record environment

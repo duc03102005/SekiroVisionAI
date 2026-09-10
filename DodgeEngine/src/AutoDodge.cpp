@@ -168,7 +168,7 @@ struct AutoDodge::Impl {
                         <<" bg_error="<<motion.background_error<<" frame_age_ms="<<now-frame.source_ms
                         <<" cv_ms="<<now-begin<<" reason="<<threat.reason;
                     if(cfg.detector_mode)values<<" model="<<prediction.version<<" frame="<<frame.sequence<<" source_ms="<<frame.source_ms
-                        <<" valid="<<prediction.valid<<" attack_p="<<(prediction.valid?std::to_string(prediction.attack_probability):"null")
+                        <<" valid="<<prediction.valid<<" attack_p="<<(prediction.valid&&prediction.trained&&prediction.attack_supported?std::to_string(prediction.attack_probability):"null")
                         <<" threat_p="<<(prediction.valid&&prediction.threat_supported?std::to_string(prediction.threat_probability):"null")
                         <<" tti_supported="<<prediction.tti_supported<<" tti_ms="<<(prediction.valid&&prediction.tti_supported?std::to_string(prediction.tti_ms):"null")
                         <<" uncertainty_ms="<<(prediction.valid&&prediction.tti_supported?std::to_string(prediction.tti_uncertainty_ms):"null")

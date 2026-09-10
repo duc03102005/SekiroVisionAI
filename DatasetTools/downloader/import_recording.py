@@ -28,6 +28,9 @@ def import_recording(bundle: Path, root: Path, *, creator: str, usage_evidence: 
     recording = json.loads(manifest_path.read_text(encoding="utf-8"))
     if recording.get("schema_version") != 1 or recording.get("format") != "sekiro-jpeg-frame-bundle":
         raise ValueError("Unsupported native recording format.")
+    marker_reason = str(recording.get("marker", {}).get("reason", ""))
+    example_only = bool(example_only or recording.get("example_only") or
+                        marker_reason.startswith(("SELF_TEST", "SYNTHETIC")))
     session = safe_id(recording["session_id"])
     sample = safe_id(recording["sample_id"])
     identifier = safe_id(source_id or (session + "_" + sample))

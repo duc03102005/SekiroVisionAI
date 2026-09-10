@@ -141,12 +141,15 @@ class AnnotationApp:
         self.notes.grid(row=10, column=0, sticky="ew", pady=3)
         buttons = ttk.Frame(center)
         buttons.grid(row=11, column=0, sticky="ew", pady=5)
-        for text, command in (("Mark whole clip NON_THREAT", self.mark_negative),
-                              ("New event", self.new_event), ("Add combo strike", self.new_strike),
-                              ("Copy last labels", self.copy_last),
-                              ("Save proposal", lambda: self.save("proposed")),
-                              ("Accept reviewed [Ctrl+S]", lambda: self.save("reviewed"))):
-            ttk.Button(buttons, text=text, command=command).pack(side="left", padx=2)
+        for column in range(3):
+            buttons.columnconfigure(column, weight=1)
+        for index, (text, command) in enumerate((("Mark whole clip NON_THREAT", self.mark_negative),
+                                                ("New event", self.new_event), ("Add combo strike", self.new_strike),
+                                                ("Copy last labels", self.copy_last),
+                                                ("Save proposal", lambda: self.save("proposed")),
+                                                ("Accept reviewed [Ctrl+S]", lambda: self.save("reviewed")))):
+            ttk.Button(buttons, text=text, command=command).grid(row=index // 3, column=index % 3,
+                                                                 sticky="ew", padx=2, pady=2)
         self.message = ttk.Label(center, text="", wraplength=970)
         self.message.grid(row=12, column=0, sticky="ew")
         ttk.Label(top, text="←/→ frame · Space play · W/A/I/R/E/D boundaries · drag image for ROI · "

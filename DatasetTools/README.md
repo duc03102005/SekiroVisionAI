@@ -122,7 +122,9 @@ propagate into recovery. Arbitrary class predictions are never trusted as labels
 `Dataset/annotation.schema.json` plus
 `DatasetTools/annotation/contract.py` define schema and cross-field validation.
 All boundaries use absolute original decoded source-frame indices; unknown
-values are null. `OBSERVED_CONTACT` requires visible contact inside the active
+values are null. The annotation `fps_num/fps_den` describes the normalized clip
+cadence, not the original source-frame clock: always use the actual PTS map for
+timing. `OBSERVED_CONTACT` requires visible contact inside the active
 interval. No-hit/missed/occluded/censored contact has no exact point TTI. Reviewed
 counterfactual intervals are stored separately and masked out of point-TTI loss.
 Observed Dodge direction is a player observation, **not a proven safe action**.
@@ -178,8 +180,9 @@ labeled **SYNTHETIC TEST ONLY**. They verify actual FFmpeg/OpenCV ingestion,
 timestamps, camera-flow behavior, clip extraction, reviewed-label export,
 no-contact censoring, leakage protection and review queues. They are not Sekiro
 gameplay, trained boss data, annotation accuracy or live Dodge measurements.
-Tk UI interaction needs a graphical session; headless tests cover its shared
-annotation journal/contract and can exercise the GUI when a display is present.
+Tk UI interaction needs a graphical session; these headless tests cover its
+shared annotation journal/contract. Interactive GUI playback was not exercised
+in the Linux workspace without a display.
 
 The current automatic miner follows a configurable combat ROI and camera motion,
 not a trained boss/Wolf tracker or verified weapon/pose model. Long videos with

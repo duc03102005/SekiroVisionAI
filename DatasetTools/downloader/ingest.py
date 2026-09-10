@@ -118,6 +118,10 @@ def probe_video(path: Path) -> tuple[dict, list[dict]]:
         process.kill()
         process.wait()
         raise
+    finally:
+        process.stdout.close()
+        if process.stderr is not None:
+            process.stderr.close()
     if not rows:
         raise ValueError("No actual source timestamps found. Nominal FPS will not be substituted for PTS.")
     try:
