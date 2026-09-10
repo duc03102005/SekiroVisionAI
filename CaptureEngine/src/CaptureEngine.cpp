@@ -113,7 +113,7 @@ struct Row {
 struct Slot {
     winrt::com_ptr<ID3D11Texture2D> texture;
     winrt::com_ptr<ID3D11ShaderResourceView> view;
-    winrt::com_ptr<ID3D11Texture2D> small, staging;
+    winrt::com_ptr<ID3D11Texture2D> reduced, staging;
     winrt::com_ptr<ID3D11RenderTargetView> small_target;
     winrt::com_ptr<ID3D11Query> event, disjoint, begin, end;
     FrameLease source;
@@ -183,7 +183,7 @@ float4 ps(Vertex v) : SV_Target {
         input = nullptr;
         context->PSSetShaderResources(0,1,&input);
         context->OMSetRenderTargets(0,nullptr,nullptr);
-        context->CopyResource(slot.staging.get(), slot.small.get());
+        context->CopyResource(slot.staging.get(), slot.reduced.get());
     }
 
     void end_capture() noexcept {
@@ -221,8 +221,8 @@ float4 ps(Vertex v) : SV_Target {
                 winrt::check_hresult(device->CreateShaderResourceView(slot.texture.get(), nullptr, slot.view.put()));
                 auto small_desc = desc; small_desc.Width = vision_width; small_desc.Height = vision_height;
                 small_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; small_desc.BindFlags = D3D11_BIND_RENDER_TARGET;
-                winrt::check_hresult(device->CreateTexture2D(&small_desc, nullptr, slot.small.put()));
-                winrt::check_hresult(device->CreateRenderTargetView(slot.small.get(), nullptr, slot.small_target.put()));
+                winrt::check_hresult(device->CreateTexture2D(&small_desc, nullptr, slot.reduced.put()));
+                winrt::check_hresult(device->CreateRenderTargetView(slot.reduced.get(), nullptr, slot.small_target.put()));
                 small_desc.BindFlags = 0; small_desc.Usage = D3D11_USAGE_STAGING; small_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
                 winrt::check_hresult(device->CreateTexture2D(&small_desc, nullptr, slot.staging.put()));
             }
@@ -465,15 +465,15 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
                 auto mapped_hr = rt.context->Map(slot.staging.get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
                 if (mapped_hr == DXGI_ERROR_WAS_STILL_DRAWING) continue;
                 winrt::check_hresult(mapped_hr);
-                SmallFrame small;
-                small.sequence = slot.row.sequence; small.generation = slot.row.generation;
-                small.source_ms = slot.row.source; small.ready_ms = qpc_ms();
+                SmallFrame reduced;
+                reduced.sequence = slot.row.sequence; reduced.generation = slot.row.generation;
+                reduced.source_ms = slot.row.source; reduced.ready_ms = qpc_ms();
                 for (int y=0; y<vision_height; ++y) {
                     const auto* pixels = static_cast<const std::uint8_t*>(mapped.pData) + y*mapped.RowPitch;
-                    for (int x=0; x<vision_width; ++x) small.gray[static_cast<std::size_t>(y*vision_width+x)] = pixels[x*4];
+                    for (int x=0; x<vision_width; ++x) reduced.gray[static_cast<std::size_t>(y*vision_width+x)] = pixels[x*4];
                 }
                 rt.context->Unmap(slot.staging.get(), 0);
-                frame_sink(small);
+                frame_sink(reduced);
             }
             slot.row.outcome = Outcome::copied;
             update_row(slot.trace_index, slot.row);
