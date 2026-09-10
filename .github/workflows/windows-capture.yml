@@ -1,0 +1,48 @@
+name: Windows capture build
+
+on:
+  push:
+    branches: [main, feature/capture-engine]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-capture-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-release:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate reviewed skills
+        run: python tools/validate_skills.py
+      - name: Configure Windows x64
+        run: cmake --preset windows-x64
+      - name: Record toolchain
+        shell: pwsh
+        run: |
+          cmake --version
+          Get-Content out/build/windows-x64/CMakeCache.txt | Select-String 'CMAKE_CXX_COMPILER:|CMAKE_SYSTEM_VERSION:|CMAKE_GENERATOR_TOOLSET:'
+          Get-ChildItem out/build/windows-x64/CMakeFiles -Recurse -Filter CMakeCXXCompiler.cmake | Get-Content | Select-String 'CMAKE_CXX_COMPILER_VERSION|CMAKE_CXX_COMPILER_ID'
+      - name: Build actual Windows capture target
+        run: cmake --build --preset windows-release --parallel
+      - name: Test timing invariants
+        run: ctest --preset windows-release
+      - name: Publish unsigned capture probe
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: SekiroCaptureProbe-windows-x64-${{ github.sha }}
+          path: |
+            out/build/windows-x64/Release/SekiroCaptureProbe.exe
+            docs/capture-runbook.md
+            docs/milestones/milestone-1.md
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "verified_date": "2026-09-10",
+  "repository": "duc03102005/SekiroVisionAI",
+  "source_commit": "3cd23db827fa2ca71c976bd843437768835eb18d",
+  "source_tree": "4a9268ca8378d1fd47203f11552719f0a97c556f",
+  "remote_tree_matches_staged_local_tree": true,
+  "branch": "feature/capture-engine",
+  "pull_request": "https://github.com/duc03102005/SekiroVisionAI/pull/1",
+  "local": {
+    "compiler": "GCC 13.3, C++20, -Wall -Wextra -Wpedantic -Werror",
+    "timing_invariants": "PASS",
+    "skill_validator": "PASS: 8 skills, 18 reviewed skill files, 33 local references",
+    "synthetic_trace_analysis": "PASS: known 60 Hz, matched ages, missing GPU time, truncated trace and invalid durations",
+    "synthetic_data_is_hardware_evidence": false
+  },
+  "windows_ci": {
+    "run_id": 34488924494,
+    "job_id": 102910261141,
+    "run_url": "https://github.com/duc03102005/SekiroVisionAI/actions/runs/34488924494",
+    "runner": "windows-2022",
+    "configuration": "Release x64",
+    "cmake": "3.31.6",
+    "msvc": "19.44.35228.0",
+    "msbuild": "17.14.51+25f168cee",
+    "windows_sdk": "10.0.26100.0",
+    "capture_target_build": "PASS",
+    "ctest": "PASS: 1/1 capture_timing",
+    "compiler_diagnostics": "No C++ compiler warnings or errors in the completed job log",
+    "action_runtime_note": "Runner reported Node 20 deprecation for pinned v4 actions and executed them on Node 24; checkout and artifact upload succeeded",
+    "artifact_id": 10156890561,
+    "artifact_url": "https://github.com/duc03102005/SekiroVisionAI/actions/runs/34488924494/artifacts/10156890561",
+    "artifact_zip_sha256": "92c325d56b9af7822154f6570a3ab85fe330a516a41d46e63ce68724f9b2b759",
+    "artifact_size_bytes": 197025,
+    "artifact_expires_at": "2026-09-24T14:26:04Z",
+    "signed": false
+  },
+  "live_windows_capture": "NOT_MEASURED",
+  "sekiro_rtx_3070_benchmark": "NOT_MEASURED",
+  "full_milestone_1": "NOT_PASS",
+  "reason": "Compilation and synthetic timing checks cannot establish live FPS, frame validity, latency, resource usage or lifecycle behavior. Follow docs/capture-runbook.md."
+}
