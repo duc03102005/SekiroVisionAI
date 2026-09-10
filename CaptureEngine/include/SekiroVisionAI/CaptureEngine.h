@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Timing.h"
+#include "SmallFrame.h"
 #include <windows.h>
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -19,6 +21,8 @@ struct WindowTarget {
 std::vector<WindowTarget> find_sekiro_windows();
 bool target_is_current(const WindowTarget& target);
 double qpc_ms() noexcept;
+// Explicit software-device functional test; never used as the game's capture fallback.
+bool gpu_readback_self_test(std::wstring& error);
 
 enum class CaptureState { idle, starting, capturing, stopping, stopped, faulted };
 const wchar_t* state_name(CaptureState state) noexcept;
@@ -48,6 +52,8 @@ public:
     CaptureEngine(const CaptureEngine&) = delete;
     CaptureEngine& operator=(const CaptureEngine&) = delete;
     bool start(const WindowTarget& target, bool record_trace);
+    // Configure only while stopped. The frame callback must enqueue/copy and return quickly.
+    bool set_frame_sink(std::function<void(const SmallFrame&)> sink, std::function<void()> discontinuity);
     void request_stop() noexcept;
     [[nodiscard]] CaptureSnapshot snapshot() const;
     bool export_trace(const std::filesystem::path& path, std::wstring& error);

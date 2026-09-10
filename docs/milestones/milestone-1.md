@@ -1,5 +1,7 @@
 # Milestone 1: NOT PASS — hardware measurements pending
 
+**Historical report.** The user's later [MVP direction](../mvp-scope.md) removed all milestone progress gates. Auto Dodge development proceeds without waiting for the hardware measurements below.
+
 Updated 2026-09-10. M0 is [PASS](milestone-0.md); architecture research and the first capture implementation are on `feature/capture-engine`.
 
 | Requirement | Status | Evidence / next step |
@@ -16,4 +18,4 @@ Updated 2026-09-10. M0 is [PASS](milestone-0.md); architecture research and the 
 | Pixel validity/HDR/overlay exclusion | NOT VERIFIED | SDR only; preview/black-content detector and overlay checks remain follow-up work |
 | Full M1 acceptance | NOT PASS | No live Windows/Sekiro/RTX 3070 benchmark has been performed |
 
-See [build and measurement instructions](../capture-runbook.md), [machine-readable build evidence](../research/evidence/milestone-1-build.json), and [draft PR #1](https://github.com/duc03102005/SekiroVisionAI/pull/1). The [unsigned x64 probe artifact](https://github.com/duc03102005/SekiroVisionAI/actions/runs/34488924494/artifacts/10156890561) was generated successfully (retained until 2026-09-24). Windows CI establishes compilation and timing-test compatibility only. Do not advance to M2 or label the capture prototype production-ready until M1's hardware criteria and failure handling have evidence.
+See [build and measurement instructions](../capture-runbook.md), [machine-readable build evidence](../research/evidence/milestone-1-build.json), and [draft PR #1](https://github.com/duc03102005/SekiroVisionAI/pull/1). The [unsigned x64 probe artifact](https://github.com/duc03102005/SekiroVisionAI/actions/runs/34488924494/artifacts/10156890561) was generated successfully (retained until 2026-09-24). These are historical compilation/test results, not progress gates under the current MVP direction.

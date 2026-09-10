@@ -1,6 +1,7 @@
 #include <SekiroVisionAI/CaptureEngine.h>
 
 #include <d3d11.h>
+#include <d3dcompiler.h>
 #include <dxgi1_2.h>
 #include <windows.graphics.capture.interop.h>
 #include <windows.graphics.directx.direct3d11.interop.h>
@@ -111,6 +112,9 @@ struct Row {
 
 struct Slot {
     winrt::com_ptr<ID3D11Texture2D> texture;
+    winrt::com_ptr<ID3D11ShaderResourceView> view;
+    winrt::com_ptr<ID3D11Texture2D> small, staging;
+    winrt::com_ptr<ID3D11RenderTargetView> small_target;
     winrt::com_ptr<ID3D11Query> event, disjoint, begin, end;
     FrameLease source;
     Row row;
@@ -128,7 +132,59 @@ struct Runtime {
     winrt::event_token arrived{}, closed{};
     bool arrived_registered{}, closed_registered{};
     Size size{};
+    bool readback{};
+    winrt::com_ptr<ID3D11VertexShader> resize_vertex;
+    winrt::com_ptr<ID3D11PixelShader> resize_pixel;
+    winrt::com_ptr<ID3D11SamplerState> sampler;
     std::array<Slot, ring_size> slots;
+
+    void initialize_readback() {
+        static constexpr char shader[] = R"hlsl(
+Texture2D source : register(t0);
+SamplerState linearSampler : register(s0);
+struct Vertex { float4 position : SV_Position; float2 uv : TEXCOORD0; };
+Vertex vs(uint id : SV_VertexID) {
+    Vertex v; v.uv = float2((id << 1) & 2, id & 2);
+    v.position = float4(v.uv * float2(2,-2) + float2(-1,1),0,1); return v;
+}
+float4 ps(Vertex v) : SV_Target {
+    float g = dot(source.Sample(linearSampler,v.uv).rgb,float3(0.299,0.587,0.114));
+    return float4(g,g,g,1);
+}
+)hlsl";
+        winrt::com_ptr<ID3DBlob> vs, ps, errors;
+        winrt::check_hresult(D3DCompile(shader, sizeof(shader)-1, "MVP_downsample", nullptr, nullptr,
+            "vs", "vs_5_0", D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, vs.put(), errors.put()));
+        errors = nullptr;
+        winrt::check_hresult(D3DCompile(shader, sizeof(shader)-1, "MVP_downsample", nullptr, nullptr,
+            "ps", "ps_5_0", D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, ps.put(), errors.put()));
+        winrt::check_hresult(device->CreateVertexShader(vs->GetBufferPointer(), vs->GetBufferSize(), nullptr, resize_vertex.put()));
+        winrt::check_hresult(device->CreatePixelShader(ps->GetBufferPointer(), ps->GetBufferSize(), nullptr, resize_pixel.put()));
+        D3D11_SAMPLER_DESC desc{}; desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        desc.AddressU = desc.AddressV = desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+        desc.ComparisonFunc = D3D11_COMPARISON_NEVER; desc.MaxLOD = D3D11_FLOAT32_MAX;
+        winrt::check_hresult(device->CreateSamplerState(&desc, sampler.put()));
+    }
+
+    void downsample(Slot& slot) {
+        ID3D11RenderTargetView* target = slot.small_target.get();
+        ID3D11ShaderResourceView* input = slot.view.get();
+        ID3D11SamplerState* sample = sampler.get();
+        D3D11_VIEWPORT viewport{0,0,static_cast<float>(vision_width),static_cast<float>(vision_height),0,1};
+        context->RSSetViewports(1, &viewport);
+        context->OMSetRenderTargets(1, &target, nullptr);
+        context->IASetInputLayout(nullptr);
+        context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        context->VSSetShader(resize_vertex.get(), nullptr, 0);
+        context->PSSetShader(resize_pixel.get(), nullptr, 0);
+        context->PSSetShaderResources(0, 1, &input);
+        context->PSSetSamplers(0, 1, &sample);
+        context->Draw(3,0);
+        input = nullptr;
+        context->PSSetShaderResources(0,1,&input);
+        context->OMSetRenderTargets(0,nullptr,nullptr);
+        context->CopyResource(slot.staging.get(), slot.small.get());
+    }
 
     void end_capture() noexcept {
         try { if (arrived_registered) pool.FrameArrived(arrived); } catch (...) {}
@@ -161,6 +217,15 @@ struct Runtime {
         desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         for (auto& slot : slots) {
             winrt::check_hresult(device->CreateTexture2D(&desc, nullptr, slot.texture.put()));
+            if (readback) {
+                winrt::check_hresult(device->CreateShaderResourceView(slot.texture.get(), nullptr, slot.view.put()));
+                auto small_desc = desc; small_desc.Width = vision_width; small_desc.Height = vision_height;
+                small_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; small_desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+                winrt::check_hresult(device->CreateTexture2D(&small_desc, nullptr, slot.small.put()));
+                winrt::check_hresult(device->CreateRenderTargetView(slot.small.get(), nullptr, slot.small_target.put()));
+                small_desc.BindFlags = 0; small_desc.Usage = D3D11_USAGE_STAGING; small_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+                winrt::check_hresult(device->CreateTexture2D(&small_desc, nullptr, slot.staging.put()));
+            }
             auto query = [&](D3D11_QUERY type, winrt::com_ptr<ID3D11Query>& result) {
                 D3D11_QUERY_DESC q{type, 0};
                 winrt::check_hresult(device->CreateQuery(&q, result.put()));
@@ -190,6 +255,40 @@ double qpc_ms() noexcept {
     LARGE_INTEGER value{};
     QueryPerformanceCounter(&value);
     return static_cast<double>(value.QuadPart) * 1000.0 / frequency;
+}
+
+bool gpu_readback_self_test(std::wstring& error) {
+    try {
+        Runtime rt; D3D_FEATURE_LEVEL level{};
+        const D3D_FEATURE_LEVEL levels[]{D3D_FEATURE_LEVEL_11_0};
+        winrt::check_hresult(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_WARP,nullptr,D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+            levels,1,D3D11_SDK_VERSION,rt.device.put(),&level,rt.context.put()));
+        rt.readback=true;rt.initialize_readback();rt.allocate_ring({512,288});
+        std::vector<std::uint32_t> pixels(512*288);
+        for(int y=0;y<288;++y)for(int x=0;x<512;++x)
+            pixels[static_cast<std::size_t>(y*512+x)]=y<144?(x<256?0xffff0000u:0xff00ff00u):(x<256?0xff0000ffu:0xffffffffu);
+        auto& slot=rt.slots[0];rt.context->UpdateSubresource(slot.texture.get(),0,nullptr,pixels.data(),512*4,0);
+        rt.downsample(slot);rt.context->End(slot.event.get());rt.context->Flush();
+        const double deadline=qpc_ms()+3000;
+        BOOL done=FALSE;
+        while(!done) {
+            winrt::check_hresult(rt.context->GetData(slot.event.get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH));
+            if(qpc_ms()>deadline)throw winrt::hresult_error(E_FAIL,L"GPU test completion timeout");
+            if(!done)Sleep(1);
+        }
+        D3D11_MAPPED_SUBRESOURCE mapped{};winrt::check_hresult(rt.context->Map(slot.staging.get(),0,D3D11_MAP_READ,0,&mapped));
+        bool valid=true;
+        const int expected[]{76,150,29,255};
+        for(int i=0;i<4;++i) {
+            const int x=(i%2)?192:64,y=(i/2)?108:36;
+            const auto* p=static_cast<const std::uint8_t*>(mapped.pData)+y*mapped.RowPitch+x*4;
+            for(int c=0;c<3;++c)valid=valid&&std::abs(static_cast<int>(p[c])-expected[i])<=2;
+        }
+        rt.context->Unmap(slot.staging.get(),0);
+        if(!valid){error=L"Readback pixels differ from independently calculated grayscale quadrants";return false;}
+        return true;
+    }catch(const winrt::hresult_error& e){error=e.message().c_str();return false;}
+    catch(...){error=L"GPU readback self-test failed";return false;}
 }
 
 std::vector<WindowTarget> find_sekiro_windows() {
@@ -235,12 +334,15 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
     std::thread worker;
     std::vector<Row> trace; // Worker-owned; read/export only after active becomes false and join.
     bool record{};
+    std::function<void(const SmallFrame&)> frame_sink;
+    std::function<void()> discontinuity;
 
     void notify() noexcept {
         { std::lock_guard lock(signal_mutex); signaled = true; }
         signal.notify_one();
     }
     void state(CaptureState value, const std::wstring& detail) {
+        if (discontinuity && (value == CaptureState::stopping || value == CaptureState::faulted)) discontinuity();
         std::lock_guard lock(metrics_mutex);
         metrics.state = value; metrics.detail = detail;
     }
@@ -303,6 +405,8 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
         winrt::com_ptr<::IInspectable> inspectable;
         winrt::check_hresult(CreateDirect3D11DeviceFromDXGIDevice(dxgi.get(), inspectable.put()));
         rt.winrt_device = inspectable.as<wd3d::IDirect3DDevice>();
+        rt.readback = static_cast<bool>(frame_sink);
+        if (rt.readback) rt.initialize_readback();
         auto interop = winrt::get_activation_factory<wgc::GraphicsCaptureItem, IGraphicsCaptureItemInterop>();
         winrt::check_hresult(interop->CreateForWindow(target.hwnd,
             winrt::guid_of<wgc::GraphicsCaptureItem>(), winrt::put_abi(rt.item)));
@@ -333,7 +437,7 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
             metrics.width = rt.size.Width; metrics.height = rt.size.Height; metrics.generation = 1;
         }
         rt.session.StartCapture();
-        state(CaptureState::capturing, L"SDR BGRA8 capture. No input automation. Trace is opt-in.");
+        state(CaptureState::capturing, rt.readback ? L"Capture + GPU downsample feeding the CV detector." : L"SDR BGRA8 capture diagnostics.");
     }
 
     void poll_completed(Runtime& rt) {
@@ -356,6 +460,21 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
             if (a == S_FALSE || b == S_FALSE || c == S_FALSE) continue;
             if (!disjoint.Disjoint && disjoint.Frequency && end >= begin)
                 slot.row.gpu_ms = static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint.Frequency);
+            if (rt.readback) {
+                D3D11_MAPPED_SUBRESOURCE mapped{};
+                auto mapped_hr = rt.context->Map(slot.staging.get(), 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped);
+                if (mapped_hr == DXGI_ERROR_WAS_STILL_DRAWING) continue;
+                winrt::check_hresult(mapped_hr);
+                SmallFrame small;
+                small.sequence = slot.row.sequence; small.generation = slot.row.generation;
+                small.source_ms = slot.row.source; small.ready_ms = qpc_ms();
+                for (int y=0; y<vision_height; ++y) {
+                    const auto* pixels = static_cast<const std::uint8_t*>(mapped.pData) + y*mapped.RowPitch;
+                    for (int x=0; x<vision_width; ++x) small.gray[static_cast<std::size_t>(y*vision_width+x)] = pixels[x*4];
+                }
+                rt.context->Unmap(slot.staging.get(), 0);
+                frame_sink(small);
+            }
             slot.row.outcome = Outcome::copied;
             update_row(slot.trace_index, slot.row);
             {
@@ -416,6 +535,7 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
             throw winrt::hresult_error(E_ABORT, L"WGC source timestamp is stale. Restart capture with fresh game content.");
         }
         if (row.width != rt.size.Width || row.height != rt.size.Height) {
+            if (discontinuity) discontinuity();
             drop_row(index, Outcome::resize);
             const Size next{row.width, row.height};
             check_size(next);
@@ -451,6 +571,7 @@ struct CaptureEngine::Impl : std::enable_shared_from_this<CaptureEngine::Impl> {
         rt.context->Begin(slot.disjoint.get());
         rt.context->End(slot.begin.get());
         rt.context->CopySubresourceRegion(slot.texture.get(), 0, 0, 0, 0, source.get(), 0, &box);
+        if (rt.readback) rt.downsample(slot);
         rt.context->End(slot.end.get());
         rt.context->End(slot.disjoint.get());
         rt.context->End(slot.event.get());
@@ -537,6 +658,13 @@ bool CaptureEngine::start(const WindowTarget& target, bool record_trace) {
     s.active = true;
     try { s.worker = std::thread([self = impl_, target] { self->run(target); }); }
     catch (...) { s.active = false; s.state(CaptureState::faulted, L"Could not start capture worker."); return false; }
+    return true;
+}
+
+bool CaptureEngine::set_frame_sink(std::function<void(const SmallFrame&)> sink, std::function<void()> discontinuity) {
+    if (impl_->active) return false;
+    if (impl_->worker.joinable()) impl_->worker.join();
+    impl_->frame_sink = std::move(sink); impl_->discontinuity = std::move(discontinuity);
     return true;
 }
 
