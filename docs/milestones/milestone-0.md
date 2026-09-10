@@ -1,28 +1,20 @@
-# MILESTONE 0: FAIL
+# MILESTONE 0: PASS
 
-Date: 2026-09-10. Reason: GitHub repository creation and initial publication are not complete. Local skills readiness does not satisfy the user's remote source-of-truth gate.
+Verified 2026-09-10 after the user created the target GitHub repository. The earlier 404 blocker is resolved.
 
 | Requirement | Result | Evidence |
 |---|---|---|
-| GitHub connected | PASS | Authenticated profile and repository listing succeeded for duc03102005 |
-| Context7 connected | PASS | ONNX Runtime resolve/query and Windows App SDK query succeeded |
-| GitHub SekiroVisionAI repository created/access verified | FAIL | `duc03102005/SekiroVisionAI` lookup returned 404; exposed tools have no create-repository operation |
-| External skills selected/imported | PASS locally | Adapted winui-code-review and ort-build, pinned revisions and MIT licenses |
-| Six custom SKILL.md files exist | PASS locally | All six required paths under .agents/skills |
-| Each installed skill reviewed | PASS locally | Eight entrypoints, all bundled references and file-hash review manifest |
-| Skill validation | PASS locally | 8/8 creator checks; 18 reviewed files; 5/5 isolated negative gate cases detected |
-| Initial skill commit | Local checkpoint only | Required message: `chore: initialize SekiroVisionAI agent skills`; consult the actual Git log |
-| Initial commit pushed and remote tree verified | FAIL | No destination repository accessible; no push/remote commit claimed |
-| M1 authorization gate | CLOSED | CaptureEngine and other application implementations remain absent |
+| GitHub connected and repository accessible | PASS | duc03102005/SekiroVisionAI; authenticated push permission |
+| Context7 connected | PASS | Successful ONNX Runtime and Windows App SDK queries during skill setup |
+| External skills selected/imported/reviewed | PASS | Adapted winui-code-review and ort-build, pinned revisions and MIT licenses |
+| Six required custom skills | PASS | Six exact requested paths under .agents/skills |
+| All installed skills reviewed | PASS | Eight entrypoints, 18 resource files, SHA-256 review manifest |
+| Skill validation | PASS | 8/8 creator checks; project validator PASS; 5/5 negative gate cases detected |
+| Initial skill commit published | PASS | [15927a071fe415eda7920e118d954c0c8a5e864a](https://github.com/duc03102005/SekiroVisionAI/commit/15927a071fe415eda7920e118d954c0c8a5e864a) |
+| Remote contents verified | PASS | 33 files; Git tree 78e360350698aa2295425e2c697ba79035724b1d exactly matches the reviewed local checkpoint |
+| Local checkout clean | PASS at verification | Fetched origin/main; git status --porcelain empty; skill validator PASS |
+| M1 gate | OPEN | Architecture research and capture implementation may now begin |
 
-See the [local validation record](../research/evidence/validation.md) for method and limits.
+The initial GitHub README commit 24a45fa36afcd66cb9561be3d920c99ea504af62 is preserved as the parent. The original local checkpoint 25279af8197e04659f5d421e9fe61573c7e144ce has the same tree; the published commit has a different SHA because it preserves the repository's existing history.
 
-## Next required external step
-
-Create a repository named `SekiroVisionAI` under `duc03102005` on GitHub. Private visibility is the proposed default for this project. Give the connected GitHub app access if the account uses selected-repository access. An empty repository is suitable; if GitHub initializes a README, preserve that commit when publishing the skills.
-
-After the repository is accessible, publish the prepared commit/tree without changing unrelated repositories, verify the remote SHA and all reviewed skill paths, confirm clean local status, then update this milestone evidence. A backup file or a local Git commit is not a substitute for this verification.
-
-## After PASS
-
-Research and record the runtime/capture architecture. Start M1 capture and counters only, then measure on Windows/Sekiro/RTX 3070. No capture performance acceptance can be concluded from this Linux environment.
+See the [publication record](../../.agents/milestone-0-publication.json) and [local validation record](../research/evidence/validation.md). M0 proves skills setup and publication, not capture FPS, model accuracy or in-game Dodge performance. Later milestones need separate evidence.

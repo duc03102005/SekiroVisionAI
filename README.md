@@ -2,7 +2,7 @@
 
 Windows native, offline single-player research project for vision-led automatic Dodge in Sekiro: Shadows Die Twice, targeting an NVIDIA RTX 3070.
 
-**Current milestone: M0 — Agent Skills. Overall status: FAIL / blocked on GitHub repository creation and publication.** This checkout contains reviewed skills and setup documentation only. No capture engine, model, trained dataset or input automation has been implemented.
+**Milestone 0 — Agent Skills: PASS.** The reviewed setup is published and verified on GitHub. Milestone 1 may now begin; no capture performance, model accuracy or in-game avoidance has been validated.
 
 - [Milestone 0 evidence and remaining step](docs/milestones/milestone-0.md)
 - [External skills review and provenance](docs/research/external-skills-review.md)
@@ -21,4 +21,4 @@ python tools/validate_skills.py
 
 The validator is standard-library-only. It validates the intentionally simple project frontmatter format, local references, review file hashes, the annotation example and the M0 application-code boundary. It does not prove skill behavior, certify absence of malicious content or pass any game-performance milestone.
 
-The intended source of truth is `duc03102005/SekiroVisionAI`. A local commit is prepared with `chore: initialize SekiroVisionAI agent skills`; it must still be published and verified. Do not use a local backup as evidence of a GitHub push.
+The source of truth is [duc03102005/SekiroVisionAI](https://github.com/duc03102005/SekiroVisionAI). The reviewed skill tree was published as [15927a0](https://github.com/duc03102005/SekiroVisionAI/commit/15927a071fe415eda7920e118d954c0c8a5e864a) with `chore: initialize SekiroVisionAI agent skills`, preserving the user's initial README commit.

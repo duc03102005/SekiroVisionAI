@@ -1,6 +1,6 @@
 # Milestone 0 local validation record
 
-Date: 2026-09-10. Environment: Linux project-preparation workspace; no Windows game execution.
+Date: 2026-09-10. Environment: Linux project-preparation workspace; no Windows game execution. The table below preserves the initial local-setup results. Publication was subsequently verified; see the [M0 PASS record](../../milestones/milestone-0.md).
 
 ## Observed results
 
@@ -41,4 +41,4 @@ The bundled creator validator used during preparation lives in the task environm
 
 ## Gate interpretation
 
-Local readiness passes. **MILESTONE 0 remains FAIL** until the repository exists, the reviewed commit is published, the remote tree is verified and the local checkout is clean. Capture FPS, latency, inference accuracy and Windows input behavior are unmeasured.
+The initial local checks alone did not pass M0. Commit 15927a071fe415eda7920e118d954c0c8a5e864a was subsequently published to main, all 33 files were verified against the original Git tree, and the clean fetched checkout passed validation. **MILESTONE 0 now PASS.** Capture FPS, latency, inference accuracy and Windows input behavior remain unmeasured.

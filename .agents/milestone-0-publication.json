@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "verified_date": "2026-09-10",
+  "repository": "duc03102005/SekiroVisionAI",
+  "branch": "main",
+  "commit": "15927a071fe415eda7920e118d954c0c8a5e864a",
+  "tree": "78e360350698aa2295425e2c697ba79035724b1d",
+  "file_count": 33,
+  "skill_count": 8,
+  "reviewed_skill_files": 18,
+  "skill_review_manifest_sha256": "12180cdc71dfdba608ae95d6009e5147bc2660079e4d53c30db0fbd3303dab5b",
+  "remote_ref_and_tree_verified": true,
+  "local_clean_at_verification": true,
+  "local_skill_validator": "PASS",
+  "note": "M0 setup only; no Windows or game performance result."
+}

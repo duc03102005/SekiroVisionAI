@@ -117,11 +117,27 @@ def check_skills(root: Path) -> tuple[list[str], dict]:
     if sample["would_hit_without_dodge"] == "UNKNOWN" and sample["impact_evidence"] == "ESTIMATED_COUNTERFACTUAL":
         errors.append("Counterfactual example needs an explicit reviewed assumption")
 
-    # This checkout is deliberately the pre-publication M0 artifact. Later milestones
-    # must revise this setup-only gate after remote M0 evidence is actually verified.
-    for name in APP_DIRS:
-        if (root / name).exists():
-            errors.append(f"Application directory present before M0 publication: {name}")
+    # This attestation was added only after fetching and verifying the published tree.
+    # It is a recorded review, not a fresh online GitHub verification or security boundary.
+    publication_path = root / ".agents/milestone-0-publication.json"
+    publication_ok = False
+    if publication_path.exists():
+        publication = json.loads(publication_path.read_text())
+        publication_ok = (
+            publication.get("status") == "PASS"
+            and publication.get("repository") == "duc03102005/SekiroVisionAI"
+            and publication.get("remote_ref_and_tree_verified") is True
+            and publication.get("local_clean_at_verification") is True
+            and re.fullmatch(r"[0-9a-f]{40}", publication.get("commit", "")) is not None
+            and re.fullmatch(r"[0-9a-f]{40}", publication.get("tree", "")) is not None
+            and publication.get("skill_review_manifest_sha256") == hashlib.sha256(review_path.read_bytes()).hexdigest()
+        )
+        if not publication_ok:
+            errors.append("Invalid or stale M0 publication attestation")
+    if not publication_ok:
+        for name in APP_DIRS:
+            if (root / name).exists():
+                errors.append(f"Application directory present before M0 publication: {name}")
     return errors, {"skills": len(found), "reviewed_skill_files": len(files), "local_references": link_count}
 
 
@@ -135,7 +151,7 @@ def main() -> int:
     for error in errors:
         print("ERROR:", error)
     print("SKILL_VALIDATION:", "FAIL" if errors else "PASS")
-    print("GitHub publication and game performance are separate, unverified gates.")
+    print("Publication is recorded separately; this offline check does not reverify GitHub or game performance.")
     return 1 if errors else 0
 
 

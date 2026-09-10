@@ -1,6 +1,6 @@
 # Technical grounding for Agent Skills — 2026-09-10
 
-This is research supporting M0 skill instructions. Runtime language, exact SDK/provider versions, temporal model and overlay architecture are not selected. Those decisions and application implementation follow a verified M0 PASS.
+This document preserves research from the original M0 session. Its initial GitHub 404 blocker was subsequently resolved; see the [M0 PASS record](../milestones/milestone-0.md). Runtime language, SDK/provider versions, temporal model and overlay decisions belong to the subsequent architecture records.
 
 ## Connectivity and source handling
 
