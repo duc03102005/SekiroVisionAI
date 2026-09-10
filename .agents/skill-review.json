@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "reviewed_date": "2026-09-10",
+  "reviewer": "Codex manual source and project review",
+  "scope": "All installed skill entrypoints and bundled references/LICENSE/example data; no external scripts executed",
+  "skills": {
+    "combat-decision-engine": {
+      "status": "REVIEWED",
+      "kind": "custom",
+      "report": "docs/research/custom-skills-review.md"
+    },
+    "low-latency-inference": {
+      "status": "REVIEWED",
+      "kind": "custom",
+      "report": "docs/research/custom-skills-review.md"
+    },
+    "ort-build": {
+      "status": "REVIEWED",
+      "kind": "external-adapted",
+      "report": "docs/research/external-skills-review.md"
+    },
+    "realtime-video-ai": {
+      "status": "REVIEWED",
+      "kind": "custom",
+      "report": "docs/research/custom-skills-review.md"
+    },
+    "sekiro-dataset-pipeline": {
+      "status": "REVIEWED",
+      "kind": "custom",
+      "report": "docs/research/custom-skills-review.md"
+    },
+    "windows-gpu-capture": {
+      "status": "REVIEWED",
+      "kind": "custom",
+      "report": "docs/research/custom-skills-review.md"
+    },
+    "windows-native-app": {
+      "status": "REVIEWED",
+      "kind": "custom",
+      "report": "docs/research/custom-skills-review.md"
+    },
+    "winui-code-review": {
+      "status": "REVIEWED",
+      "kind": "external-adapted",
+      "report": "docs/research/external-skills-review.md"
+    }
+  },
+  "files": {
+    ".agents/skills/combat-decision-engine/SKILL.md": "cafda4ff4f9ff1a3fc0f8ec1dad2e207ee0fcd62553cc5937d0dd877948d0c11",
+    ".agents/skills/combat-decision-engine/references/decision-contract.md": "b879366691565fa23b8ad7f0aaf6988e7c5c51633e1c1423329434feb4deee47",
+    ".agents/skills/low-latency-inference/SKILL.md": "93b042ee2499c73c42853642f92e36981a5b71c36526289a892d56fcef7f2669",
+    ".agents/skills/low-latency-inference/references/benchmark-contract.md": "041565abe1b19cc55fe81fbb0b74e2c6be9f7741210154df04be93e9a71fdd90",
+    ".agents/skills/ort-build/LICENSE": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+    ".agents/skills/ort-build/SKILL.md": "6e7fc2874176e7e243aaa0b36336a85f22f09446201aecc1a56d557e189974a6",
+    ".agents/skills/realtime-video-ai/SKILL.md": "71ad4ee17edf0ad33c269a47941af7151f3d51970b07ecc5f63cbe6f0b5fee48",
+    ".agents/skills/realtime-video-ai/references/model-evaluation.md": "0772d74978d80adb7e22e9ee52c83c79252d9cd56a5457409c31b546aa85f1b3",
+    ".agents/skills/sekiro-dataset-pipeline/SKILL.md": "e0d868d8d0c2db56c09138ee5ebc48450ca7e020c812b13a583b1ba5aaa7b2ad",
+    ".agents/skills/sekiro-dataset-pipeline/references/annotation-contract.md": "4dab62293b7faf5f6f60ac42f5115d53576f347959053ebc2ee9d57346285fc0",
+    ".agents/skills/sekiro-dataset-pipeline/references/annotation.example.json": "292f4fae5999e933826d10f199ddbff85d672bb25ffddf155603ad2de03aa872",
+    ".agents/skills/windows-gpu-capture/SKILL.md": "c2fc62dafa02916e27e60a01b8b526b618381676d48dabb7e0f5e9308de1ce05",
+    ".agents/skills/windows-gpu-capture/references/frame-contract.md": "de9eb7e2ff2b5fe4f52aff43debe5e63843e4862b24ae6607bb680d9142a9bcf",
+    ".agents/skills/windows-native-app/SKILL.md": "d3c6a9e5b339381d5a8a06d61680a7fd89205f3deccba2736edce173bc37d491",
+    ".agents/skills/windows-native-app/references/architecture-options.md": "56b8dc8bb63a238fa90a70ef34da4027bcb3644b9acee3a0e28aa6fa9374a7c3",
+    ".agents/skills/winui-code-review/LICENSE": "c421b2a5e0ee627bb1c5d859bbca37d7654c02f63d626e753644484a9054c2d1",
+    ".agents/skills/winui-code-review/SKILL.md": "de1a7a308a1106431bad8fe66bb84294f36f5b2d8182e43580e6c39552c66b90",
+    ".agents/skills/winui-code-review/references/quality-rules.md": "bdb960c15178f8a8660a4b2bb1063889eddcdec3d21be8dbce665bbe2d6bdf8a"
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "mode": "documentation review only; no input dispatch",
+  "policy": {
+    "entry_confidence": 0.9,
+    "entry_threat": 0.9,
+    "exit_confidence": 0.8,
+    "exit_threat": 0.8,
+    "dwell_ms": 40,
+    "max_age_ms": 50,
+    "cooldown_ms": 250,
+    "validated_safe_remaining_interval_ms": [
+      70,
+      140
+    ],
+    "timing_acceptance": "entire corrected TTI interval must fit inside the validated window",
+    "remaining_submission_delay_ms": 0,
+    "physical_keys_down": [],
+    "score_defaults": {
+      "confidence": 0.99,
+      "threat_probability": 0.99
+    },
+    "default_geometry": "valid; SCREEN right maps to D and has been validated safe",
+    "default_focus": true,
+    "session_id": "review-session-1",
+    "model_version": "review-model-1",
+    "phase_default": "ATTACK_WINDUP",
+    "max_observation_gap_ms": 50,
+    "shadow_semantics": "would-dispatch commits a virtual accepted token and cooldown; never sends OS input",
+    "packet_defaults": {
+      "wolf_track_id": "wolf-1",
+      "enemy_track_lineage": "enemy-1",
+      "attack_episode_id": "episode-1",
+      "attack_type": "HORIZONTAL_SLASH",
+      "geometry_uncertainty": "bounded and within policy",
+      "tti_uncertainty": "provided interval is valid",
+      "validity_masks": "all true unless overridden",
+      "direction_space": "SCREEN",
+      "attack_direction": "LEFTWARD",
+      "dodge_direction": "RIGHT",
+      "model_available": true,
+      "target_hwnd_process_verified": true,
+      "session_continuity": true
+    }
+  },
+  "rows": [
+    {
+      "id": 0,
+      "source_ms": 0,
+      "decision_ms": 5,
+      "enabled": false,
+      "strike": "A",
+      "tti": [
+        100,
+        120
+      ]
+    },
+    {
+      "id": 1,
+      "source_ms": 100,
+      "decision_ms": 105,
+      "enabled": true,
+      "strike": "A",
+      "tti": [
+        180,
+        200
+      ],
+      "user_arm_event": true
+    },
+    {
+      "id": 2,
+      "source_ms": 120,
+      "decision_ms": 125,
+      "enabled": true,
+      "strike": "A",
+      "tti": [
+        135,
+        155
+      ]
+    },
+    {
+      "id": 3,
+      "source_ms": 145,
+      "decision_ms": 150,
+      "enabled": true,
+      "strike": "A",
+      "tti": [
+        100,
+        120
+      ]
+    },
+    {
+      "id": 4,
+      "source_ms": 180,
+      "decision_ms": 185,
+      "enabled": true,
+      "strike": "A",
+      "tti": [
+        65,
+        85
+      ]
+    },
+    {
+      "id": 5,
+      "source_ms": 500,
+      "decision_ms": 505,
+      "enabled": true,
+      "strike": "A",
+      "tti": [
+        90,
+        110
+      ]
+    },
+    {
+      "id": 6,
+      "source_ms": 620,
+      "decision_ms": 625,
+      "enabled": true,
+      "strike": "B",
+      "new_strike_evidence": "observed new strike boundary",
+      "tti": [
+        180,
+        200
+      ]
+    },
+    {
+      "id": 7,
+      "source_ms": 670,
+      "decision_ms": 675,
+      "enabled": true,
+      "strike": "B",
+      "focus": false,
+      "tti": [
+        90,
+        110
+      ]
+    },
+    {
+      "id": 8,
+      "source_ms": 800,
+      "decision_ms": 900,
+      "enabled": true,
+      "strike": "C",
+      "new_strike_evidence": "observed new strike boundary",
+      "tti": [
+        180,
+        200
+      ],
+      "user_arm_event": true
+    },
+    {
+      "id": 9,
+      "source_ms": 1000,
+      "decision_ms": 1005,
+      "enabled": true,
+      "strike": "D",
+      "new_strike_evidence": "observed new strike boundary",
+      "safe_direction": false,
+      "attack_type": "AOE",
+      "tti": [
+        90,
+        110
+      ]
+    },
+    {
+      "id": 10,
+      "source_ms": 1100,
+      "decision_ms": 1105,
+      "enabled": true,
+      "strike": "E",
+      "new_strike_evidence": "observed new strike boundary",
+      "tti": null
+    },
+    {
+      "id": 11,
+      "source_ms": 1000,
+      "decision_ms": 1110,
+      "enabled": true,
+      "strike": "E",
+      "tti": [
+        90,
+        110
+      ]
+    }
+  ]
+}

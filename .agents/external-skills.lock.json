@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "reviewed_date": "2026-09-10",
+  "imports": [
+    {
+      "name": "winui-code-review",
+      "repository": "microsoft/win-dev-skills",
+      "commit": "f94bab12f67f8670567c08b079dfd3179a1d15b4",
+      "license": "MIT",
+      "review_status": "REVIEWED_ADAPTED",
+      "review_report": "docs/research/external-skills-review.md",
+      "bundled_executables": 0,
+      "files": [
+        {
+          "upstream_path": "plugins/winui/agent-plugin/skills/winui-code-review/SKILL.md",
+          "upstream_url": "https://github.com/microsoft/win-dev-skills/blob/f94bab12f67f8670567c08b079dfd3179a1d15b4/plugins/winui/agent-plugin/skills/winui-code-review/SKILL.md",
+          "upstream_git_blob_sha": "ead3dcb8ec909c5830f35a2127033c914c94e961",
+          "upstream_sha256": "9fba900155a3485db335de20ba4d136d62829f81a8aef35ffcff31b9082ab6a6",
+          "local_path": ".agents/skills/winui-code-review/SKILL.md",
+          "installed_sha256": "de1a7a308a1106431bad8fe66bb84294f36f5b2d8182e43580e6c39552c66b90",
+          "modified": true
+        },
+        {
+          "upstream_path": "plugins/winui/agent-plugin/skills/winui-code-review/references/quality-rules.md",
+          "upstream_url": "https://github.com/microsoft/win-dev-skills/blob/f94bab12f67f8670567c08b079dfd3179a1d15b4/plugins/winui/agent-plugin/skills/winui-code-review/references/quality-rules.md",
+          "upstream_git_blob_sha": "4079ebd4f9ee3dc6f51aa2f6b8eb110b62887b4f",
+          "upstream_sha256": "9f4c258078ab1b5ef4da5973277d31c2e59dc137590768c1cdc185b3ece9f262",
+          "local_path": ".agents/skills/winui-code-review/references/quality-rules.md",
+          "installed_sha256": "bdb960c15178f8a8660a4b2bb1063889eddcdec3d21be8dbce665bbe2d6bdf8a",
+          "modified": true
+        },
+        {
+          "upstream_path": "LICENSE",
+          "upstream_url": "https://github.com/microsoft/win-dev-skills/blob/f94bab12f67f8670567c08b079dfd3179a1d15b4/LICENSE",
+          "upstream_git_blob_sha": "25ef6e9607f14dfaa543181109d05134c09a57cd",
+          "upstream_sha256": "c421b2a5e0ee627bb1c5d859bbca37d7654c02f63d626e753644484a9054c2d1",
+          "local_path": ".agents/skills/winui-code-review/LICENSE",
+          "installed_sha256": "c421b2a5e0ee627bb1c5d859bbca37d7654c02f63d626e753644484a9054c2d1",
+          "modified": false
+        }
+      ]
+    },
+    {
+      "name": "ort-build",
+      "repository": "microsoft/onnxruntime",
+      "commit": "f2c39fe2f838cf35ce7da92824f5a5e3ee6e88a7",
+      "license": "MIT",
+      "review_status": "REVIEWED_ADAPTED",
+      "review_report": "docs/research/external-skills-review.md",
+      "bundled_executables": 0,
+      "files": [
+        {
+          "upstream_path": ".github/skills/ort-build/SKILL.md",
+          "upstream_url": "https://github.com/microsoft/onnxruntime/blob/f2c39fe2f838cf35ce7da92824f5a5e3ee6e88a7/.github/skills/ort-build/SKILL.md",
+          "upstream_git_blob_sha": "4d96ebdd92a5ed89a33cdb3153303e23ec54bb66",
+          "upstream_sha256": "02476f7300190e1844628fec0a08353f2915c122fc5062b8ac96e66df9e89704",
+          "local_path": ".agents/skills/ort-build/SKILL.md",
+          "installed_sha256": "6e7fc2874176e7e243aaa0b36336a85f22f09446201aecc1a56d557e189974a6",
+          "modified": true
+        },
+        {
+          "upstream_path": "LICENSE",
+          "upstream_url": "https://github.com/microsoft/onnxruntime/blob/f2c39fe2f838cf35ce7da92824f5a5e3ee6e88a7/LICENSE",
+          "upstream_git_blob_sha": "48bc6bb4996ac924359e8e28b9ae88970e5ed3fc",
+          "upstream_sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+          "local_path": ".agents/skills/ort-build/LICENSE",
+          "installed_sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+          "modified": false
+        }
+      ]
+    }
+  ],
+  "not_imported": [
+    {
+      "repository": "NVIDIA/skills",
+      "commit": "be3d1a48f91de1abd09536f9a73d182dbecfb337",
+      "path": "skills/deepstream-profile-pipeline/SKILL.md",
+      "entrypoint_sha256": "7d6193940e5508cc0246791634222465b5fde6e06b9402777caac61e770812ca",
+      "reason": "Ubuntu/DeepStream multi-stream throughput workflow is not the Windows batch-one live-game pipeline",
+      "scope": "Entrypoint read; referenced subtree not audited or imported"
+    }
+  ]
+}
