@@ -16,6 +16,8 @@
 namespace sekiro::replay {
 using Microsoft::WRL::ComPtr;
 namespace {
+constexpr DWORD first_video_stream=static_cast<DWORD>(MF_SOURCE_READER_FIRST_VIDEO_STREAM);
+constexpr DWORD all_streams=static_cast<DWORD>(MF_SOURCE_READER_ALL_STREAMS);
 void checked(HRESULT hr,const char* operation) {
     if(FAILED(hr)){std::ostringstream text;text<<operation<<" failed (HRESULT 0x"<<std::hex<<static_cast<unsigned long>(hr)<<')';throw std::runtime_error(text.str());}
 }
@@ -39,7 +41,7 @@ class NativeReader final:public VideoReader {
     bool ended_{};
     double previous_pts_{-std::numeric_limits<double>::infinity()};
     void update_type() {
-        ComPtr<IMFMediaType> type;checked(reader_->GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,&type),"Read decoded video type");
+        ComPtr<IMFMediaType> type;checked(reader_->GetCurrentMediaType(first_video_stream,&type),"Read decoded video type");
         GUID subtype{};checked(type->GetGUID(MF_MT_SUBTYPE,&subtype),"Read RGB subtype");
         if(subtype!=MFVideoFormat_RGB32)throw std::runtime_error("Replay decoder changed away from requested RGB32");
         UINT32 width=0,height=0;checked(MFGetAttributeSize(type.Get(),MF_MT_FRAME_SIZE,&width,&height),"Read decoded dimensions");
@@ -91,12 +93,12 @@ public:
         checked(attributes->SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING,TRUE),"Enable native RGB conversion");
         checked(attributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS,TRUE),"Allow installed hardware transforms");
         checked(MFCreateSourceReaderFromURL(path.c_str(),attributes.Get(),&reader_),"Open native media file");
-        checked(reader_->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,FALSE),"Deselect media streams");
-        checked(reader_->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,TRUE),"Select video stream");
+        checked(reader_->SetStreamSelection(all_streams,FALSE),"Deselect media streams");
+        checked(reader_->SetStreamSelection(first_video_stream,TRUE),"Select video stream");
         ComPtr<IMFMediaType> output;checked(MFCreateMediaType(&output),"Create RGB media type");
         checked(output->SetGUID(MF_MT_MAJOR_TYPE,MFMediaType_Video),"Set video type");
         checked(output->SetGUID(MF_MT_SUBTYPE,MFVideoFormat_RGB32),"Set decoded RGB32 type");
-        checked(reader_->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,nullptr,output.Get()),"Configure native RGB decoder");
+        checked(reader_->SetCurrentMediaType(first_video_stream,nullptr,output.Get()),"Configure native RGB decoder");
         update_type();
     }
     bool next(VideoFrame& out) override {
@@ -104,7 +106,7 @@ public:
         // Bound no-sample notifications. A malformed source cannot spin forever.
         for(int attempt=0;attempt<1024;++attempt) {
             DWORD stream=0,flags=0;LONGLONG pts=0;ComPtr<IMFSample> sample;
-            checked(reader_->ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,0,&stream,&flags,&pts,&sample),"Decode replay sample");
+            checked(reader_->ReadSample(first_video_stream,0,&stream,&flags,&pts,&sample),"Decode replay sample");
             if(flags&MF_SOURCE_READERF_ERROR)throw std::runtime_error("Media Foundation reported a source error");
             if(flags&MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED){update_type();++generation_;}
             if(flags&MF_SOURCE_READERF_ENDOFSTREAM)ended_=true;

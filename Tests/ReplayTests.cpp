@@ -7,6 +7,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <type_traits>
 
@@ -141,10 +142,13 @@ void shared_model(const std::filesystem::path& fixture) {
 }
 #ifdef _WIN32
 void native_mp4(const std::filesystem::path& path) {
-    auto reader=open_video(path);VideoFrame frame;int count=0;double previous=-1;
+    auto reader=open_video(path);VideoFrame frame;int count=0;double previous=-1,first=0;
+    std::vector<double> timestamps;
     while(reader->next(frame)) {
         require(frame.color->width==320&&frame.color->height==192,"Media Foundation decoded wrong dimensions");
         require(frame.pts_ms>previous,"Native MP4 PTS must be increasing");previous=frame.pts_ms;
+        if(count==0)first=frame.pts_ms;
+        timestamps.push_back(frame.pts_ms);
         const std::array<std::array<int,3>,4> colors{{{0,0,255},{0,255,0},{255,0,0},{255,255,255}}};
         for(int quadrant=0;quadrant<4;++quadrant) {
             const int x=quadrant%2?240:80,y=quadrant/2?144:48;
@@ -154,7 +158,12 @@ void native_mp4(const std::filesystem::path& path) {
         }
         ++count;
     }
-    require(count==30&&std::abs(previous-966.6667)<0.2,"Native H264 frame count or source PTS changed");
+    std::ostringstream detail;
+    detail<<"Native H264 decoded_frames="<<count<<" first_pts_ms="<<first<<" last_pts_ms="<<previous
+          <<" span_ms="<<previous-first<<" source_sha256="<<sha256_file(path)<<" pts_ms=[";
+    for(std::size_t i=0;i<timestamps.size();++i){if(i)detail<<',';detail<<timestamps[i];}detail<<']';
+    std::cout<<detail.str()<<'\n';
+    if(count!=30||std::abs(previous-966.6667)>=0.2)throw std::runtime_error("Native H264 frame count or source PTS changed: "+detail.str());
 }
 #endif
 }

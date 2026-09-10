@@ -469,10 +469,85 @@
         "Gyoubu Masataka Oniwa",
         "Isshin the Sword Saint"
       ]
+    },
+    {
+      "source_id": "MARKOV_SEKIRO_37B5B86D",
+      "source_group_id": "MARKOV_SEKIRO_37B5B86D_SESSION",
+      "player_id": "Markov gameplay contributor (original player unknown)",
+      "creator": "Markov gameplay contributor (original player unknown)",
+      "session_id": "MARKOV_SEKIRO_37B5B86D_SESSION",
+      "duplicate_group_id": "MARKOV_SEKIRO_UNKNOWN_PLAYER",
+      "boss": "EARLY_GAME_UNREVIEWED",
+      "url": "https://huggingface.co/datasets/markov-ai/gaming-500-hours/resolve/5af703f2810306e7d75eb4394ae59591f1f6e8a2/sekiro/37b5b86d-b5bc-42c4-ad51-b92c014aaf98/clip.mp4",
+      "retrieved_at": "2026-09-10T23:37:04+00:00",
+      "usage_basis": "EXPLICIT_PERMISSION",
+      "usage_evidence": "Publisher https://www.markovstudios.com/ presents data for training computer-use AI and directly links https://huggingface.co/datasets/markov-ai/gaming-500-hours as its open-source gaming data. Contextual publisher training-use invitation documented with exact fragments, date and page hashes at Dataset/catalog/permissions/markov-training-use.json. Scope: project research/training/evaluation; no media redistribution grant assumed.",
+      "sha256": "17382ce410a120475b3f9d809f3e4fa7e9cc6978e4e628ab20da240c595a3dee",
+      "pts_sha256": "2e2b3ccec19f8cf68b114bf3b65565071f1d7c2dbe82f933b4c70777cef61deb",
+      "video": {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "30/1",
+        "time_base": "1/15360",
+        "start_time": "0.000000",
+        "duration": "1221.400000",
+        "nb_frames": "36642",
+        "frame_count": 36642,
+        "fps_num": 30,
+        "fps_den": 1,
+        "first_pts_ms": 0.0,
+        "last_pts_ms": 1221366.667,
+        "duration_ms": 1221400.0
+      },
+      "decoder": "ffprobe version 6.1.1-3ubuntu5 Copyright (c) 2007-2023 the FFmpeg developers",
+      "example_only": false,
+      "download_status": "IMPORTED",
+      "processing_status": "PTS_INDEXED",
+      "media_path": "data/sources/MARKOV_SEKIRO_37B5B86D/source.mp4",
+      "pts_path": "data/sources/MARKOV_SEKIRO_37B5B86D/source_pts.jsonl",
+      "permission_evidence": "Dataset/catalog/permissions/markov-training-use.json",
+      "annotation_status": "UNREVIEWED",
+      "original_player_identity_known": false,
+      "original_session_identity_known": true,
+      "source_redistribution_authorized": false,
+      "training_exclusions_ms": [
+        [
+          0,
+          260000
+        ]
+      ],
+      "training_candidate_intervals_ms": [
+        [
+          300000,
+          500000
+        ],
+        [
+          1000000,
+          1100000
+        ]
+      ],
+      "selection_note": "Intervals are coarse visual scene selection; they are not reviewed attack, contact, successful dodge or optimal action labels. Only use selected gameplay intervals until broader video review; exclude incidental non-game overlays.",
+      "overview_observation": "Opening/early unarmed Ashina Reservoir tutorial, navigation, stealth and repeated tutorial prompts. No boss confirmed in overview review. Incidental desktop at beginning is excluded.",
+      "acquisition": {
+        "method": "Ordinary HTTP Range requests of public unencrypted publisher-distributed MP4; assembled bytes verified against full publisher LFS SHA256",
+        "distributor": "Markov",
+        "repository": "markov-ai/gaming-500-hours",
+        "repository_commit": "5af703f2810306e7d75eb4394ae59591f1f6e8a2",
+        "download_url": "https://huggingface.co/datasets/markov-ai/gaming-500-hours/resolve/5af703f2810306e7d75eb4394ae59591f1f6e8a2/sekiro/37b5b86d-b5bc-42c4-ad51-b92c014aaf98/clip.mp4",
+        "media_size_bytes": 531221451,
+        "publisher_lfs_sha256": "17382ce410a120475b3f9d809f3e4fa7e9cc6978e4e628ab20da240c595a3dee",
+        "publisher_lfs_sha256_verified": true,
+        "metadata_original": "sekiro/37b5b86d-b5bc-42c4-ad51-b92c014aaf98/metadata.json",
+        "interaction_event_logs_downloaded": false
+      }
     }
   ],
-  "acquired_video_count": 7,
-  "acquired_duration_seconds": 1188.45525,
-  "decoded_frame_count": 35871,
-  "reviewed_attack_event_count": 0
+  "acquired_video_count": 8,
+  "acquired_duration_seconds": 2409.85525,
+  "decoded_frame_count": 72513,
+  "reviewed_attack_event_count": 0,
+  "duration_note": "Raw acquired video duration, including menus/loading/cutscenes and known incidental desktop exclusions; not labeled attack minutes.",
+  "grouping_note": "Two conservative original-player groups: all six LIVE-YT clips together and both Markov sessions together. This does not prove two original players or independent player-disjoint evaluation."
 }

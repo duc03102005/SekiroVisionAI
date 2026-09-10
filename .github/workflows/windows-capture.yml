@@ -30,6 +30,7 @@ jobs:
           python tools/make_onnx_test_fixture.py out/testdata/temporal-fixture.onnx
           python tools/make_onnx_test_fixture.py out/testdata/temporal-v2-fixture.onnx --contract temporal-v2
           python tools/make_replay_fixture.py out/testdata
+          python -m Training.targets.make_fixture out/testdata/target-fixture.onnx
           python -m unittest discover -s Tests -p 'capture_trace.py'
       - name: Configure Windows x64
         run: cmake --preset windows-x64

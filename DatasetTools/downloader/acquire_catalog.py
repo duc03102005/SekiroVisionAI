@@ -86,6 +86,8 @@ def save_provenance(directory: Path, row: dict, evidence: Path) -> None:
     # original source bytes or timestamps, and are not attack annotations.
     write_json(directory / 'training-exclusions.json', {
         'source_id': row['source_id'], 'intervals_ms': row.get('training_exclusions_ms', []),
+        'candidate_intervals_ms': row.get('training_candidate_intervals_ms', []),
+        'selection_note': row.get('selection_note', ''),
         'review_status': row.get('annotation_status', 'UNREVIEWED')})
 
 
