@@ -1,0 +1,74 @@
+name: Windows Auto Dodge MVP build
+
+on:
+  push:
+    branches: [main, feature/capture-engine, feature/auto-dodge-mvp]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-capture-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-release:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate reviewed skills
+        run: python tools/validate_skills.py
+      - name: Configure Windows x64
+        run: cmake --preset windows-x64
+      - name: Record toolchain
+        shell: pwsh
+        run: |
+          cmake --version
+          Get-Content out/build/windows-x64/CMakeCache.txt | Select-String 'CMAKE_CXX_COMPILER:|CMAKE_SYSTEM_VERSION:|CMAKE_GENERATOR_TOOLSET:'
+          Get-ChildItem out/build/windows-x64/CMakeFiles -Recurse -Filter CMakeCXXCompiler.cmake | Get-Content | Select-String 'CMAKE_CXX_COMPILER_VERSION|CMAKE_CXX_COMPILER_ID'
+      - name: Build actual Windows capture target
+        run: cmake --build --preset windows-release --parallel
+      - name: Test timing, threat behavior and actual GPU readback
+        run: ctest --preset windows-release
+      - name: Launch Windows UI and input watchdog without sending input
+        id: ui-smoke
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $mvpProcess = Start-Process -FilePath out/build/windows-x64/Release/SekiroAutoDodge.exe -ArgumentList '--smoke-test' -WindowStyle Hidden -PassThru
+          if (-not $mvpProcess.WaitForExit(15000)) {
+            Stop-Process -Id $mvpProcess.Id -Force
+            throw 'MVP smoke test did not exit within 15 seconds'
+          }
+          $mvpProcess.Refresh()
+          if ($mvpProcess.ExitCode -ne 0) { throw "MVP smoke test exit code $($mvpProcess.ExitCode)" }
+      - name: Package runnable Windows MVP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out/package | Out-Null
+          Copy-Item out/build/windows-x64/Release/SekiroAutoDodge.exe out/package/
+          Copy-Item docs/MVP_QUICKSTART_VI.md out/package/README_VI.md
+          $manifest = [ordered]@{
+            version = '0.2.0-mvp'
+            built_commit = (git rev-parse HEAD)
+            source_head = '${{ github.event.pull_request.head.sha || github.sha }}'
+            architecture = 'Windows x64'
+            executable_sha256 = (Get-FileHash out/package/SekiroAutoDodge.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+            ui_smoke = '${{ steps.ui-smoke.outcome }}'
+            live_sekiro_accuracy = 'not measured'
+            runtime = 'C++20 WGC D3D11 CV heuristic SendInput'
+          }
+          $manifest | ConvertTo-Json | Set-Content -Encoding UTF8 out/package/build-manifest.json
+      - name: Publish unsigned Auto Dodge MVP
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: SekiroAutoDodge-MVP-Windows-x64-${{ github.sha }}
+          path: out/package/
+          if-no-files-found: error
+          retention-days: 30
