@@ -61,6 +61,9 @@ def export_samples(clips_path: Path, annotations_path: Path, output: Path, *,
             dodge = annotation.get("dodge_start")
             direction = (annotation["dodge_direction"] if dodge is not None and
                          anchor["source_frame"] <= dodge and annotation["dodge_direction"] != "UNKNOWN" else None)
+            attack_direction = (annotation.get("attack_direction") if is_attack and
+                                annotation.get("attack_direction_evidence") == "VISUAL_TRAJECTORY" and
+                                annotation.get("attack_direction") not in (None, "UNKNOWN") else None)
             sample = {
                 "clip_id": clip["clip_id"], "source_id": clip["source_id"],
                 "source_group_id": clip["source_group_id"], "boss": annotation["boss"],
@@ -75,7 +78,10 @@ def export_samples(clips_path: Path, annotations_path: Path, output: Path, *,
                 "labels": {"state": state, "class": annotation["attack_type"] if is_attack else None,
                            "attack": is_attack, "threat": threat, "tti_ms": tti_ms,
                            "tti_censored": tti_ms is None, "impact_evidence": annotation["impact_evidence"],
-                           "direction": direction, "direction_label_kind": "OBSERVED_RESPONSE" if direction else None},
+                           "direction": direction, "direction_label_kind": "OBSERVED_RESPONSE" if direction else None,
+                           "attack_direction": attack_direction,
+                           "attack_direction_evidence": "VISUAL_TRAJECTORY" if attack_direction else "NOT_OBSERVED",
+                           "attack_direction_space": "SCREEN_WITH_WOLF_REFERENCE"},
                 "annotation_status": "reviewed", "reviewer": annotation["reviewer"],
                 "annotation_id": annotation["annotation_id"], "annotation_revision": annotation["revision"],
                 "annotation_confidence": annotation["confidence"],
@@ -96,6 +102,8 @@ def export_samples(clips_path: Path, annotations_path: Path, output: Path, *,
                "bosses": sorted({row["boss"] for row in ordered}),
                "observed_contact_tti_samples": sum(row["labels"]["tti_ms"] is not None for row in ordered),
                "direction_semantics": "Observed player response; not a verified safe-action policy",
+               "attack_direction_semantics": "Reviewed weapon/attack path on screen; toward/away are Wolf-relative",
+               "observed_attack_direction_samples": sum(row["labels"]["attack_direction"] is not None for row in ordered),
                "all_example_only": bool(ordered) and all(row["example_only"] for row in ordered),
                "clips_sha256": sha256_file(clips_path), "annotations_sha256": sha256_file(annotations_path),
                "samples_sha256": sha256_file(output)}

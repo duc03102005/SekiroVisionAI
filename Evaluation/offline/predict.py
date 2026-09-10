@@ -6,8 +6,9 @@ from pathlib import Path
 import onnxruntime as ort
 from torch.utils.data import DataLoader
 
-from Training.datasets.video_samples import VideoSamples
+from Training.datasets.video_samples import VideoSamples, ATTACK_DIRECTIONS
 from Training.models import OUTPUT_NAMES
+from Training.models.temporal import OUTPUT_NAMES_V1
 from Evaluation.false_positive.mine import review_queue
 
 
@@ -21,20 +22,24 @@ def main():
     options = ort.SessionOptions()
     options.intra_op_num_threads = 2
     session = ort.InferenceSession(str(args.model), sess_options=options, providers=["CPUExecutionProvider"])
+    metadata = session.get_modelmeta().custom_metadata_map
+    names = OUTPUT_NAMES if metadata.get("svai.contract") == "temporal-v2" else OUTPUT_NAMES_V1
     shape = session.get_inputs()[0].shape
     if len(shape) != 5 or shape[0] != 1 or shape[2] != 3 or shape[3] != shape[4]:
-        raise ValueError("Expected temporal-v1 NTCHW RGB input")
+        raise ValueError("Expected native temporal NTCHW RGB input")
     data = VideoSamples(args.manifest, frames=shape[1], size=shape[3], require_review=False)
     rows = []
     for frames, _, _, indices in DataLoader(data, batch_size=1, shuffle=False):
         source = data.rows[int(indices[0])]
-        outputs = session.run(OUTPUT_NAMES, {"frames": frames.numpy()})
+        outputs = session.run(names, {"frames": frames.numpy()})
         rows.append({"source_id": source["source_id"], "clip_id": source["clip_id"],
                      "annotation_id": source.get("annotation_id"), "source_pts_ms": source.get("source_pts_ms"),
                      "labels": source.get("labels", {}), "boss": source.get("boss", "UNKNOWN"),
-                     "model_metadata": session.get_modelmeta().custom_metadata_map,
+                     "model_metadata": metadata,
                      "attack_probability": float(outputs[0][0, 0]), "threat_probability": float(outputs[1][0, 0]),
-                     "tti_ms": float(outputs[2][0, 0]), "tti_uncertainty_ms": float(outputs[3][0, 0])})
+                     "tti_ms": float(outputs[2][0, 0]), "tti_uncertainty_ms": float(outputs[3][0, 0]),
+                     "attack_direction_prediction": ATTACK_DIRECTIONS[int(outputs[7][0].argmax())]
+                         if len(outputs) == 8 and metadata.get("svai.attack_direction_supported") == "true" else "UNKNOWN"})
     with args.output.open("x", encoding="utf-8") as stream:
         stream.writelines(json.dumps(row)+"\n" for row in rows)
     if args.review_queue:

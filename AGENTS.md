@@ -2,7 +2,17 @@
 
 Build a Windows native, offline, single-player, vision-led Auto Dodge application for Sekiro. The user supplied the governing brief in `docs/project-brief.md`.
 
-## Current scope: temporal AI integration (user override, 2026-09-10)
+## Current scope: complete Windows application (user override, 2026-09-10)
+
+The latest governing attachment is **Complete Application Mode**. Continue on `feature/complete-application`, preserving useful code and all reviewed skills. Parallel implementation is expressly authorized. The final deliverable is a Release x64 `SekiroVisionAI.exe` with its supported production model and runtime dependencies; intermediate CI artifacts are internal validation builds, not a completed Auto Dodge release. Do not ask the user to QA individual capture, hotkey, ROI or model stages. Continue all work possible in the development environment.
+
+Normal operation must automatically discover Sekiro, load the managed production model, select an available provider and create/follow combat ROI. Keep manual ROI, model selection and heuristic controls in Advanced/Debug. F8 toggles real Auto Dodge; F9 cancels and releases owned keys. UI must distinguish actual gameplay-trained model outputs, provisional visual tracks and unavailable semantic recognition.
+
+Fix freshness at its cause: preserve WGC source QPC timestamps; never re-stamp stale frames or relax age checks to make arming succeed. Production and native prerecorded-video replay must share preprocessing, temporal model/history, threat policy and directional Dodge selection. Replay records simulated dispatch explicitly and scores only observable reviewed labels. All-boss coverage, held-out source/player/boss-family evaluation and meaningful Windows input/package tests remain necessary evidence for claiming the final application works, but do not block development of other components. Autonomous commits and appropriately reviewed/tested merges are authorized.
+
+See `docs/complete-application-status.md` for current implementation and evidence. The earlier scopes below explain history and do not reduce the latest request.
+
+### Previous scope: temporal AI integration
 
 The latest user attachment requests parallel capture-quality, multi-boss source collection, clip mining, annotation, three temporal training baselines and native ONNX integration. Continue from the runnable MVP on `feature/temporal-ai-pipeline`. Keep all reviewed skills intact. No milestone PASS/FAIL or dataset-completeness gate blocks these tracks. See `docs/temporal-ai-scope.md` for the implementation and evidence status.
 

@@ -2,7 +2,7 @@ name: Temporal learning and dataset tooling
 
 on:
   push:
-    branches: [main, feature/temporal-ai-pipeline]
+    branches: [main, feature/temporal-ai-pipeline, feature/complete-application]
   pull_request:
     branches: [main]
   workflow_dispatch:

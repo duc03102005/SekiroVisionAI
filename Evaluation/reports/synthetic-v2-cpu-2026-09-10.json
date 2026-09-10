@@ -1,0 +1,400 @@
+{
+  "evidence": "SYNTHETIC ONLY: optimizer, architecture, ONNX and CPU execution checks",
+  "gameplay_sources": 0,
+  "reviewed_gameplay_attack_labels": 0,
+  "trained_gameplay_models": 0,
+  "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+  "torch": "2.8.0+cpu",
+  "models": {
+    "cnn_gru": {
+      "optimization": {
+        "evidence": "synthetic moving tiles; no boss labels or gameplay accuracy",
+        "steps": 40,
+        "training_batch_shape": [
+          8,
+          16,
+          3,
+          64,
+          64
+        ],
+        "initial_loss": 4.280290126800537,
+        "final_loss": 2.467698097229004,
+        "optimization_seconds": 1.019377968000299,
+        "parameters": 10952
+      },
+      "parity": {
+        "status": "passed",
+        "cases": 3,
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "onnxruntime": "1.22.1",
+        "onnx": "1.19.0",
+        "opset": 17,
+        "rtol": 0.0001,
+        "atol": 0.0001,
+        "max_absolute_error": {
+          "attack_probability": 5.960464477539063e-08,
+          "threat_probability": 5.960464477539063e-08,
+          "tti_ms": 3.814697265625e-05,
+          "tti_uncertainty_ms": 3.0517578125e-05,
+          "state_logits": 9.5367431640625e-07,
+          "class_logits": 4.76837158203125e-07,
+          "direction_logits": 4.76837158203125e-07,
+          "attack_direction_logits": 9.5367431640625e-07
+        },
+        "export_and_parity_seconds": 0.2794147390004582,
+        "input_evidence": "synthetic tensors validate numerical parity, not gameplay accuracy"
+      },
+      "cpu_latency": {
+        "measurement": "synchronous ORT session.run on synthetic tensors; includes CPU IO, excludes capture/preprocess/input",
+        "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "onnxruntime": "1.22.1",
+        "requested_provider": "CPUExecutionProvider",
+        "registered_providers": [
+          "CPUExecutionProvider"
+        ],
+        "provider_partitioning": "not profiled; registered EP list does not prove exclusive node placement",
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "threads": 2,
+        "warmup": 5,
+        "iterations": 30,
+        "session_creation_ms": 5.1147009999112925,
+        "p50_ms": 3.0629350000000004,
+        "p95_ms": 3.3732228999999996,
+        "p99_ms": 4.222794040000001,
+        "max_ms": 4.556881,
+        "rtx3070_live_game": false,
+        "game_fps_delta": null,
+        "capture_to_input_ms": null
+      }
+    },
+    "cnn_tcn": {
+      "optimization": {
+        "evidence": "synthetic moving tiles; no boss labels or gameplay accuracy",
+        "steps": 40,
+        "training_batch_shape": [
+          8,
+          16,
+          3,
+          64,
+          64
+        ],
+        "initial_loss": 4.546543598175049,
+        "final_loss": 1.9567759037017822,
+        "optimization_seconds": 0.4588705790001768,
+        "parameters": 25416
+      },
+      "parity": {
+        "status": "passed",
+        "cases": 3,
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "onnxruntime": "1.22.1",
+        "onnx": "1.19.0",
+        "opset": 17,
+        "rtol": 0.0001,
+        "atol": 0.0001,
+        "max_absolute_error": {
+          "attack_probability": 1.1920928955078125e-07,
+          "threat_probability": 5.960464477539063e-08,
+          "tti_ms": 7.152557373046875e-06,
+          "tti_uncertainty_ms": 9.1552734375e-05,
+          "state_logits": 3.814697265625e-06,
+          "class_logits": 2.86102294921875e-06,
+          "direction_logits": 2.86102294921875e-06,
+          "attack_direction_logits": 2.86102294921875e-06
+        },
+        "export_and_parity_seconds": 0.15887856599965744,
+        "input_evidence": "synthetic tensors validate numerical parity, not gameplay accuracy"
+      },
+      "cpu_latency": {
+        "measurement": "synchronous ORT session.run on synthetic tensors; includes CPU IO, excludes capture/preprocess/input",
+        "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "onnxruntime": "1.22.1",
+        "requested_provider": "CPUExecutionProvider",
+        "registered_providers": [
+          "CPUExecutionProvider"
+        ],
+        "provider_partitioning": "not profiled; registered EP list does not prove exclusive node placement",
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "threads": 2,
+        "warmup": 5,
+        "iterations": 30,
+        "session_creation_ms": 5.258930999843869,
+        "p50_ms": 3.1288955,
+        "p95_ms": 3.75609875,
+        "p99_ms": 3.93484356,
+        "max_ms": 4.002337,
+        "rtx3070_live_game": false,
+        "game_fps_delta": null,
+        "capture_to_input_ms": null
+      }
+    },
+    "optical_flow_fusion": {
+      "optimization": {
+        "evidence": "synthetic moving tiles; no boss labels or gameplay accuracy",
+        "steps": 40,
+        "training_batch_shape": [
+          8,
+          16,
+          3,
+          64,
+          64
+        ],
+        "initial_loss": 4.494241237640381,
+        "final_loss": -0.07809635251760483,
+        "optimization_seconds": 1.8271026279999205,
+        "parameters": 29080
+      },
+      "parity": {
+        "status": "passed",
+        "cases": 3,
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "onnxruntime": "1.22.1",
+        "onnx": "1.19.0",
+        "opset": 17,
+        "rtol": 0.0001,
+        "atol": 0.0001,
+        "max_absolute_error": {
+          "attack_probability": 4.70521144284374e-17,
+          "threat_probability": 1.3168658806294514e-20,
+          "tti_ms": 1.33514404296875e-05,
+          "tti_uncertainty_ms": 1.9073486328125e-06,
+          "state_logits": 3.814697265625e-06,
+          "class_logits": 3.814697265625e-06,
+          "direction_logits": 2.86102294921875e-06,
+          "attack_direction_logits": 5.7220458984375e-06
+        },
+        "export_and_parity_seconds": 0.37321956300002057,
+        "input_evidence": "synthetic tensors validate numerical parity, not gameplay accuracy"
+      },
+      "cpu_latency": {
+        "measurement": "synchronous ORT session.run on synthetic tensors; includes CPU IO, excludes capture/preprocess/input",
+        "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "onnxruntime": "1.22.1",
+        "requested_provider": "CPUExecutionProvider",
+        "registered_providers": [
+          "CPUExecutionProvider"
+        ],
+        "provider_partitioning": "not profiled; registered EP list does not prove exclusive node placement",
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "threads": 2,
+        "warmup": 5,
+        "iterations": 30,
+        "session_creation_ms": 11.955330000091635,
+        "p50_ms": 3.3339135000000004,
+        "p95_ms": 4.563913349999999,
+        "p99_ms": 5.227745550000001,
+        "max_ms": 5.430312,
+        "rtx3070_live_game": false,
+        "game_fps_delta": null,
+        "capture_to_input_ms": null
+      }
+    },
+    "feature_tcn": {
+      "optimization": {
+        "evidence": "synthetic moving tiles; no boss labels or gameplay accuracy",
+        "steps": 40,
+        "training_batch_shape": [
+          8,
+          16,
+          3,
+          64,
+          64
+        ],
+        "initial_loss": 4.593477725982666,
+        "final_loss": -0.06861145794391632,
+        "optimization_seconds": 0.2932254739998825,
+        "parameters": 25224
+      },
+      "parity": {
+        "status": "passed",
+        "cases": 3,
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "onnxruntime": "1.22.1",
+        "onnx": "1.19.0",
+        "opset": 17,
+        "rtol": 0.0001,
+        "atol": 0.0001,
+        "max_absolute_error": {
+          "attack_probability": 3.213062882423401e-08,
+          "threat_probability": 3.3527612686157227e-08,
+          "tti_ms": 6.103515625e-05,
+          "tti_uncertainty_ms": 6.103515625e-05,
+          "state_logits": 2.86102294921875e-06,
+          "class_logits": 1.9073486328125e-06,
+          "direction_logits": 9.5367431640625e-07,
+          "attack_direction_logits": 2.86102294921875e-06
+        },
+        "export_and_parity_seconds": 0.14462240100056079,
+        "input_evidence": "synthetic tensors validate numerical parity, not gameplay accuracy"
+      },
+      "cpu_latency": {
+        "measurement": "synchronous ORT session.run on synthetic tensors; includes CPU IO, excludes capture/preprocess/input",
+        "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "onnxruntime": "1.22.1",
+        "requested_provider": "CPUExecutionProvider",
+        "registered_providers": [
+          "CPUExecutionProvider"
+        ],
+        "provider_partitioning": "not profiled; registered EP list does not prove exclusive node placement",
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "threads": 2,
+        "warmup": 5,
+        "iterations": 30,
+        "session_creation_ms": 5.550835000576626,
+        "p50_ms": 2.3639355,
+        "p95_ms": 2.63576585,
+        "p99_ms": 3.447792910000001,
+        "max_ms": 3.777384,
+        "rtx3070_live_game": false,
+        "game_fps_delta": null,
+        "capture_to_input_ms": null
+      }
+    },
+    "video_transformer": {
+      "optimization": {
+        "evidence": "synthetic moving tiles; no boss labels or gameplay accuracy",
+        "steps": 40,
+        "training_batch_shape": [
+          8,
+          16,
+          3,
+          64,
+          64
+        ],
+        "initial_loss": 4.737323760986328,
+        "final_loss": 1.2720214128494263,
+        "optimization_seconds": 0.3667527229999905,
+        "parameters": 22216
+      },
+      "parity": {
+        "status": "passed",
+        "cases": 3,
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "onnxruntime": "1.22.1",
+        "onnx": "1.19.0",
+        "opset": 17,
+        "rtol": 0.0001,
+        "atol": 0.0001,
+        "max_absolute_error": {
+          "attack_probability": 5.960464477539063e-08,
+          "threat_probability": 2.9802322387695312e-08,
+          "tti_ms": 0.00030517578125,
+          "tti_uncertainty_ms": 1.52587890625e-05,
+          "state_logits": 9.5367431640625e-07,
+          "class_logits": 9.5367431640625e-07,
+          "direction_logits": 1.430511474609375e-06,
+          "attack_direction_logits": 9.5367431640625e-07
+        },
+        "export_and_parity_seconds": 0.1791533880004863,
+        "input_evidence": "synthetic tensors validate numerical parity, not gameplay accuracy"
+      },
+      "cpu_latency": {
+        "measurement": "synchronous ORT session.run on synthetic tensors; includes CPU IO, excludes capture/preprocess/input",
+        "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+        "processor": "x86_64",
+        "onnxruntime": "1.22.1",
+        "requested_provider": "CPUExecutionProvider",
+        "registered_providers": [
+          "CPUExecutionProvider"
+        ],
+        "provider_partitioning": "not profiled; registered EP list does not prove exclusive node placement",
+        "input_shape": [
+          1,
+          16,
+          3,
+          320,
+          320
+        ],
+        "threads": 2,
+        "warmup": 5,
+        "iterations": 30,
+        "session_creation_ms": 6.705825000608456,
+        "p50_ms": 3.2494345,
+        "p95_ms": 3.6774654999999994,
+        "p99_ms": 3.94335541,
+        "max_ms": 3.998911,
+        "rtx3070_live_game": false,
+        "game_fps_delta": null,
+        "capture_to_input_ms": null
+      }
+    }
+  },
+  "code_provenance": {
+    "git_commit": "fa82502a1732dea6bcb3f4c31e1b0ba8f4e47526",
+    "working_tree_dirty": true,
+    "training_evaluation_code_sha256": "03e464654e4370b37c6d2255b55621701caccb170f0ce6137ee74824999ff3ee"
+  }
+}

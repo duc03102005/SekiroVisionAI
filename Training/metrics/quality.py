@@ -33,6 +33,14 @@ def summarize_predictions(rows, thresholds=None, include_groups=True):
                      "signed_bias_ms": float(error.mean()) if timing else None,
                      "nominal_90pct_laplace_interval_coverage": float(np.mean([
                          abs(e) <= r["tti_uncertainty_ms"]*math.log(10) for e, r in zip(error, timing)])) if timing else None}
+    directions = [r for r in rows if r.get("labels", {}).get("attack_direction") not in (None, "UNKNOWN")
+                  and r["labels"].get("attack_direction_evidence") == "VISUAL_TRAJECTORY"
+                  and r["labels"].get("attack_direction_space") == "SCREEN_WITH_WOLF_REFERENCE"]
+    result["attack_direction"] = {
+        "observed_trajectory_samples": len(directions),
+        "accuracy": sum(r.get("attack_direction_prediction") == r["labels"]["attack_direction"]
+                        for r in directions)/len(directions) if directions else None,
+        "semantics": "Visual attack path; this is not a safe Dodge-direction success metric"}
     # A successful ORT invocation cannot supply these gameplay facts.
     result["live_false_dodge_rate"] = None
     result["live_end_to_end_latency_ms"] = None

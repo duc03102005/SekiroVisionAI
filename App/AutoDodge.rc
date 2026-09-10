@@ -1,8 +1,8 @@
 #include <windows.h>
 1 RT_MANIFEST "AutoDodge.manifest"
 1 VERSIONINFO
-FILEVERSION 0,2,0,0
-PRODUCTVERSION 0,2,0,0
+FILEVERSION 0,4,0,0
+PRODUCTVERSION 0,4,0,0
 FILEOS VOS_NT_WINDOWS32
 FILETYPE VFT_APP
 BEGIN
@@ -10,10 +10,10 @@ BEGIN
  BEGIN
   BLOCK "040904B0"
   BEGIN
-   VALUE "FileDescription", "SekiroVisionAI Auto Dodge MVP\0"
-   VALUE "FileVersion", "0.2.0 MVP\0"
+   VALUE "FileDescription", "SekiroVisionAI\0"
+   VALUE "FileVersion", "0.4.0 development\0"
    VALUE "ProductName", "SekiroVisionAI\0"
-   VALUE "OriginalFilename", "SekiroAutoDodge.exe\0"
+   VALUE "OriginalFilename", "SekiroVisionAI.exe\0"
   END
  END
  BLOCK "VarFileInfo"

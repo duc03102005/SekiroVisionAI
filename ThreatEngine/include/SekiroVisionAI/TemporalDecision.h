@@ -17,6 +17,9 @@ struct TemporalAction {
 class TemporalDecision {
 public:
     void reset() { *this=TemporalDecision{}; }
+    // Lost focus/identity/evidence invalidates candidate continuity, but cannot
+    // allocate a second action for a strike that has already been consumed.
+    void cancel_candidate() { candidate_=-1;quiet_=-1;ready_=false; }
     TemporalAction step(const ModelPrediction& p,double now,const TemporalPolicy& c) {
         TemporalAction out;
         out.decision.episode=episode_;

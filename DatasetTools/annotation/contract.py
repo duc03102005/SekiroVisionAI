@@ -7,7 +7,7 @@ from typing import Any
 import uuid
 
 from DatasetTools.common import utc_now
-from DatasetTools.annotation.taxonomy import (ATTACK_TYPES, DIRECTIONS, IMPACT_EVIDENCE,
+from DatasetTools.annotation.taxonomy import (ATTACK_TYPES, ATTACK_DIRECTIONS, DIRECTIONS, IMPACT_EVIDENCE,
                                               MOVEMENTS, NEGATIVE_REASONS, PHASES, STATES)
 
 BOUNDARIES = ("windup_start", "active_start", "impact_frame", "recovery_start",
@@ -28,6 +28,8 @@ def new_annotation(clip: dict, *, reviewer: str = "") -> dict:
             "threat_label": None, "windup_start": None, "active_start": None, "impact_frame": None,
             "recovery_start": None, "recovery_end": None, "impact_evidence": "OUT_OF_CLIP",
             "estimated_contact_interval": None, "dodge_start": None, "dodge_direction": "UNKNOWN",
+            "attack_direction": "UNKNOWN", "attack_direction_evidence": "NOT_OBSERVED",
+            "attack_direction_space": "SCREEN_WITH_WOLF_REFERENCE",
             "dodge_timing_evidence": "NOT_OBSERVED", "direction_space": "SCREEN",
             "would_hit_without_dodge": "UNKNOWN", "confidence": 0.8,
             "roi": clip.get("roi", [0.20, 0.12, 0.82, 0.82]),
@@ -101,6 +103,20 @@ def validate_annotation(row: dict, clip: dict | None = None) -> None:
         raise ValueError("Dodge start requires INPUT_LOG or VISUAL_ONSET evidence.")
     if row.get("direction_space") != "SCREEN":
         raise ValueError("v2 direction labels use screen coordinates, not a proven safe-action target.")
+    # Optional v2 extension: old journals remain readable. A player's observed
+    # dodge never supplies this separate weapon/attack trajectory label.
+    attack_direction = row.get("attack_direction", "UNKNOWN")
+    attack_evidence = row.get("attack_direction_evidence", "NOT_OBSERVED")
+    if attack_direction not in ATTACK_DIRECTIONS:
+        raise ValueError("Invalid attack_direction.")
+    if attack_evidence not in ("VISUAL_TRAJECTORY", "NOT_OBSERVED"):
+        raise ValueError("Attack direction needs reviewed VISUAL_TRAJECTORY evidence or NOT_OBSERVED.")
+    if (attack_direction == "UNKNOWN") != (attack_evidence == "NOT_OBSERVED"):
+        raise ValueError("Unknown attack direction must remain unobserved; known direction needs visible trajectory.")
+    if row.get("attack_direction_space", "SCREEN_WITH_WOLF_REFERENCE") != "SCREEN_WITH_WOLF_REFERENCE":
+        raise ValueError("Attack direction uses screen axes, with Wolf reference for toward/away labels.")
+    if attack_direction != "UNKNOWN" and row["scope"] == "ENTIRE_CLIP_NON_THREAT":
+        raise ValueError("A non-threat interval cannot supply an attack trajectory label.")
     if row.get("would_hit_without_dodge") not in ("TRUE", "FALSE", "UNKNOWN"):
         raise ValueError("would_hit_without_dodge is TRUE, FALSE, or UNKNOWN.")
     quality = row["confidence"]

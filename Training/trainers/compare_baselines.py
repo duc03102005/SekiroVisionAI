@@ -1,4 +1,4 @@
-"""Train/export/measure all three baselines against one frozen reviewed dataset."""
+"""Train/export/measure causal RGB, TCN and flow models on one frozen dataset."""
 import argparse
 import json
 from pathlib import Path

@@ -11,7 +11,7 @@ import torch
 from Training.datasets.splits import make_splits, validate_splits
 from Training.datasets.video_samples import target_values, temporal_indices, preprocess_rgb, VideoSamples
 from Training.models import build_model
-from Training.models.temporal import ARCHITECTURES, CausalBlock, CausalAttention
+from Training.models.temporal import ARCHITECTURES, CausalBlock, CausalAttention, CausalLucasKanade
 from Training.losses.multitask import multitask_loss
 from Training.trainers.smoke import synthetic_batch
 from Evaluation.false_positive.mine import review_queue
@@ -100,19 +100,53 @@ class TrainingContracts(unittest.TestCase):
         changed[:, 8:] += 100
         torch.testing.assert_close(attention(x)[:, :8], attention(changed)[:, :8])
 
-    def test_three_models_have_native_output_contract_and_masked_loss(self):
+    def test_all_models_have_native_v2_output_contract_and_masked_loss(self):
         frames, labels, masks = synthetic_batch(count=2, frames=8, size=32)
         for architecture in ARCHITECTURES:
             with self.subTest(architecture=architecture):
                 model = build_model(architecture, frames=8, width=16)
                 outputs = model(frames)
                 self.assertEqual([tuple(v.shape) for v in outputs],
-                                 [(2, 1), (2, 1), (2, 1), (2, 1), (2, 9), (2, 14), (2, 5)])
+                                 [(2, 1), (2, 1), (2, 1), (2, 1), (2, 9), (2, 14), (2, 5), (2, 8)])
                 zeros = {key: torch.zeros_like(value) for key, value in masks.items()}
                 loss, _ = multitask_loss(outputs, labels, zeros)
                 self.assertEqual(float(loss.detach()), 0)
                 loss.backward()
                 self.assertTrue(all(p.grad is None or torch.count_nonzero(p.grad) == 0 for p in model.parameters()))
+
+    def test_weapon_direction_not_inferred_from_player_dodge_or_missing_evidence(self):
+        labels = {"direction": "RIGHT", "attack_direction": "RIGHT_TO_LEFT"}
+        values, masks = target_values({"labels": labels})
+        self.assertEqual(float(masks["direction"]), 1)
+        self.assertEqual(float(masks["attack_direction"]), 0)
+        labels.update(attack_direction_evidence="VISUAL_TRAJECTORY",
+                      attack_direction_space="SCREEN_WITH_WOLF_REFERENCE")
+        values, masks = target_values({"labels": labels})
+        self.assertEqual(float(masks["attack_direction"]), 1)
+        self.assertEqual(int(values["attack_direction"]), 1)
+        self.assertEqual(int(values["direction"]), 1)
+        labels["attack_direction"] = "UNKNOWN"
+        self.assertEqual(float(target_values({"labels": labels})[1]["attack_direction"]), 0)
+
+    def test_lucas_kanade_measures_translation_and_has_no_future_leakage(self):
+        flow = CausalLucasKanade(size=40)
+        torch.manual_seed(14)
+        # Smooth textured image translated by one pixel to the right.
+        texture = torch.nn.functional.avg_pool2d(torch.rand(1, 3, 40, 40), 3, 1, 1)
+        frames = torch.stack((texture, torch.roll(texture, 1, -1), torch.roll(texture, 2, -1)), dim=1)
+        measured = flow(frames)
+        self.assertEqual(int(torch.count_nonzero(measured[:, 0])), 0)
+        self.assertGreater(float(measured[:, 1:, 0, 6:-6, 6:-6].mean()), 0.65)
+        self.assertLess(float(measured[:, 1:, 1, 6:-6, 6:-6].mean().abs()), 0.15)
+        changed = frames.clone()
+        changed[:, 2] = torch.rand_like(changed[:, 2])
+        torch.testing.assert_close(flow(changed)[:, :2], measured[:, :2])
+        self.assertEqual(int(torch.count_nonzero(flow(torch.ones_like(frames)))), 0)
+
+    def test_legacy_v1_model_contract_remains_exportable(self):
+        model = build_model("cnn_gru", frames=8, width=16, contract="temporal-v1")
+        self.assertEqual(len(model(torch.zeros(1, 8, 3, 32, 32))), 7)
+        self.assertFalse(any(name.startswith("heads.attack_direction") for name in model.state_dict()))
 
     def test_hard_negative_and_pseudolabels_never_become_accepted(self):
         rows = [{"source_id": "a", "clip_id": "b", "attack_probability": 0.95,

@@ -20,7 +20,8 @@ def synthetic_batch(count=8, frames=16, size=64):
     x = torch.full((count, frames, 3, size, size), 0.02)
     labels = {"attack": torch.zeros(count), "threat": torch.zeros(count),
               "tti": torch.zeros(count), "state": torch.zeros(count, dtype=torch.long),
-              "class": torch.zeros(count, dtype=torch.long), "direction": torch.zeros(count, dtype=torch.long)}
+              "class": torch.zeros(count, dtype=torch.long), "direction": torch.zeros(count, dtype=torch.long),
+              "attack_direction": torch.full((count,), 7, dtype=torch.long)}
     for sample in range(count):
         positive = sample % 2 == 1
         labels["attack"][sample] = positive
@@ -29,6 +30,7 @@ def synthetic_batch(count=8, frames=16, size=64):
         labels["state"][sample] = 4 if positive else 0
         labels["class"][sample] = 0 if positive else 13
         labels["direction"][sample] = 1 if positive else 4
+        labels["attack_direction"][sample] = 0 if positive else 7
         for frame in range(frames):
             left = int((size//4 + frame*size/(frames*3)) if positive else size//4)
             x[sample, frame, 0 if positive else 2, size//4:size//2, left:left+size//5] = 0.9
@@ -66,10 +68,11 @@ def run(output, steps=80, frames=16, size=320):
             raise RuntimeError(f"Synthetic optimizer did not reduce loss for {architecture}: {before} -> {after}")
         bundle = output/f"synthetic-only-{architecture}"
         bundle.mkdir()
-        config = {"contract": "temporal-v1", "model_version": f"synthetic-smoke-{architecture}",
+        config = {"contract": "temporal-v2", "model_version": f"synthetic-smoke-{architecture}",
                   "architecture": architecture, "frames": frames, "size": size, "width": 32,
                   "training_status": "synthetic_smoke", "trained_samples": 0, "supervised_epochs": 0,
                   "attack_supported": False, "threat_supported": False, "tti_supported": False,
+                  "attack_direction_supported": False,
                   "auto_eligible": False, "sample_interval_ms": 1000/30,
                   "preprocess": "roi-rgb-bilinear-v1", "seed": 23,
                   "fixture_training_size": 64, "deployment_parity_size": size}

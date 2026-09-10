@@ -447,7 +447,11 @@ void SampleRecorder::discontinuity(const std::string& reason) {
     impl_->changed.notify_one();
 }
 
-void SampleRecorder::submit(const SmallFrame& frame) {
+void SampleRecorder::submit(const SmallFrame& source_frame) {
+    // Keep the recording ring bounded after AI switches to native-resolution
+    // pixels. The bundle still records original source dimensions and QPC.
+    SmallFrame frame = source_frame;
+    if (frame.preview_color) frame.color = std::move(frame.preview_color);
     if (!valid_frame(frame)) return;
     {
         std::lock_guard lock(impl_->mutex);
@@ -540,8 +544,11 @@ bool sample_recorder_self_test(const std::filesystem::path& directory, std::stri
                 color->bgra[i + 2] = 220; color->bgra[i + 3] = 255;
             }
             SmallFrame frame;
-            frame.color = color; frame.generation = 1;
-            frame.source_width = 128; frame.source_height = 72;
+            auto native = std::make_shared<ColorFrame>();
+            native->width = 1920; native->height = 1080; native->stride = 1920 * 4;
+            native->bgra.resize(static_cast<std::size_t>(native->stride) * native->height);
+            frame.color = native; frame.preview_color = color; frame.generation = 1;
+            frame.source_width = 1920; frame.source_height = 1080;
             const double start = recorder_qpc_ms() - 1000.0;
             recorder.enabled(true);
             for (int i = 0; i < 15; ++i) {

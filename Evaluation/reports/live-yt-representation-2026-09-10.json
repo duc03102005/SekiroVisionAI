@@ -1,0 +1,204 @@
+{
+  "evidence": "ACTUAL GAMEPLAY REPRESENTATION PRETRAINING; no attack/threat/TTI supervision or automatic-Dodge eligibility",
+  "configuration": {
+    "contract": "temporal-v2",
+    "architecture": "optical_flow_fusion",
+    "frames": 16,
+    "size": 320,
+    "width": 64,
+    "model_version": "live-yt-motion-pretrain-v2",
+    "training_status": "self_supervised",
+    "auto_eligible": false,
+    "attack_supported": false,
+    "threat_supported": false,
+    "tti_supported": false,
+    "attack_direction_supported": false,
+    "trained_samples": 0,
+    "supervised_epochs": 0,
+    "code_provenance": {
+      "git_commit": "fa82502a1732dea6bcb3f4c31e1b0ba8f4e47526",
+      "working_tree_dirty": true,
+      "training_evaluation_code_sha256": "03e464654e4370b37c6d2255b55621701caccb170f0ce6137ee74824999ff3ee"
+    },
+    "model_sha256": "c6d17a815f362e0e6f205718c6a4089f50997b9ae829df5284369a54e38001d8",
+    "onnx_opset": 17,
+    "onnx_metadata": {
+      "svai.contract": "temporal-v2",
+      "svai.model_version": "live-yt-motion-pretrain-v2",
+      "svai.training_status": "self_supervised",
+      "svai.sample_interval_ms": "33.333333",
+      "svai.preprocess": "roi-rgb-bilinear-v1",
+      "svai.tti_supported": "false",
+      "svai.threat_supported": "false",
+      "svai.attack_supported": "false",
+      "svai.attack_direction_supported": "false",
+      "svai.auto_eligible": "false",
+      "svai.direction_semantics": "observed_screen_action_not_recommended_input",
+      "svai.attack_direction_semantics": "visual_trajectory_screen_with_wolf_reference",
+      "svai.attack_direction_confidence_semantics": "uncalibrated_softmax_maximum_not_safe_action_probability",
+      "svai.uncertainty_semantics": "laplace_scale_ms_not_calibrated_coverage"
+    }
+  },
+  "training": {
+    "method": "symmetric clip contrastive photometric views",
+    "optimization_steps": 86,
+    "training_seconds": 121.17065200999969,
+    "epochs": 2,
+    "batch_size": 4,
+    "sample_count": 175,
+    "environment": {
+      "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+      "torch": "2.8.0+cpu",
+      "device": "cpu"
+    },
+    "gameplay_attack_metrics": null,
+    "compare_against_supervised_only_with_frozen_splits": true,
+    "onnx_parity": {
+      "status": "passed",
+      "cases": 3,
+      "input_shape": [
+        1,
+        16,
+        3,
+        320,
+        320
+      ],
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "onnxruntime": "1.22.1",
+      "onnx": "1.19.0",
+      "opset": 17,
+      "rtol": 0.0001,
+      "atol": 0.0001,
+      "max_absolute_error": {
+        "attack_probability": 2.9802322387695312e-08,
+        "threat_probability": 2.9802322387695312e-08,
+        "tti_ms": 6.103515625e-05,
+        "tti_uncertainty_ms": 0.0,
+        "state_logits": 4.470348358154297e-08,
+        "class_logits": 4.470348358154297e-08,
+        "direction_logits": 5.960464477539063e-08,
+        "attack_direction_logits": 5.960464477539063e-08
+      },
+      "export_and_parity_seconds": 0.5489577260004808,
+      "input_evidence": "synthetic tensors validate numerical parity, not gameplay accuracy"
+    }
+  },
+  "loss_first_5": [
+    1.3844804763793945,
+    1.3810480833053589,
+    1.3832823038101196,
+    1.3836572170257568,
+    1.3833516836166382
+  ],
+  "loss_last_5": [
+    0.8322901129722595,
+    0.3584023714065552,
+    0.5817689895629883,
+    0.2086610645055771,
+    0.26018089056015015
+  ],
+  "sources": {
+    "source_ids": [
+      "LIVE_YT_GAMING_SEKIRO_005",
+      "LIVE_YT_GAMING_SEKIRO_016",
+      "LIVE_YT_GAMING_SEKIRO_019",
+      "LIVE_YT_GAMING_SEKIRO_023",
+      "LIVE_YT_GAMING_SEKIRO_026",
+      "LIVE_YT_GAMING_SEKIRO_029"
+    ],
+    "manifest_sha256": "981f953fb85702a76a72e5fa23b67e010f6a6af1e7f3efe47b6282110fb0efd9",
+    "source_groups": [
+      "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION"
+    ],
+    "source_provenance": {
+      "LIVE_YT_GAMING_SEKIRO_005": {
+        "source_sha256": "c2fa4830178ea8b6b8673edbe80d2a25d8c8f092fd35a60170b43ca39cad6bb4",
+        "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-005.mp4",
+        "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+        "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "usage_basis": "OPEN_LICENSE",
+        "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+      },
+      "LIVE_YT_GAMING_SEKIRO_016": {
+        "source_sha256": "c62e7f42790f61f2ee5aa05453705eb2b7f14ff1e803033e5647dd2bfde2af20",
+        "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-016.mp4",
+        "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+        "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "usage_basis": "OPEN_LICENSE",
+        "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+      },
+      "LIVE_YT_GAMING_SEKIRO_019": {
+        "source_sha256": "39aa400e29faad21b03d339c65823f2459a2ddd7ef8defe9c16cd502c6169603",
+        "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-019.mp4",
+        "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+        "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "usage_basis": "OPEN_LICENSE",
+        "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+      },
+      "LIVE_YT_GAMING_SEKIRO_023": {
+        "source_sha256": "4f088d2d0f23d8b1177f63576ad99e876e504f1c3e64852e8d220a0c673ef5d5",
+        "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-023.mp4",
+        "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+        "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "usage_basis": "OPEN_LICENSE",
+        "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+      },
+      "LIVE_YT_GAMING_SEKIRO_026": {
+        "source_sha256": "802df151d316881bc4ff52404466fd648a2ae4b715c19e6a7d5f657a42f77c5f",
+        "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-026.mp4",
+        "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+        "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "usage_basis": "OPEN_LICENSE",
+        "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+      },
+      "LIVE_YT_GAMING_SEKIRO_029": {
+        "source_sha256": "ebc2d0acdff1d73ce50b12b9410431ef78a44d9ea7236720abf41aee974a7c48",
+        "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-029.mp4",
+        "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+        "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "usage_basis": "OPEN_LICENSE",
+        "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+      }
+    },
+    "holdout_claim": "Pretraining exposure only; no attack labels or independent generalization test"
+  },
+  "inference_latency": {
+    "measurement": "synchronous ORT session.run on synthetic tensors; includes CPU IO, excludes capture/preprocess/input",
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "onnxruntime": "1.22.1",
+    "requested_provider": "CPUExecutionProvider",
+    "registered_providers": [
+      "CPUExecutionProvider"
+    ],
+    "provider_partitioning": "not profiled; registered EP list does not prove exclusive node placement",
+    "input_shape": [
+      1,
+      16,
+      3,
+      320,
+      320
+    ],
+    "threads": 2,
+    "warmup": 5,
+    "iterations": 30,
+    "session_creation_ms": 26.505279000048176,
+    "p50_ms": 7.168421,
+    "p95_ms": 22.902468849999998,
+    "p99_ms": 23.70924518,
+    "max_ms": 23.831439,
+    "rtx3070_live_game": false,
+    "game_fps_delta": null,
+    "capture_to_input_ms": null
+  },
+  "native_runtime_test": "Linux C++ ORT1.25.0 preprocess/cadence/v1-v2/AUTO fallback tests executed successfully; no live game test",
+  "weights_sha256": "c6d17a815f362e0e6f205718c6a4089f50997b9ae829df5284369a54e38001d8"
+}

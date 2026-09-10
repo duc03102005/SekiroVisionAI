@@ -1,8 +1,8 @@
-name: Windows Temporal Auto Dodge build
+name: Windows application and native replay validation
 
 on:
   push:
-    branches: [main, feature/capture-engine, feature/auto-dodge-mvp, feature/temporal-ai-pipeline]
+    branches: [main, feature/capture-engine, feature/auto-dodge-mvp, feature/temporal-ai-pipeline, feature/complete-application]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -26,8 +26,11 @@ jobs:
         run: python tools/validate_skills.py
       - name: Create input-dependent synthetic ONNX contract fixture
         run: |
-          python -m pip install numpy==2.2.6 onnx==1.18.0
+          python -m pip install numpy==2.2.6 onnx==1.18.0 imageio-ffmpeg==0.6.0
           python tools/make_onnx_test_fixture.py out/testdata/temporal-fixture.onnx
+          python tools/make_onnx_test_fixture.py out/testdata/temporal-v2-fixture.onnx --contract temporal-v2
+          python tools/make_replay_fixture.py out/testdata
+          python -m unittest discover -s Tests -p 'capture_trace.py'
       - name: Configure Windows x64
         run: cmake --preset windows-x64
       - name: Record toolchain
@@ -44,58 +47,29 @@ jobs:
         id: ui-smoke
         shell: pwsh
         run: |
-          $mvpProcess = Start-Process -FilePath out/build/windows-x64/Release/SekiroAutoDodge.exe -ArgumentList '--smoke-test' -WindowStyle Hidden -PassThru
-          if (-not $mvpProcess.WaitForExit(15000)) {
-            Stop-Process -Id $mvpProcess.Id -Force
-            throw 'MVP smoke test did not exit within 15 seconds'
+          $appProcess = Start-Process -FilePath out/build/windows-x64/Release/SekiroVisionAI.exe -ArgumentList '--smoke-test' -WindowStyle Hidden -PassThru
+          if (-not $appProcess.WaitForExit(15000)) {
+            Stop-Process -Id $appProcess.Id -Force
+            throw 'Application smoke test did not exit within 15 seconds'
           }
-          $mvpProcess.Refresh()
-          if ($mvpProcess.ExitCode -ne 0) { throw "MVP smoke test exit code $($mvpProcess.ExitCode)" }
-      - name: Package runnable Windows app and native dependencies
+          $appProcess.Refresh()
+          if ($appProcess.ExitCode -ne 0) { throw "Application smoke test exit code $($appProcess.ExitCode)" }
+      - name: Package and verify application with system-only PATH
         shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force out/package | Out-Null
-          Copy-Item out/build/windows-x64/Release/SekiroAutoDodge.exe out/package/
-          Copy-Item out/build/windows-x64/Release/*.dll out/package/
-          Copy-Item docs/TEMPORAL_QUICKSTART_VI.md out/package/README_VI.md
-          New-Item -ItemType Directory -Force out/package/licenses | Out-Null
-          Copy-Item out/build/windows-x64/_deps/svai_ort-src/LICENSE out/package/licenses/ONNXRuntime-LICENSE.txt
-          Copy-Item out/build/windows-x64/_deps/svai_ort-src/ThirdPartyNotices.txt out/package/licenses/ONNXRuntime-ThirdPartyNotices.txt
-          Copy-Item out/build/windows-x64/_deps/svai_directml-src/LICENSE.txt out/package/licenses/DirectML-LICENSE.txt
-          Copy-Item out/build/windows-x64/_deps/svai_directml-src/ThirdPartyNotices.txt out/package/licenses/DirectML-ThirdPartyNotices.txt
-          $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
-          $vsPath = & $vswhere -latest -products '*' -property installationPath
-          $crtDirectory = Get-ChildItem "$vsPath/VC/Redist/MSVC" -Directory | Sort-Object Name -Descending | ForEach-Object { Join-Path $_.FullName 'x64/Microsoft.VC143.CRT' } | Where-Object { Test-Path $_ } | Select-Object -First 1
-          if (-not $crtDirectory) { throw 'App-local VC++ redistributable runtime was not found' }
-          Copy-Item "$crtDirectory/*.dll" out/package/
-          Copy-Item docs/runtime-dependencies.md out/package/licenses/runtime-dependencies.md
-          New-Item -ItemType Directory -Force out/package/models/attack-v0.1 | Out-Null
-          Copy-Item models/attack-v0.1/README.md out/package/models/attack-v0.1/README.md
-          # Isolated package smoke: imports resolve entirely from packaged DLLs/Windows.
-          $packagedProcess = Start-Process -FilePath out/package/SekiroAutoDodge.exe -ArgumentList '--smoke-test' -WindowStyle Hidden -PassThru
-          if (-not $packagedProcess.WaitForExit(15000)) { Stop-Process -Id $packagedProcess.Id -Force; throw 'Packaged smoke timeout' }
-          $packagedProcess.Refresh()
-          if ($packagedProcess.ExitCode -ne 0) { throw "Packaged app failed: $($packagedProcess.ExitCode)" }
-          $manifest = [ordered]@{
-            version = '0.3.0-temporal-pipeline'
-            built_commit = (git rev-parse HEAD)
-            source_head = '${{ github.event.pull_request.head.sha || github.sha }}'
-            architecture = 'Windows x64'
-            executable_sha256 = (Get-FileHash out/package/SekiroAutoDodge.exe -Algorithm SHA256).Hash.ToLowerInvariant()
-            ui_smoke = '${{ steps.ui-smoke.outcome }}'
-            live_sekiro_accuracy = 'not measured'
-            runtime = 'C++20 WGC D3D11 ORT DirectML/CPU WIC SendInput'
-            onnxruntime = '1.24.4 DirectML; CPU fallback explicitly reported'
-            directml = '1.15.4'
-            gameplay_model = 'not included: no rights-verified reviewed gameplay training data'
-            packaged_smoke = 'passed'
-            files = @(Get-ChildItem out/package -Recurse -File | ForEach-Object { @{ path = $_.FullName.Substring((Resolve-Path out/package).Path.Length + 1); sha256 = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() } })
-          }
-          $manifest | ConvertTo-Json | Set-Content -Encoding UTF8 out/package/build-manifest.json
-      - name: Publish unsigned Windows Temporal Auto Dodge
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        run: ./tools/package_windows.ps1 -SourceSha '${{ github.event.pull_request.head.sha || github.sha }}'
+      - name: Preserve native test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: SekiroAutoDodge-Temporal-Windows-x64-${{ github.sha }}
+          name: native-validation-${{ github.sha }}
+          path: |
+            out/build/windows-x64/Testing/Temporary/
+            out/replay-validation/
+          retention-days: 30
+      - name: Store internal Windows application (not a functional release)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: INTERNAL-SekiroVisionAI-Windows-x64-${{ github.sha }}
           path: out/package/
           if-no-files-found: error
           retention-days: 30

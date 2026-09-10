@@ -17,6 +17,8 @@ CLASSES = ("HORIZONTAL_SLASH", "VERTICAL_SLASH", "DIAGONAL_SLASH", "THRUST", "SW
            "JUMP_ATTACK", "OVERHEAD_ATTACK", "SPIN_ATTACK", "PROJECTILE", "CHARGE", "AOE",
            "MULTI_HIT_COMBO", "UNKNOWN_ATTACK")
 DIRECTIONS = ("LEFT", "RIGHT", "FORWARD", "BACK", "NEUTRAL")
+ATTACK_DIRECTIONS = ("LEFT_TO_RIGHT", "RIGHT_TO_LEFT", "TOP_TO_BOTTOM", "BOTTOM_TO_TOP",
+                     "TOWARD_WOLF", "AWAY_FROM_WOLF", "RADIAL", "UNKNOWN")
 DEFAULT_ROI = (0.28, 0.12, 0.72, 0.61)
 
 
@@ -57,13 +59,21 @@ def target_values(row):
             raise ValueError(f"Unknown {key}: {value!r}")
         values[key] = classes.index(value) if value is not None else 0
         masks[key] = float(value is not None)
+    trajectory = labels.get("attack_direction")
+    if trajectory is not None and trajectory not in ATTACK_DIRECTIONS:
+        raise ValueError(f"Unknown attack_direction: {trajectory!r}")
+    valid_trajectory = (trajectory not in (None, "UNKNOWN") and
+                        labels.get("attack_direction_evidence") == "VISUAL_TRAJECTORY" and
+                        labels.get("attack_direction_space") == "SCREEN_WITH_WOLF_REFERENCE")
+    values["attack_direction"] = ATTACK_DIRECTIONS.index(trajectory) if valid_trajectory else 7
+    masks["attack_direction"] = float(valid_trajectory)
     tti = labels.get("tti_ms")
     supported = (tti is not None and not labels.get("tti_censored", True)
                  and labels.get("impact_evidence") == "OBSERVED_CONTACT")
     if supported and (not math.isfinite(float(tti)) or not 0 <= float(tti) <= 3000):
         raise ValueError("Observed TTI must be finite and within the documented 3000ms horizon")
     values["tti"], masks["tti"] = float(tti) if supported else 0.0, float(supported)
-    return ({key: torch.tensor(value, dtype=torch.long if key in ("state", "class", "direction") else torch.float32)
+    return ({key: torch.tensor(value, dtype=torch.long if key in ("state", "class", "direction", "attack_direction") else torch.float32)
              for key, value in values.items()}, {key: torch.tensor(value) for key, value in masks.items()})
 
 

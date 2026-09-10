@@ -31,16 +31,21 @@ struct CaptureSnapshot {
     CaptureState state{CaptureState::idle};
     std::wstring detail{L"Select a Sekiro window and press Start."};
     std::wstring adapter{L"unavailable"};
+    std::wstring delivery_detail{L"NO_DELIVERED_FRAME"};
     std::uint32_t adapter_luid_low{};
     std::int32_t adapter_luid_high{};
     int width{}, height{};
     std::uint64_t generation{}, received{}, completed{}, dropped_newest{}, dropped_busy{}, dropped_resize{};
     std::uint64_t dropped_invalid{}, callback_notifications{}, callback_gaps{}, invalid_gpu_times{}, copied_bytes{};
+    std::uint64_t delivered{}, dropped_stale{}, dropped_duplicate{}, dropped_delivery_superseded{};
+    std::uint64_t readback_bytes{};
     std::uint64_t trace_rows{};
     unsigned in_flight{}, peak_in_flight{};
     bool active{}, recording{}, trace_full{};
     double source_silence_ms{unavailable}, capture_fps{}, copy_fps{};
+    double latest_source_ms{}, latest_delivered_source_ms{}, source_age_ms{unavailable}, delivered_age_ms{unavailable}, delivered_fps{};
     Percentiles source_intervals, dequeue_age, ready_age, gpu_copy;
+    Percentiles consumer_age, sink_time;
 };
 
 // UI/control calls are serialized by the host. snapshot() is safe during capture.

@@ -1,0 +1,1 @@
+{"contract":"temporal-v2","architecture":"optical_flow_fusion","frames":16,"size":320,"width":64,"sample_interval_ms":33.333333,"epochs":5,"batch_size":4,"learning_rate":0.001,"seed":17,"preprocess":"roi-rgb-bilinear-v1","flow_semantics":"causal local Lucas-Kanade at40x40; raw/residual flow and backward acceleration; same operators embedded inside ONNX"}

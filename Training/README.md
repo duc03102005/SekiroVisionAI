@@ -1,22 +1,20 @@
 # Temporal training pipeline
 
 This is executable offline tooling inside SekiroVisionAI. It does not add Python
-to the Windows app. It implements three causal baselines, masked multi-task
+to the Windows app. It implements five causal baselines, masked multi-task
 learning, source-group splits, early ONNX export, calibration, review queues and
 CPU/provider latency measurement. Capture and native model integration proceed
 independently; no milestone PASS/FAIL gate is involved.
 
-**Current evidence:** no permission-cleared Sekiro videos or reviewed gameplay
-labels were acquired in this session. The public source catalog is research,
-not a dataset already trained. The CI experiment optimizes generated colored
-tiles and checks all three exported networks. Those artifacts are explicitly
-synthetic, cannot enable Auto Dodge, and provide no boss accuracy or live latency
-claim. See `Dataset/catalog/source_research.md` for concrete acquisition results.
-The completed local run is recorded in
-`Evaluation/reports/synthetic-cpu-2026-09-10.json`, including the exact training
-code hash and dirty-worktree flag. All three optimizers reduced their synthetic
-loss and all three ONNX exports passed numerical parity. Shared-host CPU timing
-varied between runs; it is not a winner selection or a game latency claim.
+**Evidence:** actual, permission-documented Sekiro clips are now locally indexed
+in the source manifest; source hashes and scope are recorded by the acquisition
+catalog. Unlabeled footage supports representation learning. It does not supply
+observed contact, supervised attack directions or all-boss validation by itself.
+Synthetic optimizer/export experiments remain separate and never enable Auto
+Dodge. The earlier three-model run is preserved in
+`Evaluation/reports/synthetic-cpu-2026-09-10.json`; the v2 comparison adds CNN+TCN
+and real optical-flow fusion. Shared-host CPU timings cannot choose the best
+provider/model for an RTX3070 rendering Sekiro.
 
 ## Install
 
@@ -58,7 +56,8 @@ python -m Training.export.onnx_bundle models/attack-v0.1-cnn-gru
 python -m Evaluation.latency.benchmark models/attack-v0.1-cnn-gru/model.onnx models/attack-v0.1-cnn-gru/cpu-latency.json
 ```
 
-Run the identical frozen split with `--architecture feature_tcn` and
+Run the identical frozen split with `--architecture cnn_tcn`,
+`--architecture optical_flow_fusion`, `--architecture feature_tcn` and
 `--architecture video_transformer`, each in a new version directory. Config
 reference files in `Training/configs` describe the defaults; the CLI records the
 actual used arguments in the output `config.json`. Change `--frames` among
@@ -66,7 +65,7 @@ actual used arguments in the output `config.json`. Change `--frames` among
 Changing temporal cadence/length requires a corresponding trained/exported
 configuration; resizing a checkpoint does not prove equivalent quality.
 
-To execute all three training/export/latency runs and write one comparison:
+To execute all five training/export/latency runs and write one comparison:
 
 ```bash
 python -m Training.trainers.compare_baselines local-data/samples.jsonl local-data/splits-v1 models/comparison-v0.1 --version-prefix attack-v0.1 --epochs 5
@@ -77,8 +76,16 @@ synthetic examples through the supervised trainer and does not silently replace
 missing media with random tensors. It writes `comparison.json` after each model
 so completed runs remain reviewable if a later architecture fails.
 
-The CNN+GRU and transformer use a small depthwise CNN frame encoder. The TCN
-baseline uses RGB spatial appearance cells and backward frame differences as an
+The CNN+GRU, CNN+TCN and transformer use a small depthwise CNN frame encoder.
+CNN+TCN uses strictly left-padded temporal convolutions. Optical-flow fusion
+solves local Lucas–Kanade brightness-constancy equations over consecutive
+grayscale frames at40×40, then fuses raw flow, translation-subtracted flow and
+temporal acceleration with learned RGB features and a causal TCN. This is a
+single-level small-displacement estimate, not pose, weapon recognition or a
+guarantee against camera rotation/parallax. Its operators live inside the ONNX
+graph, so Python and native inference compute the same flow.
+
+The separate `feature_tcn` baseline uses RGB spatial appearance cells and backward frame differences as an
 explicit **feature proxy**, not detected objects, anatomical pose, optical flow,
 or a tracked weapon. It makes baseline comparison possible before a licensed,
 Sekiro-compatible detector/pose model is available. The transformer has two
@@ -96,7 +103,12 @@ Training requires `annotation_status=reviewed` plus reviewer identity and reject
 only for uncensored `OBSERVED_CONTACT`; no-hit and unobserved contact remain
 masked. `threat` is an independently reviewed intersection/threat label, not an
 automatic copy of `attack`. Direction is observed player movement in screen
-coordinates, not a demonstrated safe input. A no-hit dataset can train attack
+coordinates, not a demonstrated safe input. `attack_direction` is a separate
+head: its loss needs a reviewed `VISUAL_TRAJECTORY` label in
+`SCREEN_WITH_WOLF_REFERENCE` coordinates. Missing/UNKNOWN labels are masked,
+and observed player dodge direction never fills this label. Native direction
+confidence is the uncalibrated softmax maximum, not safe-action probability.
+A no-hit dataset can train attack
 heads while truthfully leaving threat/TTI unsupported.
 
 Every run records source/split hashes, seed, optimizer progress, supported-label
@@ -126,13 +138,23 @@ Outputs, in order:
 | state_logits | [1,9] | IDLE/WALK/RUN/TURN/WINDUP/ACTIVE/RECOVERY/COMBO/FEINT |
 | class_logits | [1,14] | Exact order in Training.datasets.video_samples.CLASSES |
 | direction_logits | [1,5] | Observed LEFT/RIGHT/FORWARD/BACK/NEUTRAL, not recommended keys |
+| attack_direction_logits | [1,8] | LEFT_TO_RIGHT/RIGHT_TO_LEFT/TOP_TO_BOTTOM/BOTTOM_TO_TOP/TOWARD_WOLF/AWAY_FROM_WOLF/RADIAL/UNKNOWN |
 
-Metadata contains `svai.contract=temporal-v1`, model version, training status,
+Metadata contains `svai.contract=temporal-v2`, model version, training status,
 preprocess/cadence and trained-head support flags. A supervised attack-only model
 can load for live scores while TTI/threat remain unavailable. Synthetic,
 untrained and self-supervised-only models never become model Auto Dodge simply
 because ONNX can execute. The threat decision engine still owns action timing,
 hysteresis, episode identity, cooldown and input guards.
+
+Legacy `temporal-v1` graphs keep their seven original output names/order and
+remain loadable; their attack-direction field is unsupported/UNKNOWN. v2 appends
+the eighth head and requires explicit trajectory semantics metadata before
+exposing a supported direction. `AUTO` runtime selection attempts available
+CUDA, DirectML, then CPU sessions, executing three warmup runs before readiness.
+The displayed provider is extracted from ORT's actual warmup node-placement
+profile, and fallback attempts remain visible. This is an availability order,
+not a claim that CUDA or DirectML was fastest on the user's hardware.
 
 Export checks ONNX structure and executes three actual CPU ORT numerical-parity
 cases against PyTorch with rtol/atol1e-4. A passed parity test validates export,
@@ -166,6 +188,9 @@ alone is not event precision or false Dodge per minute.
 ## Optional self-supervision and smoke tests
 
 ```bash
+python -m Training.datasets.prepare_unlabeled local-data/source_manifest.jsonl local-data/representation-windows
+python -m Training.trainers.pretrain local-data/representation-windows/unlabeled_samples.jsonl models/motion-representation-v0.1 --architecture optical_flow_fusion
+python -m Training.export.onnx_bundle models/motion-representation-v0.1
 python -m Training.trainers.pretrain local-data/unlabeled-windows.jsonl models/representation-v0.1 --architecture cnn_gru
 python -m Training.trainers.train local-data/samples.jsonl local-data/splits-v1 models/attack-v0.2-cnn-gru --model-version attack-v0.2-cnn-gru --pretrained models/representation-v0.1/checkpoint.pt
 python -m unittest discover -s Tests -p 'training_*.py'
@@ -173,12 +198,18 @@ python -m Training.trainers.smoke artifacts/temporal-synthetic --steps 80
 ```
 
 The optional pretrainer implements symmetric contrastive clip embeddings with
-two photometric views. It is deliberately small, does not claim VideoMAE or
+two photometric views and a same-clip temporal-reversal margin. Static histories
+are masked from the order task; the reversed history contains only already
+observed frames. This auxiliary task supplies motion-order supervision without
+inventing attacks or contact times. `--temporal-weight 0` disables it for an
+appearance-only ablation. Clean-gameplay intervals can be explicitly selected
+with `prepare_unlabeled --selections`; desktop overlays are not training inputs.
+The pretrainer is deliberately small, does not claim VideoMAE or
 pose learning, and leaves every decision head unsupported until fine-tuning.
 Use only training-source unlabeled media for pretraining if a held-out source/
 boss comparison is intended; pretraining exposure must be disclosed.
 
-Synthetic smoke optimization trains all three architectures on mathematical
+Synthetic smoke optimization trains all five architectures on mathematical
 colored-tile sequences at64×64, then executes parity and actual CPU latency at
 the declared deployment shape (default16×320×320). The changed image size is
 explicit in evidence; this is an implementation test, not task generalization.
@@ -187,6 +218,8 @@ explicit in evidence; this is an implementation test, not task generalization.
 
 - [PyTorch2.8 ONNX exporters](https://docs.pytorch.org/docs/2.8/onnx.html): explicit static TorchScript exporter selection preserves standard GRU export for this baseline; no unsupported dynamic shape promise.
 - [ONNX Runtime Python API](https://onnxruntime.ai/docs/api/python/api_summary.html): explicit execution providers and synchronous session.run measurement.
+- [ORT DirectML configuration](https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html): sequential execution, disabled memory patterns, adapter indices and fallback limitations.
+- [OpenCV optical-flow explanation](https://docs.opencv.org/4.x/d4/dee/tutorial_optical_flow.html): Lucas–Kanade brightness constancy and local small-motion assumptions; this project implements the local solve directly in exported tensor operations.
 - [TCN reference paper](https://arxiv.org/abs/1803.01271): architectural motivation, not a Sekiro performance claim.
 - [VideoMAE implementation](https://github.com/MCG-NJU/VideoMAE): heavier future pretraining candidate, not a dependency or claimed implementation here.
 

@@ -14,7 +14,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from Training.datasets.splits import read_jsonl, load_splits, validate_splits
-from Training.datasets.video_samples import VideoSamples, STATES, CLASSES, DIRECTIONS, DEFAULT_ROI
+from Training.datasets.video_samples import VideoSamples, STATES, CLASSES, DIRECTIONS, ATTACK_DIRECTIONS, DEFAULT_ROI
 from Training.losses import multitask_loss
 from Training.metrics.quality import summarize_predictions, choose_threshold
 from Training.models import build_model
@@ -76,7 +76,8 @@ def evaluate(model, dataset, device, batch_size=1):
                                 "tti_uncertainty_ms": float(outputs[3][offset, 0]),
                                 "predicted_state": STATES[int(outputs[4][offset].argmax())],
                                 "predicted_class": CLASSES[int(outputs[5][offset].argmax())],
-                                "observed_direction_prediction": DIRECTIONS[int(outputs[6][offset].argmax())]})
+                                "observed_direction_prediction": DIRECTIONS[int(outputs[6][offset].argmax())],
+                                "attack_direction_prediction": ATTACK_DIRECTIONS[int(outputs[7][offset].argmax())]})
     return predictions
 
 
@@ -98,7 +99,11 @@ def label_support(rows):
         return {"positive": sum(v is True for v in values), "negative": sum(v is False for v in values)}
     timing = sum(r.get("labels", {}).get("tti_ms") is not None and not r["labels"].get("tti_censored", True)
                  and r["labels"].get("impact_evidence") == "OBSERVED_CONTACT" for r in rows)
-    return {"attack": binary("attack"), "threat": binary("threat"), "observed_tti": timing}
+    directions = [r.get("labels", {}).get("attack_direction") for r in rows
+                  if r.get("labels", {}).get("attack_direction_evidence") == "VISUAL_TRAJECTORY" and
+                  r.get("labels", {}).get("attack_direction_space") == "SCREEN_WITH_WOLF_REFERENCE"]
+    return {"attack": binary("attack"), "threat": binary("threat"), "observed_tti": timing,
+            "attack_direction": {name: directions.count(name) for name in ATTACK_DIRECTIONS[:-1]}}
 
 
 def train(args):
@@ -158,7 +163,7 @@ def train(args):
     for head in ("attack", "threat"):
         thresholds[head], threshold_notes[head] = choose_threshold(validation_rows, head)
     support = label_support(training.rows)
-    config = {"contract": "temporal-v1", "model_version": args.model_version, "architecture": args.architecture,
+    config = {"contract": "temporal-v2", "model_version": args.model_version, "architecture": args.architecture,
               "frames": args.frames, "size": args.size, "width": args.width, "batch": 1,
               "input_name": "frames", "layout": "NTCHW", "preprocess": "roi-rgb-bilinear-v1",
               "roi": DEFAULT_ROI, "sample_interval_ms": 1000/30, "seed": args.seed,
@@ -166,8 +171,11 @@ def train(args):
               "threat_supported": support["threat"]["positive"] > 0 and support["threat"]["negative"] > 0,
               "tti_supported": support["observed_tti"] > 0,
               "attack_supported": support["attack"]["positive"] > 0 and support["attack"]["negative"] > 0,
+              "attack_direction_supported": sum(value > 0 for value in support["attack_direction"].values()) >= 2,
               "states": STATES, "classes": CLASSES, "directions": DIRECTIONS,
               "direction_semantics": "observed screen action, not a safe action recommendation",
+              "attack_directions": ATTACK_DIRECTIONS,
+              "attack_direction_semantics": "reviewed visual trajectory in screen axes; toward/away reference Wolf; uncalibrated softmax",
               "tti_semantics": "Laplace location/scale for observed contact; no-hit point labels masked",
               "thresholds": thresholds, "calibration": calibration, "threshold_selection": threshold_notes,
               "annotation_support": support, "supervised_epochs": args.epochs,

@@ -1,0 +1,8 @@
+{
+  "schema": "svai-production-models-v1",
+  "status": "unavailable",
+  "reason": "Gameplay-trained target and attack/threat/TTI models have not yet passed a representative gameplay evaluation.",
+  "assets": [],
+  "supported_bosses": [],
+  "validation_evidence": null
+}

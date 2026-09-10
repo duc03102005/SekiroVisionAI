@@ -4,16 +4,34 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <vector>
 
 namespace sekiro {
 inline constexpr double unavailable = std::numeric_limits<double>::quiet_NaN();
 
+// WGC SystemRelativeTime is already a QPC-derived TimeSpan, whose ticks are
+// 100 ns. It is not a raw QueryPerformanceCounter value or a UTC timestamp.
+inline double wgc_timespan_ms(std::int64_t ticks_100ns) noexcept {
+    return ticks_100ns > 0 ? static_cast<double>(ticks_100ns) / 10000.0 : unavailable;
+}
+
+inline double qpc_ticks_ms(std::int64_t ticks, std::int64_t frequency) noexcept {
+    if (ticks <= 0 || frequency <= 0) return unavailable;
+    return static_cast<double>(ticks) * 1000.0 / static_cast<double>(frequency);
+}
+
 inline double age_ms(double source, double observed) noexcept {
     if (!std::isfinite(source) || !std::isfinite(observed) || source <= 0 || observed < source)
         return unavailable;
     return observed - source;
+}
+
+inline bool fresh_at(double source, double observed, double maximum_age_ms) noexcept {
+    const double age = age_ms(source, observed);
+    return std::isfinite(maximum_age_ms) && maximum_age_ms > 0 &&
+        std::isfinite(age) && age < maximum_age_ms;
 }
 
 struct Percentiles {
