@@ -2,9 +2,12 @@
 
 Windows native, offline single-player research project for vision-led automatic Dodge in Sekiro: Shadows Die Twice, targeting an NVIDIA RTX 3070.
 
-**Milestone 0 — Agent Skills: PASS.** The reviewed setup is published and verified on GitHub. Milestone 1 may now begin; no capture performance, model accuracy or in-game avoidance has been validated.
+**Milestone 0 — Agent Skills: PASS.** The reviewed setup is published and verified on GitHub. **Milestone 1 — Capture Engine: in progress.** A native Windows capture probe is implemented on `feature/capture-engine`; live Sekiro/RTX 3070 performance is not measured.
 
-- [Milestone 0 evidence and remaining step](docs/milestones/milestone-0.md)
+- [Build/run the Windows capture probe and measure M1](docs/capture-runbook.md)
+- [Milestone 1 evidence and pending hardware gate](docs/milestones/milestone-1.md)
+- [Runtime decision](docs/adr/001-native-runtime.md) and [capture decision](docs/adr/002-window-capture.md)
+- [Milestone 0 evidence](docs/milestones/milestone-0.md)
 - [External skills review and provenance](docs/research/external-skills-review.md)
 - [Custom skills review](docs/research/custom-skills-review.md)
 - [Current-source research notes](docs/research/technical-notes.md)
