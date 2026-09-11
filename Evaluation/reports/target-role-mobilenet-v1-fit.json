@@ -1,0 +1,76 @@
+{
+  "deployment_status": "EXPERIMENTAL_NOT_PRODUCTION_VALIDATED",
+  "trained_on_actual_gameplay": true,
+  "source_groups": [
+    "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION"
+  ],
+  "reviewed_frames": 41,
+  "annotation_method": "AI_VISUAL_REVIEW_NOT_INDEPENDENT_HUMAN_GOLD",
+  "source_commit": "af126fcfd83c0fd872248560085037256a5ae55f",
+  "annotation_sha256": "83f2ca2cd98e1fee72ad8597c09cd27ba51bdc515ddfd38e480dec11c94b94d3",
+  "onnx_sha256": "130dd12dafef7a3ea639574a2a344464daed4c4aca31067b9e63eb95acc39a80",
+  "training_steps": 1400,
+  "seed": 3070,
+  "parameters": 1043178,
+  "resume_checkpoint_sha256": null,
+  "architecture": "mobilenet-v3-small-fpn-roles-v1",
+  "training_code_sha256": {
+    "Training/targets/__init__.py": "804b50d1d9e7bef5b811c7138ff55974cc7d317b78fb19eb66ca8a20ed087315",
+    "Training/targets/evaluate.py": "a0678f72c40d46b0b8844f56c3afd77d767cec74e1e82029e42022f008303518",
+    "Training/targets/make_fixture.py": "80de1af6222185f99da808bb21bb67189d4b84d18d555f4f7eef5446f0dd9d43",
+    "Training/targets/model.py": "ac9b32b819cff83aba84450d752412e77cb1c0686f05a9b904084f2249956aab",
+    "Training/targets/pretrained.py": "087d9011a20c992ef566f85cebceeaee1303c6816288c8789c86632f998c2b9e",
+    "Training/targets/train.py": "e13798a6951cff8ccd0a33805e48c501e93d028d8b9634c2a9c7cbe0bc063f54",
+    "Training/targets/verify_native.py": "e7d02382330f1bd7e02230f659f1776f7bd825b8d1e16003014f7b0b85e48746"
+  },
+  "pretrained_weights": "TorchVision MobileNet_V3_Small_Weights.IMAGENET1K_V1",
+  "loss_first_50_mean": 2.0472775053977967,
+  "loss_last_50_mean": 0.15646763935685157,
+  "fitting_metrics_only": {
+    "Wolf": {
+      "tp": 38,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "mean_matched_iou": 0.8983024096595223
+    },
+    "Enemy": {
+      "tp": 25,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.9615384615384616,
+      "mean_matched_iou": 0.8864876563967928
+    }
+  },
+  "held_out_accuracy": null,
+  "no_held_out_reason": "Initial review is one conservatively grouped source family; no random-frame leakage split was made.",
+  "cpu_model_ms_shared_development_host": {
+    "p50": 2.781013999992865,
+    "p95": 3.04483100080688,
+    "max": 3.818741999566555
+  },
+  "pytorch_ort_parity_max_abs": [
+    1.9669532775878906e-06,
+    7.748603820800781e-07,
+    1.996755599975586e-06
+  ],
+  "training_seconds": 191.3354746340001,
+  "versions": {
+    "torch": "2.8.0+cpu",
+    "onnxruntime": "1.22.1"
+  },
+  "thresholds": {
+    "score": 0.75,
+    "nms_iou": 0.4,
+    "matching_iou": 0.5
+  },
+  "limitations": [
+    "No all-boss coverage",
+    "No independent human ground truth",
+    "No RTX 3070 live-game benchmark",
+    "Scores uncalibrated"
+  ],
+  "pretrained_provenance": "TargetDetection/pretrained-provenance.json"
+}

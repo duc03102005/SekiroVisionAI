@@ -1,0 +1,23 @@
+{
+  "publisher": "Markov",
+  "publisher_url": "https://www.markovstudios.com/",
+  "dataset_url": "https://huggingface.co/datasets/markov-ai/gaming-500-hours",
+  "retrieved_date": "2026-09-10",
+  "dataset_revision": "5af703f2810306e7d75eb4394ae59591f1f6e8a2",
+  "publisher_html_sha256": "83b5baaa308885dcce00d1f11198b440479a0638741b601b8bd09df56a4c7897",
+  "dataset_readme_sha256": "6f3d60ca80dcb8bb6a9cb0abe99387d9f5a51f2a05906c09b9687b02787962e8",
+  "exact_public_statement_fragments": [
+    "Data + environments for training computer-use AI.",
+    "Our open-source work",
+    "500+ hours Gaming data",
+    "Train on how people actually use computers."
+  ],
+  "context": "The publisher page presents its purpose as collecting computer interaction data for training AI, lists the gaming dataset directly in its open-source section, and links that item to the exact Hugging Face dataset. The recording creators are described by the publisher as contributors whose native gameplay was captured and trimmed to gameplay. The page and linked README were inspected; neither provides a named dataset license or a separate usage restriction. The page exposes no Terms/Privacy/License navigation links.",
+  "usage_basis": "EXPLICIT_PERMISSION",
+  "accepted_scope": "Publisher public invitation to download and train models on its linked gaming data; used for this project research/training/evaluation. This is a contextual training-use invitation, not an assertion of a named open license.",
+  "redistribution_of_original_media_authorized": false,
+  "redistribution_note": "No explicit media-redistribution grant was found. Do not commit or redistribute source recordings or event logs. Keep source attribution with model/evaluation provenance.",
+  "selection": "Only two sekiro/ game sessions, not unrelated workflows or separately selected desktop recordings. Visual review subsequently found an incidental task-switcher/application overlay around960s in the combat recording despite its pure-gameplay description; training exclusions are recorded per source and raw media is not redistributed. Interaction event logs were not downloaded.",
+  "contacted_publisher": false,
+  "catalog_restriction_file_scan": "Hugging Face API file listing at pinned revision contains no LICENSE, TERMS, COPYRIGHT or PERMISSION named file; no license field exists in dataset card."
+}

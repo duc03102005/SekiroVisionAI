@@ -1,0 +1,394 @@
+{
+  "schema_version": 1,
+  "created_date": "2026-09-10",
+  "purpose": "Canonical collection targets and shared visual semantics. This is not a trained label set or reviewed coverage claim.",
+  "boss_phase_policy": "UNREVIEWED is a collection placeholder, not an asserted phase. Add boss phase keys only after reviewing the source and preserve per-source frame boundaries. Never infer phase from title alone.",
+  "bosses": [
+    {
+      "name": "Gyoubu Masataka Oniwa",
+      "group": "main",
+      "aliases": [
+        "Gyoubu Oniwa"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Lady Butterfly",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Genichiro Ashina",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Folding Screen Monkeys",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Guardian Ape",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Headless Ape",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Corrupted Monk",
+      "group": "main",
+      "aliases": [
+        "Illusion Corrupted Monk"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "True Corrupted Monk",
+      "group": "main",
+      "aliases": [
+        "True Monk"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Great Shinobi Owl",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Owl Father",
+      "group": "main",
+      "aliases": [
+        "Owl (Father)"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Divine Dragon",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Demon of Hatred",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Emma",
+      "group": "main",
+      "aliases": [
+        "Emma, the Gentle Blade",
+        "Emma the Gentle Blade"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Isshin Ashina",
+      "group": "main",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Isshin the Sword Saint",
+      "group": "main",
+      "aliases": [
+        "Isshin, the Sword Saint"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Inner Genichiro",
+      "group": "inner",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Inner Father",
+      "group": "inner",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Inner Isshin",
+      "group": "inner",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Chained Ogre",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Blazing Bull",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Juzou the Drunkard",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Ashina Elite",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Seven Ashina Spears",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Lone Shadow",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Snake Eyes",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "O'Rin",
+      "group": "miniboss",
+      "aliases": [
+        "O’Rin",
+        "O'Rin of the Water",
+        "Orin of the Water"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Armoured Warrior",
+      "group": "miniboss",
+      "aliases": [
+        "Armored Warrior"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Long-arm Centipede",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Shichimen Warrior",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Headless",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Sakura Bull",
+      "group": "miniboss",
+      "aliases": [
+        "Sakura Bull of the Palace"
+      ],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    },
+    {
+      "name": "Okami Leader Shizu",
+      "group": "miniboss",
+      "aliases": [],
+      "phase_keys": [
+        "UNREVIEWED"
+      ],
+      "annotation_count": 0
+    }
+  ],
+  "threat_labels": [
+    "NON_THREAT",
+    "THREAT",
+    "UNKNOWN_THREAT"
+  ],
+  "state_labels": [
+    "IDLE",
+    "WALK",
+    "RUN",
+    "TURN",
+    "ATTACK_WINDUP",
+    "ACTIVE_ATTACK",
+    "RECOVERY",
+    "COMBO_CONTINUATION",
+    "FEINT",
+    "UNKNOWN_STATE"
+  ],
+  "attack_labels": [
+    "HORIZONTAL_SLASH",
+    "VERTICAL_SLASH",
+    "DIAGONAL_SLASH",
+    "THRUST",
+    "SWEEP",
+    "GRAB",
+    "JUMP_ATTACK",
+    "OVERHEAD_ATTACK",
+    "SPIN_ATTACK",
+    "PROJECTILE",
+    "CHARGE",
+    "AOE",
+    "MULTI_HIT_COMBO",
+    "UNKNOWN_ATTACK"
+  ],
+  "negative_tags": [
+    "IDLE",
+    "WALK",
+    "RUN",
+    "TURN",
+    "PLAYER_HEAL",
+    "PLAYER_ATTACK",
+    "BOSS_BLOCK",
+    "BOSS_DEFLECT",
+    "RECOVERY",
+    "CAMERA_ROTATION",
+    "CAMERA_SHAKE",
+    "PARTICLES",
+    "PROSTHETIC_EFFECT",
+    "DEATHBLOW",
+    "CUTSCENE_TRANSITION",
+    "NON_ATTACK_JUMP",
+    "FEINT",
+    "MENU",
+    "TRAVERSAL",
+    "OCCLUSION"
+  ],
+  "impact_evidence": [
+    "OBSERVED_CONTACT",
+    "ESTIMATED_COUNTERFACTUAL",
+    "NO_CONTACT",
+    "OCCLUDED",
+    "OUT_OF_CLIP"
+  ],
+  "dodge_directions": [
+    "LEFT",
+    "RIGHT",
+    "FORWARD",
+    "BACK",
+    "NEUTRAL",
+    "UNKNOWN"
+  ],
+  "label_notes": [
+    "No-hit/no-damage claims are creator source descriptions, not verified impact labels.",
+    "Observed dodge direction is not proof of the safest direction.",
+    "Per-strike episode IDs are required for combo continuation.",
+    "Boss phase and attack phase are distinct dimensions.",
+    "Classifier output order must be versioned in each model config; do not infer indices from this collection taxonomy."
+  ]
+}

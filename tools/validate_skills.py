@@ -1,4 +1,4 @@
-"""Validate M0 skill artifacts without executing skill instructions or using network.
+"""Validate preserved skill artifacts without executing skill instructions or using network.
 
 This deliberately validates the project's simple name/description frontmatter subset,
 not arbitrary YAML. It cannot certify a skill's intent or verify a GitHub push.
@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import os
 import sys
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -17,11 +18,6 @@ EXPECTED = {
     "windows-gpu-capture", "realtime-video-ai", "sekiro-dataset-pipeline",
     "low-latency-inference", "combat-decision-engine", "windows-native-app",
     "winui-code-review", "ort-build",
-}
-APP_DIRS = {
-    "App", "CaptureEngine", "VisionEngine", "TemporalEngine", "ThreatEngine",
-    "DodgeEngine", "InputEngine", "ModelRuntime", "Overlay", "DatasetTools",
-    "Training", "Evaluation", "Models", "Config", "Tests",
 }
 LINK = re.compile(r"\[[^\]\n]*\]\(([^\s)]+)(?:\s+\"[^\"]*\")?\)")
 
@@ -62,9 +58,15 @@ def check_skills(root: Path) -> tuple[list[str], dict]:
             errors.append(f"Unfinished scaffold: {p.parent.name}")
 
     link_count = 0
-    for p in sorted(root.rglob("*.md")):
-        if ".git" in p.parts:
-            continue
+    markdown_files = []
+    # Check authored repository docs, not installed dependencies or build output.
+    # The reviewed skill inventory above is always checked separately in full.
+    for directory, children, filenames in os.walk(root):
+        children[:] = [name for name in children if name not in
+                       {".git", "out", "build", "artifacts", "node_modules", "__pycache__", "local-data"}
+                       and not name.startswith(".venv")]
+        markdown_files.extend(Path(directory) / name for name in filenames if name.endswith(".md"))
+    for p in sorted(markdown_files):
         for target in LINK.findall(p.read_text(encoding="utf-8")):
             u = urlsplit(target)
             if u.scheme or not u.path:
@@ -117,27 +119,7 @@ def check_skills(root: Path) -> tuple[list[str], dict]:
     if sample["would_hit_without_dodge"] == "UNKNOWN" and sample["impact_evidence"] == "ESTIMATED_COUNTERFACTUAL":
         errors.append("Counterfactual example needs an explicit reviewed assumption")
 
-    # This attestation was added only after fetching and verifying the published tree.
-    # It is a recorded review, not a fresh online GitHub verification or security boundary.
-    publication_path = root / ".agents/milestone-0-publication.json"
-    publication_ok = False
-    if publication_path.exists():
-        publication = json.loads(publication_path.read_text())
-        publication_ok = (
-            publication.get("status") == "PASS"
-            and publication.get("repository") == "duc03102005/SekiroVisionAI"
-            and publication.get("remote_ref_and_tree_verified") is True
-            and publication.get("local_clean_at_verification") is True
-            and re.fullmatch(r"[0-9a-f]{40}", publication.get("commit", "")) is not None
-            and re.fullmatch(r"[0-9a-f]{40}", publication.get("tree", "")) is not None
-            and publication.get("skill_review_manifest_sha256") == hashlib.sha256(review_path.read_bytes()).hexdigest()
-        )
-        if not publication_ok:
-            errors.append("Invalid or stale M0 publication attestation")
-    if not publication_ok:
-        for name in APP_DIRS:
-            if (root / name).exists():
-                errors.append(f"Application directory present before M0 publication: {name}")
+    # User override (2026-09-10): historical publication/milestone status is not a development gate.
     return errors, {"skills": len(found), "reviewed_skill_files": len(files), "local_references": link_count}
 
 
@@ -151,7 +133,7 @@ def main() -> int:
     for error in errors:
         print("ERROR:", error)
     print("SKILL_VALIDATION:", "FAIL" if errors else "PASS")
-    print("Publication is recorded separately; this offline check does not reverify GitHub or game performance.")
+    print("Skill integrity only; milestone status never gates application development.")
     return 1 if errors else 0
 
 

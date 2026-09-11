@@ -1,0 +1,771 @@
+{
+  "evidence": "ACTUAL SEKiro video motion pretraining and AI-reviewed phase learning; not a functional Auto Dodge release",
+  "motion": {
+    "model_sha256": "129f8efb136e57ffce4f5076abfb04aa8b6d4684a7be3c3764b99a818d203224",
+    "checkpoint_sha256": "5f32031792d29afb6f27de1c70960a1b7a8153563836af37fe61844634031019",
+    "configuration": {
+      "contract": "temporal-v2",
+      "architecture": "optical_flow_fusion",
+      "frames": 16,
+      "size": 320,
+      "width": 64,
+      "model_version": "live-yt-markov-motion-pretrain-v3",
+      "training_status": "self_supervised",
+      "auto_eligible": false,
+      "attack_supported": false,
+      "threat_supported": false,
+      "tti_supported": false,
+      "attack_direction_supported": false,
+      "trained_samples": 0,
+      "supervised_epochs": 0,
+      "pretraining_temporal_weight": 0.25,
+      "code_provenance": {
+        "git_commit": "488f1d0a6065e5a36e172d429633329544e88ff8",
+        "working_tree_dirty": true,
+        "training_evaluation_code_sha256": "674fb1adef73d6360b9f84612a3578f1cf3de46c35ccfadff80d85f6055270e3"
+      },
+      "model_sha256": "129f8efb136e57ffce4f5076abfb04aa8b6d4684a7be3c3764b99a818d203224",
+      "onnx_opset": 17,
+      "onnx_metadata": {
+        "svai.contract": "temporal-v2",
+        "svai.model_version": "live-yt-markov-motion-pretrain-v3",
+        "svai.training_status": "self_supervised",
+        "svai.sample_interval_ms": "33.333333",
+        "svai.preprocess": "roi-rgb-bilinear-v1",
+        "svai.tti_supported": "false",
+        "svai.threat_supported": "false",
+        "svai.attack_supported": "false",
+        "svai.attack_direction_supported": "false",
+        "svai.auto_eligible": "false",
+        "svai.direction_semantics": "observed_screen_action_not_recommended_input",
+        "svai.attack_direction_semantics": "visual_trajectory_screen_with_wolf_reference",
+        "svai.attack_direction_confidence_semantics": "uncalibrated_softmax_maximum_not_safe_action_probability",
+        "svai.uncertainty_semantics": "laplace_scale_ms_not_calibrated_coverage"
+      }
+    },
+    "sample_count": 328,
+    "optimization_steps": 164,
+    "training_seconds": 296.77740141199956,
+    "loss_first_5": [
+      1.4193416833877563,
+      1.4210482835769653,
+      1.4211902618408203,
+      1.422972559928894,
+      1.4229474067687988
+    ],
+    "loss_last_5": [
+      0.09926135838031769,
+      0.23192276060581207,
+      0.08185051381587982,
+      0.08736664056777954,
+      0.061335451900959015
+    ],
+    "selected_preparation": {
+      "purpose": "self-supervised representation learning only",
+      "supervised_labels": 0,
+      "source_manifest_sha256": "891882cf1068c29c056620ec04ff32ff31e0a9cd22c44e142897640c9dca9e07",
+      "source_count": 7,
+      "source_groups": [
+        "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+        "MARKOV_SEKIRO_A7ECDCA8_SESSION"
+      ],
+      "clip_count": 15,
+      "sample_count": 328,
+      "history_length": 16,
+      "stride": 8,
+      "normalization": "30Hz causal floor-PTS frames; no future interpolation",
+      "selected_intervals_sha256": "7c427e7d9509dfdd7604bf9ed1fc39e424b82f150bfe7a220920a5175abdadc4",
+      "selected_intervals": [
+        {
+          "source_id": "LIVE_YT_GAMING_SEKIRO_005",
+          "start_ms": 34.0,
+          "end_ms": 8122.001,
+          "selection_basis": "Previously inspected short gameplay clip; representation-only, no accepted attack labels"
+        },
+        {
+          "source_id": "LIVE_YT_GAMING_SEKIRO_016",
+          "start_ms": 66.0,
+          "end_ms": 8310.168,
+          "selection_basis": "Previously inspected short gameplay clip; representation-only, no accepted attack labels"
+        },
+        {
+          "source_id": "LIVE_YT_GAMING_SEKIRO_019",
+          "start_ms": 66.0,
+          "end_ms": 8299.301000000001,
+          "selection_basis": "Previously inspected short gameplay clip; representation-only, no accepted attack labels"
+        },
+        {
+          "source_id": "LIVE_YT_GAMING_SEKIRO_023",
+          "start_ms": 66.0,
+          "end_ms": 8287.101,
+          "selection_basis": "Previously inspected short gameplay clip; representation-only, no accepted attack labels"
+        },
+        {
+          "source_id": "LIVE_YT_GAMING_SEKIRO_026",
+          "start_ms": 66.0,
+          "end_ms": 8299.401,
+          "selection_basis": "Previously inspected short gameplay clip; representation-only, no accepted attack labels"
+        },
+        {
+          "source_id": "LIVE_YT_GAMING_SEKIRO_029",
+          "start_ms": 66.0,
+          "end_ms": 8316.001,
+          "selection_basis": "Previously inspected short gameplay clip; representation-only, no accepted attack labels"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 245000,
+          "end_ms": 250000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 280000,
+          "end_ms": 285000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 425000,
+          "end_ms": 430000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 500000,
+          "end_ms": 505000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 600000,
+          "end_ms": 605000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 860000,
+          "end_ms": 865000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 900000,
+          "end_ms": 905000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 1080000,
+          "end_ms": 1085000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        },
+        {
+          "source_id": "MARKOV_SEKIRO_A7ECDCA8",
+          "start_ms": 1100000,
+          "end_ms": 1105000,
+          "selection_basis": "Within acquisition-reviewed clean gameplay candidates; excludes desktop overlay940000-1060000ms; representation-only"
+        }
+      ]
+    },
+    "parity": {
+      "status": "passed",
+      "cases": 3,
+      "input_shape": [
+        1,
+        16,
+        3,
+        320,
+        320
+      ],
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "onnxruntime": "1.22.1",
+      "onnx": "1.19.0",
+      "opset": 17,
+      "rtol": 0.0001,
+      "atol": 0.0001,
+      "max_absolute_error": {
+        "attack_probability": 5.960464477539063e-08,
+        "threat_probability": 5.960464477539063e-08,
+        "tti_ms": 6.103515625e-05,
+        "tti_uncertainty_ms": 0.0,
+        "state_logits": 4.0978193283081055e-08,
+        "class_logits": 4.470348358154297e-08,
+        "direction_logits": 3.725290298461914e-08,
+        "attack_direction_logits": 4.0978193283081055e-08
+      },
+      "export_and_parity_seconds": 3.4499067920005473,
+      "input_evidence": "synthetic tensors validate numerical parity, not gameplay accuracy"
+    }
+  },
+  "phase": {
+    "model_sha256": "1f352305009c1720c02e8de8e1148ad39ace6d3219d2ea06feb7f78ceaa03430",
+    "checkpoint_sha256": "b45aa2bbffa07b6ed197a4f99b9ec82f42f8d73aed864954d663bad4e23c26c5",
+    "head_support": {
+      "attack_supported": true,
+      "state_supported": true,
+      "class_supported": false,
+      "threat_supported": false,
+      "tti_supported": false,
+      "attack_direction_supported": false,
+      "observed_direction_supported": false,
+      "auto_eligible": false
+    },
+    "annotation_support": {
+      "attack": {
+        "positive": 10,
+        "negative": 232
+      },
+      "threat": {
+        "positive": 0,
+        "negative": 232
+      },
+      "observed_tti": 0,
+      "attack_direction": {
+        "LEFT_TO_RIGHT": 0,
+        "RIGHT_TO_LEFT": 0,
+        "TOP_TO_BOTTOM": 0,
+        "BOTTOM_TO_TOP": 0,
+        "TOWARD_WOLF": 0,
+        "AWAY_FROM_WOLF": 0,
+        "RADIAL": 0
+      },
+      "state": {
+        "IDLE": 0,
+        "WALK": 0,
+        "RUN": 0,
+        "TURN": 0,
+        "ATTACK_WINDUP": 7,
+        "ACTIVE_ATTACK": 3,
+        "RECOVERY": 0,
+        "COMBO_CONTINUATION": 0,
+        "FEINT": 0
+      },
+      "class": {
+        "HORIZONTAL_SLASH": 0,
+        "VERTICAL_SLASH": 0,
+        "DIAGONAL_SLASH": 0,
+        "THRUST": 0,
+        "SWEEP": 0,
+        "GRAB": 0,
+        "JUMP_ATTACK": 0,
+        "OVERHEAD_ATTACK": 0,
+        "SPIN_ATTACK": 0,
+        "PROJECTILE": 0,
+        "CHARGE": 0,
+        "AOE": 0,
+        "MULTI_HIT_COMBO": 0,
+        "UNKNOWN_ATTACK": 0
+      },
+      "direction": {
+        "LEFT": 0,
+        "RIGHT": 0,
+        "FORWARD": 0,
+        "BACK": 0,
+        "NEUTRAL": 0
+      }
+    },
+    "configuration": {
+      "contract": "temporal-v2",
+      "model_version": "hirata-phase-dev-v2",
+      "architecture": "optical_flow_fusion",
+      "frames": 16,
+      "size": 320,
+      "width": 64,
+      "batch": 1,
+      "input_name": "frames",
+      "layout": "NTCHW",
+      "preprocess": "roi-rgb-bilinear-v1",
+      "roi": [
+        0.28,
+        0.12,
+        0.72,
+        0.61
+      ],
+      "sample_interval_ms": 33.333333333333336,
+      "seed": 17,
+      "training_status": "trained",
+      "trained_samples": 242,
+      "threat_supported": false,
+      "tti_supported": false,
+      "attack_supported": true,
+      "attack_direction_supported": false,
+      "states": [
+        "IDLE",
+        "WALK",
+        "RUN",
+        "TURN",
+        "ATTACK_WINDUP",
+        "ACTIVE_ATTACK",
+        "RECOVERY",
+        "COMBO_CONTINUATION",
+        "FEINT"
+      ],
+      "classes": [
+        "HORIZONTAL_SLASH",
+        "VERTICAL_SLASH",
+        "DIAGONAL_SLASH",
+        "THRUST",
+        "SWEEP",
+        "GRAB",
+        "JUMP_ATTACK",
+        "OVERHEAD_ATTACK",
+        "SPIN_ATTACK",
+        "PROJECTILE",
+        "CHARGE",
+        "AOE",
+        "MULTI_HIT_COMBO",
+        "UNKNOWN_ATTACK"
+      ],
+      "directions": [
+        "LEFT",
+        "RIGHT",
+        "FORWARD",
+        "BACK",
+        "NEUTRAL"
+      ],
+      "direction_semantics": "observed screen action, not a safe action recommendation",
+      "attack_directions": [
+        "LEFT_TO_RIGHT",
+        "RIGHT_TO_LEFT",
+        "TOP_TO_BOTTOM",
+        "BOTTOM_TO_TOP",
+        "TOWARD_WOLF",
+        "AWAY_FROM_WOLF",
+        "RADIAL",
+        "UNKNOWN"
+      ],
+      "attack_direction_semantics": "reviewed visual trajectory in screen axes; toward/away reference Wolf; uncalibrated softmax",
+      "tti_semantics": "Laplace location/scale for observed contact; no-hit point labels masked",
+      "thresholds": {
+        "attack": 0.85,
+        "threat": 0.85
+      },
+      "calibration": {
+        "attack": {
+          "temperature": 1.0,
+          "status": "not_fitted_missing_validation_classes"
+        },
+        "threat": {
+          "temperature": 1.0,
+          "status": "not_fitted_missing_validation_classes"
+        }
+      },
+      "threshold_selection": {
+        "attack": {
+          "status": "insufficient_validation_classes",
+          "threshold": 0.85
+        },
+        "threat": {
+          "status": "insufficient_validation_classes",
+          "threshold": 0.85
+        }
+      },
+      "annotation_support": {
+        "attack": {
+          "positive": 10,
+          "negative": 232
+        },
+        "threat": {
+          "positive": 0,
+          "negative": 232
+        },
+        "observed_tti": 0,
+        "attack_direction": {
+          "LEFT_TO_RIGHT": 0,
+          "RIGHT_TO_LEFT": 0,
+          "TOP_TO_BOTTOM": 0,
+          "BOTTOM_TO_TOP": 0,
+          "TOWARD_WOLF": 0,
+          "AWAY_FROM_WOLF": 0,
+          "RADIAL": 0
+        },
+        "state": {
+          "IDLE": 0,
+          "WALK": 0,
+          "RUN": 0,
+          "TURN": 0,
+          "ATTACK_WINDUP": 7,
+          "ACTIVE_ATTACK": 3,
+          "RECOVERY": 0,
+          "COMBO_CONTINUATION": 0,
+          "FEINT": 0
+        },
+        "class": {
+          "HORIZONTAL_SLASH": 0,
+          "VERTICAL_SLASH": 0,
+          "DIAGONAL_SLASH": 0,
+          "THRUST": 0,
+          "SWEEP": 0,
+          "GRAB": 0,
+          "JUMP_ATTACK": 0,
+          "OVERHEAD_ATTACK": 0,
+          "SPIN_ATTACK": 0,
+          "PROJECTILE": 0,
+          "CHARGE": 0,
+          "AOE": 0,
+          "MULTI_HIT_COMBO": 0,
+          "UNKNOWN_ATTACK": 0
+        },
+        "direction": {
+          "LEFT": 0,
+          "RIGHT": 0,
+          "FORWARD": 0,
+          "BACK": 0,
+          "NEUTRAL": 0
+        }
+      },
+      "supervised_epochs": 3,
+      "manifest_sha256": "57a020324d1de642063df3a44e4c019e26a0b52092e35b6a781a57d69d67b64d",
+      "code_provenance": {
+        "git_commit": "488f1d0a6065e5a36e172d429633329544e88ff8",
+        "working_tree_dirty": true,
+        "training_evaluation_code_sha256": "674fb1adef73d6360b9f84612a3578f1cf3de46c35ccfadff80d85f6055270e3"
+      },
+      "pretrained_checkpoint_sha256": "2a73d3a4d5d3a657594ce922cecbf34158eece83ba79e3d46a4bfe3b3512f2e4",
+      "pretraining_source_provenance": {
+        "source_ids": [
+          "LIVE_YT_GAMING_SEKIRO_005",
+          "LIVE_YT_GAMING_SEKIRO_016",
+          "LIVE_YT_GAMING_SEKIRO_019",
+          "LIVE_YT_GAMING_SEKIRO_023",
+          "LIVE_YT_GAMING_SEKIRO_026",
+          "LIVE_YT_GAMING_SEKIRO_029"
+        ],
+        "manifest_sha256": "981f953fb85702a76a72e5fa23b67e010f6a6af1e7f3efe47b6282110fb0efd9",
+        "source_groups": [
+          "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION"
+        ],
+        "source_provenance": {
+          "LIVE_YT_GAMING_SEKIRO_005": {
+            "source_sha256": "c2fa4830178ea8b6b8673edbe80d2a25d8c8f092fd35a60170b43ca39cad6bb4",
+            "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-005.mp4",
+            "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+            "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "usage_basis": "OPEN_LICENSE",
+            "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+          },
+          "LIVE_YT_GAMING_SEKIRO_016": {
+            "source_sha256": "c62e7f42790f61f2ee5aa05453705eb2b7f14ff1e803033e5647dd2bfde2af20",
+            "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-016.mp4",
+            "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+            "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "usage_basis": "OPEN_LICENSE",
+            "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+          },
+          "LIVE_YT_GAMING_SEKIRO_019": {
+            "source_sha256": "39aa400e29faad21b03d339c65823f2459a2ddd7ef8defe9c16cd502c6169603",
+            "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-019.mp4",
+            "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+            "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "usage_basis": "OPEN_LICENSE",
+            "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+          },
+          "LIVE_YT_GAMING_SEKIRO_023": {
+            "source_sha256": "4f088d2d0f23d8b1177f63576ad99e876e504f1c3e64852e8d220a0c673ef5d5",
+            "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-023.mp4",
+            "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+            "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "usage_basis": "OPEN_LICENSE",
+            "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+          },
+          "LIVE_YT_GAMING_SEKIRO_026": {
+            "source_sha256": "802df151d316881bc4ff52404466fd648a2ae4b715c19e6a7d5f657a42f77c5f",
+            "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-026.mp4",
+            "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+            "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "usage_basis": "OPEN_LICENSE",
+            "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+          },
+          "LIVE_YT_GAMING_SEKIRO_029": {
+            "source_sha256": "ebc2d0acdff1d73ce50b12b9410431ef78a44d9ea7236720abf41aee974a7c48",
+            "source_url": "https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video/resolve/acada673760d28567052f4c4feb0e22a94cf85e8/video.zip#video/Sekiro-029.mp4",
+            "source_group_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "player_id": "LIVE-YT-Gaming contributor (original player unknown)",
+            "session_id": "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION",
+            "usage_basis": "OPEN_LICENSE",
+            "usage_evidence": "UT Austin LIVE-YT-Gaming publisher permits use/copy/modify/distribute database for any purpose with notice and attribution: https://live.ece.utexas.edu/research/LIVE-YT-Gaming/index.html . Q-Bench-Video author paper Table 1 identifies CG video source as LIVE-YT-Gaming: https://arxiv.org/html/2409.20063v2 . Authors distribute selected media at https://huggingface.co/datasets/zhangzicheng/Q-Bench-Video ."
+          }
+        },
+        "holdout_claim": "Pretraining exposure only; no attack labels or independent generalization test"
+      },
+      "pretraining_holdout_overlap": {
+        "val": [],
+        "test": [],
+        "heldout_boss": []
+      },
+      "auto_eligible": false,
+      "state_supported": true,
+      "class_supported": false,
+      "observed_direction_supported": false,
+      "metadata_revision": {
+        "reason": "Categorical-head support derived from exact original training manifest; no additional optimizer steps",
+        "parent_checkpoint_sha256": "b3c6a58ea7ab5774bdfaca9a5e33e5e889bb0b87ac2e4bbf549a1646f3300cb7",
+        "review_manifest_sha256": "57a020324d1de642063df3a44e4c019e26a0b52092e35b6a781a57d69d67b64d",
+        "metadata_code_provenance": {
+          "git_commit": "af126fcfd83c0fd872248560085037256a5ae55f",
+          "working_tree_dirty": true,
+          "training_evaluation_code_sha256": "b7ef0c015bd5831482cfbdec84d417b7844026fa503bc5fea736f653af19a8ce"
+        }
+      },
+      "model_sha256": "1f352305009c1720c02e8de8e1148ad39ace6d3219d2ea06feb7f78ceaa03430",
+      "onnx_opset": 17,
+      "onnx_metadata": {
+        "svai.contract": "temporal-v2",
+        "svai.model_version": "hirata-phase-dev-v2",
+        "svai.training_status": "trained",
+        "svai.sample_interval_ms": "33.333333",
+        "svai.preprocess": "roi-rgb-bilinear-v1",
+        "svai.tti_supported": "false",
+        "svai.threat_supported": "false",
+        "svai.attack_supported": "true",
+        "svai.attack_direction_supported": "false",
+        "svai.state_supported": "true",
+        "svai.class_supported": "false",
+        "svai.observed_direction_supported": "false",
+        "svai.auto_eligible": "false",
+        "svai.direction_semantics": "observed_screen_action_not_recommended_input",
+        "svai.attack_direction_semantics": "visual_trajectory_screen_with_wolf_reference",
+        "svai.attack_direction_confidence_semantics": "uncalibrated_softmax_maximum_not_safe_action_probability",
+        "svai.uncertainty_semantics": "laplace_scale_ms_not_calibrated_coverage"
+      }
+    },
+    "history": [
+      {
+        "epoch": 1,
+        "mean_train_loss": 0.45437889550354515,
+        "batches": 61
+      },
+      {
+        "epoch": 2,
+        "mean_train_loss": 0.2680393806162489,
+        "batches": 61
+      },
+      {
+        "epoch": 3,
+        "mean_train_loss": 0.23075350835314878,
+        "batches": 61
+      }
+    ],
+    "training_seconds": 252.3589944539999,
+    "optimizer_steps": 183,
+    "parity": {
+      "status": "passed",
+      "cases": 3,
+      "input_shape": [
+        1,
+        16,
+        3,
+        320,
+        320
+      ],
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "onnxruntime": "1.22.1",
+      "onnx": "1.19.0",
+      "opset": 17,
+      "rtol": 0.0001,
+      "atol": 0.0001,
+      "max_absolute_error": {
+        "attack_probability": 7.488415576517582e-08,
+        "threat_probability": 4.8602032620692626e-08,
+        "tti_ms": 7.62939453125e-05,
+        "tti_uncertainty_ms": 5.7220458984375e-06,
+        "state_logits": 3.814697265625e-06,
+        "class_logits": 1.430511474609375e-06,
+        "direction_logits": 1.9073486328125e-06,
+        "attack_direction_logits": 9.5367431640625e-07
+      },
+      "export_and_parity_seconds": 2.956686840999282,
+      "input_evidence": "synthetic tensors validate numerical parity, not gameplay accuracy"
+    }
+  },
+  "source_heldout_gyoubu": {
+    "evidence": "AI-reviewed model anchor evaluation; not human gold or production Dodge acceptance",
+    "checkpoint_sha256": "b45aa2bbffa07b6ed197a4f99b9ec82f42f8d73aed864954d663bad4e23c26c5",
+    "samples_sha256": "9a3816456f581662c51736dbf2d17edf8855ed3f5207d6d39cfbe9e34a0ddde3",
+    "model_version": "hirata-phase-dev-v2",
+    "code_provenance": {
+      "git_commit": "af126fcfd83c0fd872248560085037256a5ae55f",
+      "working_tree_dirty": true,
+      "training_evaluation_code_sha256": "4380d3afce4a76fc73b7ad7157061615f2e2d096172046a7a229fdbf67033f68"
+    },
+    "evaluated_sources": [
+      "MARKOV_SEKIRO_A7ECDCA8"
+    ],
+    "supervised_training_overlap": [],
+    "pretraining_exposure_overlap": [],
+    "review_methods": [
+      "AI_VISUAL_REVIEW_NOT_INDEPENDENT_HUMAN_GOLD"
+    ],
+    "thresholds": {
+      "attack": 0.85,
+      "threat": 0.85
+    },
+    "thresholds_changed_during_evaluation": false,
+    "metrics": {
+      "metric_unit": "reviewed clip anchor; not live events",
+      "sample_count": 29,
+      "attack": {
+        "evaluable_samples": 29,
+        "threshold": 0.85,
+        "tp": 0,
+        "fp": 0,
+        "fn": 8,
+        "tn": 21,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "false_positive_fraction_of_negatives": 0.0,
+        "missed_positive_fraction": 1.0,
+        "brier": 0.2758310446188476,
+        "model_head_supported": true,
+        "available_label_count": 29
+      },
+      "threat": {
+        "evaluable_samples": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "false_positive_fraction_of_negatives": null,
+        "missed_positive_fraction": null,
+        "model_head_supported": false,
+        "available_label_count": 21
+      },
+      "tti": {
+        "observed_samples": 0,
+        "censored_or_unsupported_samples": 29,
+        "model_head_supported": false,
+        "mae_ms": null,
+        "p90_absolute_error_ms": null,
+        "signed_bias_ms": null,
+        "nominal_90pct_laplace_interval_coverage": null
+      },
+      "attack_direction": {
+        "observed_trajectory_samples": 0,
+        "model_head_supported": false,
+        "accuracy": null,
+        "semantics": "Visual attack path; this is not a safe Dodge-direction success metric"
+      },
+      "live_false_dodge_rate": null,
+      "live_end_to_end_latency_ms": null,
+      "event_metrics": "Use Evaluation.offline.events with reviewed event intervals and emitted decisions.",
+      "per_boss": {
+        "Gyoubu Masataka Oniwa": {
+          "metric_unit": "reviewed clip anchor; not live events",
+          "sample_count": 29,
+          "attack": {
+            "evaluable_samples": 29,
+            "threshold": 0.85,
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "tn": 21,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "false_positive_fraction_of_negatives": 0.0,
+            "missed_positive_fraction": 1.0,
+            "brier": 0.2758310446188476,
+            "model_head_supported": true,
+            "available_label_count": 29
+          },
+          "threat": {
+            "evaluable_samples": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "false_positive_fraction_of_negatives": null,
+            "missed_positive_fraction": null,
+            "model_head_supported": false,
+            "available_label_count": 21
+          },
+          "tti": {
+            "observed_samples": 0,
+            "censored_or_unsupported_samples": 29,
+            "model_head_supported": false,
+            "mae_ms": null,
+            "p90_absolute_error_ms": null,
+            "signed_bias_ms": null,
+            "nominal_90pct_laplace_interval_coverage": null
+          },
+          "attack_direction": {
+            "observed_trajectory_samples": 0,
+            "model_head_supported": false,
+            "accuracy": null,
+            "semantics": "Visual attack path; this is not a safe Dodge-direction success metric"
+          },
+          "live_false_dodge_rate": null,
+          "live_end_to_end_latency_ms": null,
+          "event_metrics": "Use Evaluation.offline.events with reviewed event intervals and emitted decisions."
+        }
+      },
+      "per_attack_class": {
+        "UNKNOWN": {
+          "metric_unit": "reviewed clip anchor; not live events",
+          "sample_count": 29,
+          "attack": {
+            "evaluable_samples": 29,
+            "threshold": 0.85,
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "tn": 21,
+            "precision": null,
+            "recall": 0.0,
+            "f1": 0.0,
+            "false_positive_fraction_of_negatives": 0.0,
+            "missed_positive_fraction": 1.0,
+            "brier": 0.2758310446188476,
+            "model_head_supported": true,
+            "available_label_count": 29
+          },
+          "threat": {
+            "evaluable_samples": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "false_positive_fraction_of_negatives": null,
+            "missed_positive_fraction": null,
+            "model_head_supported": false,
+            "available_label_count": 21
+          },
+          "tti": {
+            "observed_samples": 0,
+            "censored_or_unsupported_samples": 29,
+            "model_head_supported": false,
+            "mae_ms": null,
+            "p90_absolute_error_ms": null,
+            "signed_bias_ms": null,
+            "nominal_90pct_laplace_interval_coverage": null
+          },
+          "attack_direction": {
+            "observed_trajectory_samples": 0,
+            "model_head_supported": false,
+            "accuracy": null,
+            "semantics": "Visual attack path; this is not a safe Dodge-direction success metric"
+          },
+          "live_false_dodge_rate": null,
+          "live_end_to_end_latency_ms": null,
+          "event_metrics": "Use Evaluation.offline.events with reviewed event intervals and emitted decisions."
+        }
+      }
+    }
+  },
+  "limitations": [
+    "No accepted point body-contact labels; TTI and Auto Dodge unsupported",
+    "Tiny AI visual review; not independent human gold",
+    "8 positive normalized test anchors all missed; includes repeated floor-PTS observations, not8independent attacks",
+    "21 reviewed negative test anchors rejected; no non-threat-minutes Dodge metric",
+    "Source held out from LIVE-only supervised learning and pretraining; original player identities unknown",
+    "No all-boss accuracy or RTX3070/live-game performance established"
+  ]
+}

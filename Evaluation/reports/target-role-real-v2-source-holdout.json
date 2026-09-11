@@ -1,0 +1,45 @@
+{
+  "evaluation": "SMALL_FROZEN_SOURCE_HOLDOUT_NOT_PRODUCTION_ACCEPTANCE",
+  "model_sha256": "4d8de7fcfa7470bf433d3e65f89f87b2f5cbce8838dff445085720f3bf588e65",
+  "annotation_sha256": "1609563efbd5f1d752cfbe7d4df323d804580c9c167f34918fd423bc39a88ae8",
+  "frames": 7,
+  "train_groups": [
+    "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION"
+  ],
+  "test_groups": [
+    "MARKOV_SEKIRO_A7ECDCA8_SESSION"
+  ],
+  "group_overlap": false,
+  "player_disjointness": "UNKNOWN_ORIGINAL_PLAYER_IDENTITIES",
+  "annotation_review": "AI_VISUAL_REVIEW_NOT_INDEPENDENT_HUMAN_GOLD",
+  "thresholds_frozen_from_training_run": {
+    "score": 0.75,
+    "nms_iou": 0.4,
+    "matching_iou": 0.5
+  },
+  "metrics": {
+    "Wolf": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 5,
+      "precision": null,
+      "recall": 0.0,
+      "mean_matched_iou": null
+    },
+    "Enemy": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 5,
+      "precision": null,
+      "recall": 0.0,
+      "mean_matched_iou": null
+    }
+  },
+  "cpu_model_ms_shared_development_host": {
+    "p50": 0.6944599999769707,
+    "p95": 0.7312976995308418,
+    "max": 0.7354319996011327
+  },
+  "limitations": "Seven reviewed frames from one mounted boss session do not establish all-boss generalization, temporal continuity or Dodge success.",
+  "subsequent_usage": "This first check is frozen. After observing its failure, the same frames become development validation for later architecture comparisons, never final-test evidence."
+}

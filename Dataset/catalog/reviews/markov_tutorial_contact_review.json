@@ -1,0 +1,2078 @@
+{
+  "review_schema_version": "1.0",
+  "review_id": "MARKOV_SEKIRO_37B5B86D_CONTACT_REVIEW_2026_09_10",
+  "reviewer": "Codex gameplay_acquisition agent",
+  "reviewer_type": "AI_VISUAL_REVIEW",
+  "independent_human_gold": false,
+  "review_date": "2026-09-10",
+  "source_id": "MARKOV_SEKIRO_37B5B86D",
+  "source_group_id": "MARKOV_SEKIRO_37B5B86D_SESSION",
+  "duplicate_group_id": "MARKOV_SEKIRO_UNKNOWN_PLAYER",
+  "source_sha256": "17382ce410a120475b3f9d809f3e4fa7e9cc6978e4e628ab20da240c595a3dee",
+  "source_pts_sha256": "2e2b3ccec19f8cf68b114bf3b65565071f1d7c2dbe82f933b4c70777cef61deb",
+  "source_relative_path": "data/sources/MARKOV_SEKIRO_37B5B86D/source.mp4",
+  "pts_relative_path": "data/sources/MARKOV_SEKIRO_37B5B86D/source_pts.jsonl",
+  "scope": "Tutorial session only; excluded incidental desktop at 0-260 seconds; sampled scene review plus all successive frames in two candidate strike windows. This is not exhaustive full-session frame review.",
+  "excluded_source_pts_intervals_ms": [
+    [
+      0,
+      260000
+    ]
+  ],
+  "decode": {
+    "opencv_version": "4.12.0",
+    "frame_index_semantics": "zero-based absolute source decode frame",
+    "pts_origin": "source_pts.jsonl, not reconstructed from nominal FPS",
+    "sequential_decode_windows_half_open": [
+      [
+        23970,
+        24267
+      ],
+      [
+        27810,
+        28019
+      ],
+      [
+        24088,
+        24112
+      ],
+      [
+        27892,
+        27916
+      ]
+    ],
+    "visual_review_all_frames_windows_half_open": [
+      [
+        24088,
+        24112
+      ],
+      [
+        27892,
+        27916
+      ]
+    ],
+    "full_scene_sampling": "overview at listed frames; dense scenes every 5 seconds; encounter sheets every 8 source frames",
+    "transforms": "Full frames resized for sheets; strike crops at x450,y230,w900,h820 resized to 630x574 with separate black timestamp border. No color/contrast enhancement, interpolation of time, or synthetic pixels."
+  },
+  "result": {
+    "high_confidence_observed_weapon_body_contacts": 0,
+    "point_tti_targets": 0,
+    "reviewed_attack_candidates_with_unresolved_contact": 2,
+    "contact_target_policy": "Both impact frames/PTS remain null and contact TTI loss must be masked. No inferred impact from sparks, HP, posture, death overlay, or avoidance."
+  },
+  "candidate_events": [
+    {
+      "candidate_id": "MARKOV_37B5_A_OVERHEAD_803",
+      "clip_source_frame_half_open": [
+        24066,
+        24163
+      ],
+      "clip_source_pts_ms": [
+        802200.0,
+        805433.333
+      ],
+      "attacker_description": "Foreground armoured swordsman wearing a broad conical hat. Character name not verified from appearance.",
+      "attack_presence": "VISUALLY_OBSERVED",
+      "attack_type_proposal": "VERTICAL_SLASH",
+      "attacker_identity": "UNKNOWN_TUTORIAL_SWORDSMAN",
+      "phase_anchors": [
+        {
+          "source_frame": 24090,
+          "source_pts_ms": 803000.0,
+          "phase": "ATTACK_WINDUP",
+          "note": "Sword and arms raised overhead while approaching Wolf; this is an observed windup pose, not exact onset.",
+          "is_precise_boundary": false
+        },
+        {
+          "source_frame": 24097,
+          "source_pts_ms": 803233.333,
+          "phase": "ACTIVE_ATTACK",
+          "note": "First inspected lowered/downstroke-followthrough pose after the overhead pose; the blade-to-body intersection is concealed. Exact active onset is unknown.",
+          "is_precise_boundary": false
+        },
+        {
+          "source_frame": 24122,
+          "source_pts_ms": 804066.667,
+          "phase": "UNKNOWN_PHASE",
+          "note": "Attacker has the blade extended low to the left after the downward stroke; recovery boundary cannot be separated confidently from followthrough using this evidence.",
+          "is_precise_boundary": false
+        }
+      ],
+      "windup_start": null,
+      "active_start": null,
+      "recovery_start": null,
+      "impact_frame": null,
+      "impact_pts_ms": null,
+      "estimated_contact_interval_ms": null,
+      "impact_evidence": "OCCLUDED",
+      "contact_tti_loss_mask": false,
+      "safe_direction_loss_mask": false,
+      "rejection_reason": "At frames 24095-24096 the sword is still overhead; frame 24097 already shows the low followthrough pose. At 24098 onward the attacker and foliage cover the blade/Wolf intersection. Orange effects and later Wolf reaction do not establish a visible point contact. Repeated or near-identical visual poses occur at successive CFR timestamps.",
+      "detailed_contact_sheet_paths": [
+        "data/reviews/markov_tutorial_contacts/strike_a_native_1.jpg",
+        "data/reviews/markov_tutorial_contacts/strike_a_native_2.jpg",
+        "data/reviews/markov_tutorial_contacts/strike_a_native_3.jpg"
+      ]
+    },
+    {
+      "candidate_id": "MARKOV_37B5_B_OVERHEAD_930",
+      "clip_source_frame_half_open": [
+        27874,
+        27963
+      ],
+      "clip_source_pts_ms": [
+        929133.333,
+        932100.0
+      ],
+      "attacker_description": "Foreground armoured swordsman wearing a broad conical hat. Character name not verified from appearance.",
+      "attack_presence": "VISUALLY_OBSERVED",
+      "attack_type_proposal": "VERTICAL_SLASH",
+      "attacker_identity": "UNKNOWN_TUTORIAL_SWORDSMAN",
+      "phase_anchors": [
+        {
+          "source_frame": 27895,
+          "source_pts_ms": 929833.333,
+          "phase": "ATTACK_WINDUP",
+          "note": "Sword and hands raised above the head while stepping toward crouched Wolf.",
+          "is_precise_boundary": false
+        },
+        {
+          "source_frame": 27900,
+          "source_pts_ms": 930000.0,
+          "phase": "ACTIVE_ATTACK",
+          "note": "First low forward/downstroke-followthrough pose after frame 27899 overhead pose. Enemy body and foliage obscure the point where the blade would meet Wolf.",
+          "is_precise_boundary": false
+        },
+        {
+          "source_frame": 27922,
+          "source_pts_ms": 930733.333,
+          "phase": "UNKNOWN_PHASE",
+          "note": "Wolf reaction and attacker largely concealed in the grass; no exact recovery boundary accepted.",
+          "is_precise_boundary": false
+        }
+      ],
+      "windup_start": null,
+      "active_start": null,
+      "recovery_start": null,
+      "impact_frame": null,
+      "impact_pts_ms": null,
+      "estimated_contact_interval_ms": null,
+      "impact_evidence": "OCCLUDED",
+      "contact_tti_loss_mask": false,
+      "safe_direction_loss_mask": false,
+      "rejection_reason": "Frames 27896-27899 hold an overhead pose; frame 27900 already shows the low pose. The sword/body intersection is blocked by the foreground attacker, Wolf, and foliage; visible orange sparks at 27904-27911 are insufficient body-contact evidence. The death overlay near 932.8 seconds is not used as an impact label.",
+      "detailed_contact_sheet_paths": [
+        "data/reviews/markov_tutorial_contacts/strike_b_native_1.jpg",
+        "data/reviews/markov_tutorial_contacts/strike_b_native_2.jpg",
+        "data/reviews/markov_tutorial_contacts/strike_b_native_3.jpg"
+      ]
+    }
+  ],
+  "identity_observations": {
+    "hud_encounter_name": "Leader Shigenori Yamauchi",
+    "hud_evidence": [
+      {
+        "source_frame": 24106,
+        "source_pts_ms": 803533.333
+      },
+      {
+        "source_frame": 27914,
+        "source_pts_ms": 930466.667
+      }
+    ],
+    "character_appearance_identity_verified": false,
+    "new_verified_boss_identity_labels": [],
+    "note": "The name is visible on the HUD during hostile encounters, but HUD proximity does not identify the foreground swordsman. Do not convert it into an appearance-verified boss target."
+  },
+  "other_scene_observations": [
+    {
+      "source_frames": [
+        23100
+      ],
+      "observation": "Stealth tutorial modal."
+    },
+    {
+      "source_frames": [
+        24900,
+        25500,
+        26100,
+        26700,
+        27300,
+        28500,
+        29100,
+        29700,
+        30300
+      ],
+      "observation": "Tutorial traversal and grass approaches between repeated encounters; these sparse samples do not establish continuous no-threat intervals."
+    },
+    {
+      "source_frames": [
+        30450,
+        30600,
+        30750
+      ],
+      "observation": "Wolf on a rooftop/outer ledge, then falling beside stone wall, then death overlay. Do not label the death overlay as an enemy attack contact."
+    },
+    {
+      "source_frames": [
+        32250,
+        32400,
+        32850,
+        33000,
+        33150
+      ],
+      "observation": "Wolf traverses a roof, then falls down the stone-wall/cliff side, followed by death overlay. No incoming weapon contact is visible in these samples."
+    },
+    {
+      "source_frames": [
+        33600,
+        33750,
+        34800,
+        34950,
+        35100,
+        35250
+      ],
+      "observation": "Equipment/settings menus, useful as menu examples; no body-contact annotation."
+    }
+  ],
+  "visual_cadence_caveat": "CFR source PTS are unique, but multiple adjacent frames show held/near-identical poses. This review did not certify a per-pixel duplicate-frame count or a distinct-observation frame rate.",
+  "inspected_frame_presentations": 223,
+  "unique_source_frames_inspected": 206,
+  "inspected_frames": [
+    {
+      "source_frame": 8100,
+      "source_pts_ms": 270000.0,
+      "sheet": "overview_1.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 9300,
+      "source_pts_ms": 310000.0,
+      "sheet": "overview_1.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 10500,
+      "source_pts_ms": 350000.0,
+      "sheet": "overview_1.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 11700,
+      "source_pts_ms": 390000.0,
+      "sheet": "overview_1.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 12900,
+      "source_pts_ms": 430000.0,
+      "sheet": "overview_1.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 14100,
+      "source_pts_ms": 470000.0,
+      "sheet": "overview_1.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 15300,
+      "source_pts_ms": 510000.0,
+      "sheet": "overview_1.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 16500,
+      "source_pts_ms": 550000.0,
+      "sheet": "overview_1.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 17700,
+      "source_pts_ms": 590000.0,
+      "sheet": "overview_2.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 18900,
+      "source_pts_ms": 630000.0,
+      "sheet": "overview_2.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 20100,
+      "source_pts_ms": 670000.0,
+      "sheet": "overview_2.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 21300,
+      "source_pts_ms": 710000.0,
+      "sheet": "overview_2.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 22500,
+      "source_pts_ms": 750000.0,
+      "sheet": "overview_2.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 23700,
+      "source_pts_ms": 790000.0,
+      "sheet": "overview_2.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 24900,
+      "source_pts_ms": 830000.0,
+      "sheet": "overview_2.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 26100,
+      "source_pts_ms": 870000.0,
+      "sheet": "overview_2.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 27300,
+      "source_pts_ms": 910000.0,
+      "sheet": "overview_3.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 28500,
+      "source_pts_ms": 950000.0,
+      "sheet": "overview_3.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 29700,
+      "source_pts_ms": 990000.0,
+      "sheet": "overview_3.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 30900,
+      "source_pts_ms": 1030000.0,
+      "sheet": "overview_3.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 32100,
+      "source_pts_ms": 1070000.0,
+      "sheet": "overview_3.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 33300,
+      "source_pts_ms": 1110000.0,
+      "sheet": "overview_3.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 34500,
+      "source_pts_ms": 1150000.0,
+      "sheet": "overview_3.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 35700,
+      "source_pts_ms": 1190000.0,
+      "sheet": "overview_3.jpg",
+      "render": "full frame resized 640x360"
+    },
+    {
+      "source_frame": 23100,
+      "source_pts_ms": 770000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 23250,
+      "source_pts_ms": 775000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 23400,
+      "source_pts_ms": 780000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 23550,
+      "source_pts_ms": 785000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 23700,
+      "source_pts_ms": 790000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 23850,
+      "source_pts_ms": 795000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 24000,
+      "source_pts_ms": 800000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 24150,
+      "source_pts_ms": 805000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 24300,
+      "source_pts_ms": 810000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 24450,
+      "source_pts_ms": 815000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 24600,
+      "source_pts_ms": 820000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 24750,
+      "source_pts_ms": 825000.0,
+      "sheet": "dense_1.jpg"
+    },
+    {
+      "source_frame": 24900,
+      "source_pts_ms": 830000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 25050,
+      "source_pts_ms": 835000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 25200,
+      "source_pts_ms": 840000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 25350,
+      "source_pts_ms": 845000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 25500,
+      "source_pts_ms": 850000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 25650,
+      "source_pts_ms": 855000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 25800,
+      "source_pts_ms": 860000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 25950,
+      "source_pts_ms": 865000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 26100,
+      "source_pts_ms": 870000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 26250,
+      "source_pts_ms": 875000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 26400,
+      "source_pts_ms": 880000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 26550,
+      "source_pts_ms": 885000.0,
+      "sheet": "dense_2.jpg"
+    },
+    {
+      "source_frame": 26700,
+      "source_pts_ms": 890000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 26850,
+      "source_pts_ms": 895000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 27000,
+      "source_pts_ms": 900000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 27150,
+      "source_pts_ms": 905000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 27300,
+      "source_pts_ms": 910000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 27450,
+      "source_pts_ms": 915000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 27600,
+      "source_pts_ms": 920000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 27750,
+      "source_pts_ms": 925000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 27900,
+      "source_pts_ms": 930000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 28050,
+      "source_pts_ms": 935000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 28200,
+      "source_pts_ms": 940000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 28350,
+      "source_pts_ms": 945000.0,
+      "sheet": "dense_3.jpg"
+    },
+    {
+      "source_frame": 28500,
+      "source_pts_ms": 950000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 28650,
+      "source_pts_ms": 955000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 28800,
+      "source_pts_ms": 960000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 29100,
+      "source_pts_ms": 970000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 29250,
+      "source_pts_ms": 975000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 29400,
+      "source_pts_ms": 980000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 29550,
+      "source_pts_ms": 985000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 29700,
+      "source_pts_ms": 990000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 29850,
+      "source_pts_ms": 995000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 30000,
+      "source_pts_ms": 1000000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 30150,
+      "source_pts_ms": 1005000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 30300,
+      "source_pts_ms": 1010000.0,
+      "sheet": "dense_4.jpg"
+    },
+    {
+      "source_frame": 30450,
+      "source_pts_ms": 1015000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 30600,
+      "source_pts_ms": 1020000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 30750,
+      "source_pts_ms": 1025000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 30900,
+      "source_pts_ms": 1030000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 31050,
+      "source_pts_ms": 1035000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 31200,
+      "source_pts_ms": 1040000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 31350,
+      "source_pts_ms": 1045000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 31500,
+      "source_pts_ms": 1050000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 31650,
+      "source_pts_ms": 1055000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 31800,
+      "source_pts_ms": 1060000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 31950,
+      "source_pts_ms": 1065000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 32100,
+      "source_pts_ms": 1070000.0,
+      "sheet": "dense_5.jpg"
+    },
+    {
+      "source_frame": 32250,
+      "source_pts_ms": 1075000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 32400,
+      "source_pts_ms": 1080000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 32550,
+      "source_pts_ms": 1085000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 32700,
+      "source_pts_ms": 1090000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 32850,
+      "source_pts_ms": 1095000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 33000,
+      "source_pts_ms": 1100000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 33150,
+      "source_pts_ms": 1105000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 33300,
+      "source_pts_ms": 1110000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 33450,
+      "source_pts_ms": 1115000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 33600,
+      "source_pts_ms": 1120000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 33750,
+      "source_pts_ms": 1125000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 33900,
+      "source_pts_ms": 1130000.0,
+      "sheet": "dense_6.jpg"
+    },
+    {
+      "source_frame": 34050,
+      "source_pts_ms": 1135000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 34800,
+      "source_pts_ms": 1160000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 34950,
+      "source_pts_ms": 1165000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 35100,
+      "source_pts_ms": 1170000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 35250,
+      "source_pts_ms": 1175000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 35400,
+      "source_pts_ms": 1180000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 35550,
+      "source_pts_ms": 1185000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 35700,
+      "source_pts_ms": 1190000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 35850,
+      "source_pts_ms": 1195000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 36000,
+      "source_pts_ms": 1200000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 36150,
+      "source_pts_ms": 1205000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 36300,
+      "source_pts_ms": 1210000.0,
+      "sheet": "dense_7.jpg"
+    },
+    {
+      "source_frame": 36450,
+      "source_pts_ms": 1215000.0,
+      "sheet": "dense_8.jpg"
+    },
+    {
+      "source_frame": 36600,
+      "source_pts_ms": 1220000.0,
+      "sheet": "dense_8.jpg"
+    },
+    {
+      "source_frame": 23970,
+      "source_pts_ms": 799000.0,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 23978,
+      "source_pts_ms": 799266.667,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 23986,
+      "source_pts_ms": 799533.333,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 23994,
+      "source_pts_ms": 799800.0,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24002,
+      "source_pts_ms": 800066.667,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24010,
+      "source_pts_ms": 800333.333,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24018,
+      "source_pts_ms": 800600.0,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24026,
+      "source_pts_ms": 800866.667,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24034,
+      "source_pts_ms": 801133.333,
+      "sheet": "encounter_a_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24042,
+      "source_pts_ms": 801400.0,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24050,
+      "source_pts_ms": 801666.667,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24058,
+      "source_pts_ms": 801933.333,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24066,
+      "source_pts_ms": 802200.0,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24074,
+      "source_pts_ms": 802466.667,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24082,
+      "source_pts_ms": 802733.333,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24090,
+      "source_pts_ms": 803000.0,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24098,
+      "source_pts_ms": 803266.667,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24106,
+      "source_pts_ms": 803533.333,
+      "sheet": "encounter_a_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24114,
+      "source_pts_ms": 803800.0,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24122,
+      "source_pts_ms": 804066.667,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24130,
+      "source_pts_ms": 804333.333,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24138,
+      "source_pts_ms": 804600.0,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24146,
+      "source_pts_ms": 804866.667,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24154,
+      "source_pts_ms": 805133.333,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24162,
+      "source_pts_ms": 805400.0,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24170,
+      "source_pts_ms": 805666.667,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24178,
+      "source_pts_ms": 805933.333,
+      "sheet": "encounter_a_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24186,
+      "source_pts_ms": 806200.0,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24194,
+      "source_pts_ms": 806466.667,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24202,
+      "source_pts_ms": 806733.333,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24210,
+      "source_pts_ms": 807000.0,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24218,
+      "source_pts_ms": 807266.667,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24226,
+      "source_pts_ms": 807533.333,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24234,
+      "source_pts_ms": 807800.0,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24242,
+      "source_pts_ms": 808066.667,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24250,
+      "source_pts_ms": 808333.333,
+      "sheet": "encounter_a_4.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24258,
+      "source_pts_ms": 808600.0,
+      "sheet": "encounter_a_5.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24266,
+      "source_pts_ms": 808866.667,
+      "sheet": "encounter_a_5.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27810,
+      "source_pts_ms": 927000.0,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27818,
+      "source_pts_ms": 927266.667,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27826,
+      "source_pts_ms": 927533.333,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27834,
+      "source_pts_ms": 927800.0,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27842,
+      "source_pts_ms": 928066.667,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27850,
+      "source_pts_ms": 928333.333,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27858,
+      "source_pts_ms": 928600.0,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27866,
+      "source_pts_ms": 928866.667,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27874,
+      "source_pts_ms": 929133.333,
+      "sheet": "encounter_b_1.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27882,
+      "source_pts_ms": 929400.0,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27890,
+      "source_pts_ms": 929666.667,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27898,
+      "source_pts_ms": 929933.333,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27906,
+      "source_pts_ms": 930200.0,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27914,
+      "source_pts_ms": 930466.667,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27922,
+      "source_pts_ms": 930733.333,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27930,
+      "source_pts_ms": 931000.0,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27938,
+      "source_pts_ms": 931266.667,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27946,
+      "source_pts_ms": 931533.333,
+      "sheet": "encounter_b_2.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27954,
+      "source_pts_ms": 931800.0,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27962,
+      "source_pts_ms": 932066.667,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27970,
+      "source_pts_ms": 932333.333,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27978,
+      "source_pts_ms": 932600.0,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27986,
+      "source_pts_ms": 932866.667,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 27994,
+      "source_pts_ms": 933133.333,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 28002,
+      "source_pts_ms": 933400.0,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 28010,
+      "source_pts_ms": 933666.667,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 28018,
+      "source_pts_ms": 933933.333,
+      "sheet": "encounter_b_3.jpg",
+      "sequential_decode": true
+    },
+    {
+      "source_frame": 24088,
+      "source_pts_ms": 802933.333,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24089,
+      "source_pts_ms": 802966.667,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24090,
+      "source_pts_ms": 803000.0,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24091,
+      "source_pts_ms": 803033.333,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24092,
+      "source_pts_ms": 803066.667,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24093,
+      "source_pts_ms": 803100.0,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24094,
+      "source_pts_ms": 803133.333,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24095,
+      "source_pts_ms": 803166.667,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24096,
+      "source_pts_ms": 803200.0,
+      "sheet": "strike_a_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24097,
+      "source_pts_ms": 803233.333,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24098,
+      "source_pts_ms": 803266.667,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24099,
+      "source_pts_ms": 803300.0,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24100,
+      "source_pts_ms": 803333.333,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24101,
+      "source_pts_ms": 803366.667,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24102,
+      "source_pts_ms": 803400.0,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24103,
+      "source_pts_ms": 803433.333,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24104,
+      "source_pts_ms": 803466.667,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24105,
+      "source_pts_ms": 803500.0,
+      "sheet": "strike_a_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24106,
+      "source_pts_ms": 803533.333,
+      "sheet": "strike_a_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24107,
+      "source_pts_ms": 803566.667,
+      "sheet": "strike_a_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24108,
+      "source_pts_ms": 803600.0,
+      "sheet": "strike_a_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24109,
+      "source_pts_ms": 803633.333,
+      "sheet": "strike_a_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24110,
+      "source_pts_ms": 803666.667,
+      "sheet": "strike_a_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 24111,
+      "source_pts_ms": 803700.0,
+      "sheet": "strike_a_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27892,
+      "source_pts_ms": 929733.333,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27893,
+      "source_pts_ms": 929766.667,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27894,
+      "source_pts_ms": 929800.0,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27895,
+      "source_pts_ms": 929833.333,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27896,
+      "source_pts_ms": 929866.667,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27897,
+      "source_pts_ms": 929900.0,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27898,
+      "source_pts_ms": 929933.333,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27899,
+      "source_pts_ms": 929966.667,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27900,
+      "source_pts_ms": 930000.0,
+      "sheet": "strike_b_native_1.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27901,
+      "source_pts_ms": 930033.333,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27902,
+      "source_pts_ms": 930066.667,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27903,
+      "source_pts_ms": 930100.0,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27904,
+      "source_pts_ms": 930133.333,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27905,
+      "source_pts_ms": 930166.667,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27906,
+      "source_pts_ms": 930200.0,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27907,
+      "source_pts_ms": 930233.333,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27908,
+      "source_pts_ms": 930266.667,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27909,
+      "source_pts_ms": 930300.0,
+      "sheet": "strike_b_native_2.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27910,
+      "source_pts_ms": 930333.333,
+      "sheet": "strike_b_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27911,
+      "source_pts_ms": 930366.667,
+      "sheet": "strike_b_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27912,
+      "source_pts_ms": 930400.0,
+      "sheet": "strike_b_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27913,
+      "source_pts_ms": 930433.333,
+      "sheet": "strike_b_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27914,
+      "source_pts_ms": 930466.667,
+      "sheet": "strike_b_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    },
+    {
+      "source_frame": 27915,
+      "source_pts_ms": 930500.0,
+      "sheet": "strike_b_native_3.jpg",
+      "sequential_decode": true,
+      "crop_xywh": [
+        450,
+        230,
+        900,
+        820
+      ],
+      "crop_render_size": [
+        630,
+        574
+      ]
+    }
+  ],
+  "contact_sheets": [
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/dense_1.jpg",
+      "sha256": "92c8041582a5a0b2f4c1d0030d5ad8a9dffc3dedeb15d6eaf76f4be59b80d749"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/dense_2.jpg",
+      "sha256": "bb8ac7b62d66449203dfe9fb95de7976bbde291d5ac1c4201f349298d32a489a"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/dense_3.jpg",
+      "sha256": "d5475a42cf73c7a7139fbc433a48d4b8bd0fa868b52e42971fc20e5819b2d29e"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/dense_4.jpg",
+      "sha256": "a1132da27d3dacae35785e073ce775b257f59002dc9f01f11fdbf14196ffcfae"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/dense_5.jpg",
+      "sha256": "12b720d05e1f9756b3a3c4a19a34274cf4dfdeb9e2ca57b853697c4b14630210"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/dense_6.jpg",
+      "sha256": "440efc6c241c5b0ec9c5c3df261fde4088a2bf42ebe05b5190925bcfbce9b0ee"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/dense_7.jpg",
+      "sha256": "9bb96957eac04748545eaec9fca60ce869bed699441ae9170061981f04d329ff"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/dense_8.jpg",
+      "sha256": "eb4744f45578a22b0195e009421ff75aba723deec72dc8b95b601c3f320afde4"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/encounter_a_1.jpg",
+      "sha256": "41418dae100059480da73c3c9bb92c143e67c27b7497af63ab43b4793854f0c3"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/encounter_a_2.jpg",
+      "sha256": "49bc2ce397fa2a84d7773283ecf785a8134f490aba876ead5c2511610b1498dc"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/encounter_a_3.jpg",
+      "sha256": "3e6c26f8a8ced3933f79831a9be875f309a995d900872f2100ca818a8c66c1cc"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/encounter_a_4.jpg",
+      "sha256": "61327ab0171329408df21271e6abd8e36d17a6cf1fffc4a390bf53626e22c2ad"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/encounter_a_5.jpg",
+      "sha256": "56088f0771cc48a1363229c445657c0172f89ab908a7e2897ee5a58383c97455"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/encounter_b_1.jpg",
+      "sha256": "f416b2a8fcec5a7ce3b1152f11da4858254fddb5b881a29e232f7c3c112587a7"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/encounter_b_2.jpg",
+      "sha256": "1986f9625cc94c40de91798e77fd0bc3a2b320c4bd1f94f730005ab03ac1670d"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/encounter_b_3.jpg",
+      "sha256": "544998dd9b2c05ebc27248f4224b130b49dcc78ab42f9a1e7513029edbcf77c4"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/overview_1.jpg",
+      "sha256": "68694ad55e5ca77b80159101f849835668f486b03dbed8986f24a0af99fd4a4b"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/overview_2.jpg",
+      "sha256": "db7eb959a89bb6c2a667d3d0fd2f8ccd0116729a40fe2da5b65d77f9072083f2"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/overview_3.jpg",
+      "sha256": "243cd0a7833683896359a5a09091dbd28aecb2341283baff4584c8c42ce56b3f"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/strike_a_native_1.jpg",
+      "sha256": "92d865318eef9953bea7545619aa27d2c7a8a8f9240ae66c3ab55a61c956eb73"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/strike_a_native_2.jpg",
+      "sha256": "51d26f5537b980e83fa5ecd97c63ec230588a720fa1a0a364c23e9524abeec95"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/strike_a_native_3.jpg",
+      "sha256": "534d4f4e44e81a1338ae927f723b71434896fd071dd6616482a849727c555eee"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/strike_b_native_1.jpg",
+      "sha256": "11d0a0c98b19ca9b006a73e3ea9b8dc189592031d70fd58046956d2b8b96ea41"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/strike_b_native_2.jpg",
+      "sha256": "94394e03fe0245294b095df98f9f2af432b7345be57e96c37550c509ed19fb2b"
+    },
+    {
+      "relative_path": "data/reviews/markov_tutorial_contacts/strike_b_native_3.jpg",
+      "sha256": "c0e23b8c5fa30745d253bdcb0dd2f304729b61a970129bc33b0fd525dbb04eb9"
+    }
+  ],
+  "media_distribution": "Contact sheets and original media remain ignored local research artifacts. Permission record does not grant redistribution of Markov footage. Commit this textual evidence index only."
+}

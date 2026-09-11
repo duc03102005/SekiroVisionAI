@@ -2,11 +2,27 @@
 
 Build a Windows native, offline, single-player, vision-led Auto Dodge application for Sekiro. The user supplied the governing brief in `docs/project-brief.md`.
 
-## Milestone gate
+## Current scope: complete Windows application (user override, 2026-09-10)
 
-Read `docs/milestones/milestone-0.md` before application work. Milestone 0 passes only after the six custom skills and selected external skills are reviewed, committed, pushed to the intended GitHub repository, and the remote contents are verified. A local commit or a file backup is insufficient. If that gate is not passed, limit work to skills, their validation, provenance, and setup documentation. Do not create CaptureEngine or other application implementations yet.
+The latest governing attachment is **Complete Application Mode**. Continue on `feature/complete-application`, preserving useful code and all reviewed skills. Parallel implementation is expressly authorized. The final deliverable is a Release x64 `SekiroVisionAI.exe` with its supported production model and runtime dependencies; intermediate CI artifacts are internal validation builds, not a completed Auto Dodge release. Do not ask the user to QA individual capture, hotkey, ROI or model stages. Continue all work possible in the development environment.
 
-After M0 passes, research architecture, record decisions in `docs/adr/`, then implement M1. Follow the milestone order in the brief. Input integration begins at M10 after offline evaluation and threat suppression. Report PASS or FAIL with evidence at each gate; unavailable hardware results remain unmeasured.
+Normal operation must automatically discover Sekiro, load the managed production model, select an available provider and create/follow combat ROI. Keep manual ROI, model selection and heuristic controls in Advanced/Debug. F8 toggles real Auto Dodge; F9 cancels and releases owned keys. UI must distinguish actual gameplay-trained model outputs, provisional visual tracks and unavailable semantic recognition.
+
+Fix freshness at its cause: preserve WGC source QPC timestamps; never re-stamp stale frames or relax age checks to make arming succeed. Production and native prerecorded-video replay must share preprocessing, temporal model/history, threat policy and directional Dodge selection. Replay records simulated dispatch explicitly and scores only observable reviewed labels. All-boss coverage, held-out source/player/boss-family evaluation and meaningful Windows input/package tests remain necessary evidence for claiming the final application works, but do not block development of other components. Autonomous commits and appropriately reviewed/tested merges are authorized.
+
+See `docs/complete-application-status.md` for current implementation and evidence. The earlier scopes below explain history and do not reduce the latest request.
+
+### Previous scope: temporal AI integration
+
+The latest user attachment requests parallel capture-quality, multi-boss source collection, clip mining, annotation, three temporal training baselines and native ONNX integration. Continue from the runnable MVP on `feature/temporal-ai-pipeline`. Keep all reviewed skills intact. No milestone PASS/FAIL or dataset-completeness gate blocks these tracks. See `docs/temporal-ai-scope.md` for the implementation and evidence status.
+
+The primary target is now a genuinely trained temporal attack/threat/TTI model. Retain the CV heuristic as an explicitly selected fallback and mining/debug aid. Never relabel synthetic tests, randomly initialized heads, public reference URLs or unreviewed proposals as trained gameplay evidence. Acquire media only with documented lawful usage; keep unobservable contact and dodge-direction safety unknown. A missing trained model must be visible in the app, without fabricated probability or TTI.
+
+### Existing MVP remains available
+
+The user explicitly removed **all milestone PASS/FAIL progress gates**. Build the vertical slice now: Sekiro HWND capture → combat ROI → motion/CV → temporal threat episode → one Dodge → Shift or direction + Shift. Dataset completeness, formal capture benchmarks, trained models, all-boss coverage and a finished UI are not prerequisites. Keep the existing Agent Skills as technical references; their older milestone, M9/M10, model/TTI-only and offline-evaluation prerequisites are superseded by this instruction.
+
+Heuristic frame differencing, camera compensation, sparse block flow, motion acceleration and causal history are authorized provisional detectors. Their scores are heuristic, not calibrated probabilities or verified enemy/weapon recognition. Connect real Windows SendInput in the MVP. Use configurable thresholds, attack arming, hysteresis, a consumed episode token and cooldown to reduce unwanted Dodge. Record limitations honestly while continuing implementation; a missing benchmark must never block development. See `docs/mvp-scope.md` for the current deliverables. Historical milestone documents record prior work, not current gates.
 
 ## Skill routing
 
@@ -29,7 +45,7 @@ The imported skills are reviewed project copies, not installation of the upstrea
 - False-positive Dodge suppression has priority over recall. Uncertain evidence means abstain.
 - Auto Dodge starts disabled. Focus loss, stale capture, model failure, Stop and emergency disable cancel pending actions and release owned synthetic keys.
 - Keep capture and inference queues bounded. Track frame age and GPU resource ownership. A D3D texture is not an ONNX CUDA tensor.
-- Python is for dataset, annotation, training, evaluation and tooling. Do not choose a final runtime language until the architecture comparison is done.
+- Python is for dataset, annotation, training, evaluation and tooling. The runnable MVP uses the existing C++ Windows runtime; a future UI/model change must preserve the working end-to-end path.
 - Example UI numbers and target FPS/latencies are not measured results. Never synthesize benchmark evidence or label guessed TTI as ground truth.
 
 ## Source control

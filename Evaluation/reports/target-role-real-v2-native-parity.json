@@ -1,0 +1,30 @@
+{
+  "model_sha256": "4d8de7fcfa7470bf433d3e65f89f87b2f5cbce8838dff445085720f3bf588e65",
+  "actual_gameplay_native_parity": [
+    {
+      "source_id": "LIVE_YT_GAMING_SEKIRO_005",
+      "source_frame": 33,
+      "source_sha256": "c2fa4830178ea8b6b8673edbe80d2a25d8c8f092fd35a60170b43ca39cad6bb4",
+      "detections": 3,
+      "preprocessing_max_abs": 1.1920928955078125e-07,
+      "native_python_detections_match": true
+    },
+    {
+      "source_id": "LIVE_YT_GAMING_SEKIRO_005",
+      "source_frame": 99,
+      "source_sha256": "c2fa4830178ea8b6b8673edbe80d2a25d8c8f092fd35a60170b43ca39cad6bb4",
+      "detections": 3,
+      "preprocessing_max_abs": 1.1920928955078125e-07,
+      "native_python_detections_match": true
+    },
+    {
+      "source_id": "LIVE_YT_GAMING_SEKIRO_026",
+      "source_frame": 175,
+      "source_sha256": "802df151d316881bc4ff52404466fd648a2ae4b715c19e6a7d5f657a42f77c5f",
+      "detections": 3,
+      "preprocessing_max_abs": 5.960464477539063e-08,
+      "native_python_detections_match": true
+    }
+  ],
+  "meaning": "Software parity only; not held-out detection accuracy or Dodge success."
+}

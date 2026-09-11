@@ -1,0 +1,76 @@
+name: Windows application and native replay validation
+
+on:
+  push:
+    branches: [main, feature/capture-engine, feature/auto-dodge-mvp, feature/temporal-ai-pipeline, feature/complete-application]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-capture-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-release:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate reviewed skills
+        run: python tools/validate_skills.py
+      - name: Create input-dependent synthetic ONNX contract fixture
+        run: |
+          python -m pip install numpy==2.2.6 onnx==1.18.0 imageio-ffmpeg==0.6.0
+          python tools/make_onnx_test_fixture.py out/testdata/temporal-fixture.onnx
+          python tools/make_onnx_test_fixture.py out/testdata/temporal-v2-fixture.onnx --contract temporal-v2
+          python tools/make_replay_fixture.py out/testdata
+          python -m Training.targets.make_fixture out/testdata/target-fixture.onnx
+          python -m unittest discover -s Tests -p 'capture_trace.py'
+      - name: Configure Windows x64
+        run: cmake --preset windows-x64
+      - name: Record toolchain
+        shell: pwsh
+        run: |
+          cmake --version
+          Get-Content out/build/windows-x64/CMakeCache.txt | Select-String 'CMAKE_CXX_COMPILER:|CMAKE_SYSTEM_VERSION:|CMAKE_GENERATOR_TOOLSET:'
+          Get-ChildItem out/build/windows-x64/CMakeFiles -Recurse -Filter CMakeCXXCompiler.cmake | Get-Content | Select-String 'CMAKE_CXX_COMPILER_VERSION|CMAKE_CXX_COMPILER_ID'
+      - name: Build native Windows capture, ONNX, recording and input
+        run: cmake --build --preset windows-release --parallel
+      - name: Test decisions, GPU color readback, native ORT and WIC recording
+        run: ctest --preset windows-release
+      - name: Launch Windows UI and input watchdog without sending input
+        id: ui-smoke
+        shell: pwsh
+        run: |
+          $appProcess = Start-Process -FilePath out/build/windows-x64/Release/SekiroVisionAI.exe -ArgumentList '--smoke-test' -WindowStyle Hidden -PassThru
+          if (-not $appProcess.WaitForExit(15000)) {
+            Stop-Process -Id $appProcess.Id -Force
+            throw 'Application smoke test did not exit within 15 seconds'
+          }
+          $appProcess.Refresh()
+          if ($appProcess.ExitCode -ne 0) { throw "Application smoke test exit code $($appProcess.ExitCode)" }
+      - name: Package and verify application with system-only PATH
+        shell: pwsh
+        run: ./tools/package_windows.ps1 -SourceSha '${{ github.event.pull_request.head.sha || github.sha }}'
+      - name: Preserve native test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-validation-${{ github.sha }}
+          path: |
+            out/build/windows-x64/Testing/Temporary/
+            out/replay-validation/
+          retention-days: 30
+      - name: Store internal Windows application (not a functional release)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: INTERNAL-SekiroVisionAI-Windows-x64-${{ github.sha }}
+          path: out/package/
+          if-no-files-found: error
+          retention-days: 30
