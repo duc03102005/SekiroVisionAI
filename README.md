@@ -2,17 +2,24 @@
 
 Windows native, offline single-player Auto Dodge for Sekiro: Shadows Die Twice, targeting an NVIDIA RTX 3070.
 
-**Current branch: `feature/temporal-ai-pipeline` (0.3).** The existing native app now has clear color capture/preview, a causal RGB ROI history, ONNX Runtime DirectML/CPU inference, model threat/TTI decisions, real Shift or direction+Shift, and opt-in training sample recording. The earlier CV heuristic remains an explicitly selected fallback. Auto Dodge starts OFF; **F8** toggles in game, **F9** disables/releases, **F10** tests input when enabled, **F7** toggles recording, and **F4/F5/F6** mark samples for review.
+**Current branch: `feature/complete-application` (0.4 development).** The native Windows application builds as `SekiroVisionAI.exe`. It automatically discovers Sekiro, captures full-resolution color frames independently of its smaller preview, and uses a shared native combat pipeline for live capture and prerecorded-video replay. The pipeline connects automatic actor detection/tracking, temporal ONNX inference, threat episodes, directional selection and real Windows input. **F8** toggles Auto Dodge; **F9** cancels and releases owned keys. Manual ROI, heuristic mode, model selection and recording controls are in Advanced/Debug.
 
-**No gameplay-trained AI model is bundled yet.** The 60-source catalog covers all requested boss families as research links; acquired/reviewed gameplay remains 0. Three trainable temporal architectures, clip mining, annotation, supervised/self-supervised training and ONNX export are implemented. Synthetic learning/parity tests are labeled separately and cannot enable model Auto Dodge. This version has not demonstrated reliable model-driven Dodge in the user's Sekiro game.
+**The complete Auto Dodge release is not ready.** Eight actual videos, about 40 minutes, have been acquired with hashes, original timestamps and documented usage. Motion representation, attack-phase and Wolf/enemy models have been trained on real reviewed frames. They remain development candidates: the role and phase models transfer poorly to Gyoubu, and reviewed exact contact/TTI labels remain unavailable. No production model is bundled. The internal Windows package therefore cannot provide the requested normal-mode model-driven Dodge. Synthetic test models never enable it.
 
-The user's 2026-09-10 instructions removed milestone PASS/FAIL development gates and requested parallel dataset/model/capture work. All eight reviewed Agent Skills are preserved. Dataset completion and formal capture benchmarking do not block implementation or early training on a small authorized reviewed set.
+Development continues without milestone approval gates. All eight reviewed Agent Skills are preserved. Missing data and RTX 3070 measurements do not block implementation; they remain limits on claims of all-boss accuracy, timing and live-game success.
+
+- [Current implementation and evidence](docs/complete-application-status.md)
+- [Windows application guide](docs/APPLICATION_README_VI.txt)
+- [Shared native ReplayHarness](ReplayHarness/README.md)
+- [Actual gameplay learning experiments and reproducible commands](Training/REAL_GAMEPLAY_EXPERIMENTS.md)
+- [Actor detector training, native contract and generalization failures](Training/targets/README.md)
+- [Full-quality capture and the remaining GPU transfer work](docs/gpu-input-path.md)
 
 - [Run this Windows version — Vietnamese guide](docs/TEMPORAL_QUICKSTART_VI.md)
 - [Temporal scope: implemented work and actual limitations](docs/temporal-ai-scope.md)
 - [Executed validation and Windows package](docs/temporal-validation.md)
 - [Dataset tools and annotation](DatasetTools/README.md)
-- [Three temporal baselines, training and ONNX export](Training/README.md)
+- [Temporal architectures, training and ONNX export](Training/README.md)
 - [Video source research and acquisition evidence](Dataset/catalog/source_research.md)
 - [Training sample recording format](docs/recording-format.md)
 - [Pinned native dependencies](docs/runtime-dependencies.md)

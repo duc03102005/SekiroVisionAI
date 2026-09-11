@@ -18,7 +18,11 @@ int main(int argc,char** argv){try {
     // 144Hz source must make approximately 30Hz observations, not 36Hz.
     for(int i=0;i<144;++i){frame.sequence=i+1;frame.source_ms=1000+i*(1000.0/144);prediction=model.process(frame,{});
         if(prediction.reason!="MODEL_SAMPLE_INTERVAL")++accepted;
-        if(prediction.valid)require(!prediction.trained&&!prediction.auto_eligible,"Synthetic result cannot enable input");}
+        if(prediction.valid) {
+            require(!prediction.trained&&!prediction.auto_eligible,"Synthetic result cannot enable input");
+            require(!prediction.state_supported&&prediction.state==9,"Unsupported state logits must not look recognized");
+            require(!prediction.class_supported&&prediction.attack_class==13,"Unsupported class logits must not affect Dodge policy");
+        }}
     require(accepted>=29&&accepted<=31,"Persistent sampling grid must retain 30Hz cadence");
     require(model.status().history_size==16,"Temporal history should warm");
     frame.sequence=200;frame.source_ms=4000;prediction=model.process(frame,{});

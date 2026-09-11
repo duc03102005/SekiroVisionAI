@@ -14,6 +14,9 @@ from Training.models import build_model
 from Training.models.temporal import ARCHITECTURES, CausalBlock, CausalAttention, CausalLucasKanade
 from Training.losses.multitask import multitask_loss
 from Training.trainers.smoke import synthetic_batch
+from Training.trainers.pretrain import contrastive_loss
+from Training.datasets.reviewed_intervals import export as export_intervals
+from Training.metrics.quality import summarize_predictions
 from Evaluation.false_positive.mine import review_queue
 from Evaluation.offline.events import evaluate_events
 
@@ -147,6 +150,50 @@ class TrainingContracts(unittest.TestCase):
         model = build_model("cnn_gru", frames=8, width=16, contract="temporal-v1")
         self.assertEqual(len(model(torch.zeros(1, 8, 3, 32, 32))), 7)
         self.assertFalse(any(name.startswith("heads.attack_direction") for name in model.state_dict()))
+
+    def test_temporal_pretraining_does_not_invent_order_for_static_clips(self):
+        model = build_model("optical_flow_fusion", frames=8, width=16)
+        frames = torch.full((2, 8, 3, 32, 32), 0.4)
+        without = contrastive_loss(model, frames, temporal_weight=0)
+        with_order = contrastive_loss(model, frames, temporal_weight=0.25)
+        torch.testing.assert_close(without, with_order)
+
+    def test_reviewed_phase_cores_leave_gap_and_contact_unknown(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            mapping = [{"source_frame": source_frame, "source_pts_ms": source_frame*1000/30,
+                        "duplicated": False} for source_frame in range(90, 141)]
+            (root/"frames.jsonl").write_text("".join(json.dumps(row)+"\n" for row in mapping))
+            clip = {"clip_id": "unit-mapping-fixture", "source_id": "unit-source", "source_group_id": "g",
+                    "player_id": "p", "session_id": "s", "source_sha256": "metadata-test-only",
+                    "source_pts_path": str(root/"frames.jsonl"), "video_path": "not-decoded-by-mapping-test.mp4",
+                    "frame_map_path": str(root/"frames.jsonl"), "fps_num": 30, "fps_den": 1,
+                    "roi": [0, 0, 1, 1]}
+            (root/"clips.jsonl").write_text(json.dumps(clip)+"\n")
+            reviews = []
+            for begin, end, state in ((100, 113, "ATTACK_WINDUP"), (117, 121, "ACTIVE_ATTACK")):
+                reviews.append({"schema": "reviewed-phase-intervals-v1", "review_id": f"test-{begin}",
+                    "source_id": "unit-source", "source_sha256": "metadata-test-only",
+                    "start_source_frame": begin, "end_source_frame": end, "annotation_status": "reviewed",
+                    "reviewer": "unit-test-fixture", "review_method": "SYNTHETIC_METADATA_TEST",
+                    "evidence": "No real media involved in this mapping regression test",
+                    "labels": {"state": state, "attack": True, "threat": None, "tti_ms": None,
+                               "tti_censored": True, "impact_evidence": "OCCLUDED"}})
+            (root/"reviews.jsonl").write_text("".join(json.dumps(row)+"\n" for row in reviews))
+            export_intervals(root/"clips.jsonl", root/"reviews.jsonl", root/"samples.jsonl", frames=16)
+            samples = [json.loads(line) for line in (root/"samples.jsonl").read_text().splitlines()]
+            self.assertEqual({row["source_frame"] for row in samples}, set(range(105, 113))|set(range(117, 121)))
+            self.assertTrue(all(row["labels"]["tti_ms"] is None and row["labels"]["threat"] is None for row in samples))
+
+    def test_unsupported_head_logits_never_become_accuracy_evidence(self):
+        row = {"attack_probability": 0.05, "threat_probability": 0.01,
+               "labels": {"attack": False, "threat": False}}
+        metrics = summarize_predictions([row], supported_heads={"attack_supported": True, "threat_supported": False})
+        self.assertEqual(metrics["attack"]["tn"], 1)
+        self.assertEqual(metrics["threat"]["available_label_count"], 1)
+        self.assertEqual(metrics["threat"]["evaluable_samples"], 0)
+        self.assertIsNone(metrics["threat"]["false_positive_fraction_of_negatives"])
+        self.assertFalse(metrics["per_boss"]["UNKNOWN"]["threat"]["model_head_supported"])
 
     def test_hard_negative_and_pseudolabels_never_become_accepted(self):
         rows = [{"source_id": "a", "clip_id": "b", "attack_probability": 0.95,

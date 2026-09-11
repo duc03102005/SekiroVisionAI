@@ -30,9 +30,26 @@ def digest(path):
     return value.hexdigest()
 
 
+def provenance_keys(source):
+    """Conservative source/player/uploader/session identity constraints."""
+    return {key+":"+str(source[key]) for key in (
+        "source_id", "source_group_id", "player_id", "creator", "session_id", "duplicate_group_id", "sha256")
+        if source.get(key)}
+
+
+def validate_group_splits(rows, sources):
+    assigned = {}
+    for row in rows:
+        for identity in provenance_keys(sources[row["source_id"]]):
+            previous = assigned.setdefault(identity, row["split"])
+            if previous != row["split"]:
+                raise ValueError("Source/player/creator/session leakage across target partitions")
+
+
 def load_data(annotations, manifest):
     rows = [json.loads(line) for line in Path(annotations).read_text().splitlines() if line.strip()]
     sources = {row["source_id"]: row for row in map(json.loads, Path(manifest).read_text().splitlines())}
+    validate_group_splits(rows, sources)
     found = {}
     for source_id in sorted({row["source_id"] for row in rows}):
         source = sources[source_id]
@@ -51,7 +68,17 @@ def load_data(annotations, manifest):
         decoder = cv2.VideoCapture(str(path))
         try:
             index = 0
+            ordered_pts = [pts[i] for i in sorted(pts)]
+            intervals = np.diff(ordered_pts)
+            verified_cfr = len(intervals)>1 and float(np.max(intervals)-np.min(intervals))<0.01
             while selected:
+                wanted = min(selected)
+                if verified_cfr and wanted-index>300:
+                    # Indexed seeking is used only when the original PTS index
+                    # proves constant cadence; VFR sources remain sequential.
+                    if not decoder.set(cv2.CAP_PROP_POS_FRAMES, wanted) or abs(decoder.get(cv2.CAP_PROP_POS_FRAMES)-wanted)>0.1:
+                        raise ValueError("CFR source frame seek was not acknowledged")
+                    index = wanted
                 ok, bgr = decoder.read()
                 if not ok:
                     break
@@ -72,6 +99,8 @@ def load_data(annotations, manifest):
         group_splits.setdefault(row["source_group_id"], set()).add(row["split"])
         if row.get("schema_version") != "target-roles-v1" or row.get("review_method") != "AI_VISUAL_REVIEW":
             raise ValueError("Unsupported or unreviewed target annotations")
+        if any(not isinstance(row["role_reviewed"].get(role), bool) for role in ROLES):
+            raise ValueError("Role review masks must be explicit booleans")
         for obj in row["objects"]:
             if obj["role"] not in ROLES or len(obj["box"]) != 4:
                 raise ValueError("Invalid target role or box")
@@ -189,9 +218,10 @@ def evaluate(session, rows, images):
                     metrics[role]["fp"] += 1
             metrics[role]["fn"] += len(truth)-len(used)
     for value in metrics.values():
-        value["precision"] = value["tp"]/max(1, value["tp"]+value["fp"])
-        value["recall"] = value["tp"]/max(1, value["tp"]+value["fn"])
-        value["mean_matched_iou"] = float(np.mean(value.pop("matched_iou"))) if value["tp"] else None
+        value["precision"] = value["tp"]/(value["tp"]+value["fp"]) if value["tp"]+value["fp"] else None
+        value["recall"] = value["tp"]/(value["tp"]+value["fn"]) if value["tp"]+value["fn"] else None
+        overlaps = value.pop("matched_iou")
+        value["mean_matched_iou"] = float(np.mean(overlaps)) if overlaps else None
     return metrics, predictions, {"p50": float(np.median(timings)), "p95": float(np.percentile(timings, 95)), "max": max(timings)}
 
 
@@ -204,6 +234,7 @@ def main():
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument("--seed", type=int, default=3070)
     parser.add_argument("--resume", help="Previously trained state_dict checkpoint; its hash is recorded")
+    parser.add_argument("--backbone", choices=["tiny", "imagenet-mnv3"], default="tiny")
     args = parser.parse_args()
     output = Path(args.output)
     if output.exists():
@@ -214,14 +245,28 @@ def main():
     train_indices = [i for i, row in enumerate(rows) if row["split"] == "train"]
     if not train_indices:
         raise ValueError("No actual reviewed training frames")
-    model = RoleDetector().train()
+    code_hashes = {str(path): digest(path) for path in sorted(Path("Training/targets").glob("*.py"))}
+    if args.backbone == "imagenet-mnv3":
+        from Training.targets.pretrained import PretrainedRoleDetector
+        model = PretrainedRoleDetector(pretrained=not bool(args.resume)).train()
+    else:
+        model = RoleDetector().train()
     if args.resume:
         model.load_state_dict(torch.load(args.resume, map_location="cpu", weights_only=True)["state_dict"])
-    learning_rate = 0.0008 if args.resume else 0.002
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.0001)
+    learning_rate = 0.001 if args.backbone == "imagenet-mnv3" else 0.0008 if args.resume else 0.002
+    if args.backbone == "imagenet-mnv3":
+        backbone_ids = {id(p) for p in model.backbone.parameters()}
+        groups = [{"params": list(model.backbone.parameters()), "lr_factor": 0.03},
+                  {"params": [p for p in model.parameters() if id(p) not in backbone_ids], "lr_factor": 1.0}]
+    else:
+        groups = [{"params": list(model.parameters()), "lr_factor": 1.0}]
+    optimizer = torch.optim.AdamW(groups, lr=learning_rate, weight_decay=0.0001)
     losses = []
     start = time.perf_counter()
     for step in range(args.steps):
+        if args.backbone == "imagenet-mnv3":
+            for parameter in model.backbone.parameters():
+                parameter.requires_grad_(step>=200)
         # Balance visible hostile actors against traversal/NPC negatives without
         # promoting masked or unknown enemy observations to positive labels.
         enemy_indices = [i for i in train_indices if rows[i]["role_reviewed"]["Enemy"] and
@@ -229,7 +274,7 @@ def main():
         indices = random.choices(train_indices, k=args.batch//2) + random.choices(enemy_indices or train_indices, k=args.batch-args.batch//2)
         batch, heat, boxes, positive, reviewed = transformed_batch(images, rows, indices, augment=step%4!=0)
         for group in optimizer.param_groups:
-            group["lr"] = learning_rate*(0.25+0.75*(1+math.cos(math.pi*step/args.steps))/2)
+            group["lr"] = learning_rate*group["lr_factor"]*(0.25+0.75*(1+math.cos(math.pi*step/args.steps))/2)
         optimizer.zero_grad(set_to_none=True)
         loss = loss_value(model.raw(batch), heat, boxes, positive, reviewed)
         if not torch.isfinite(loss):
@@ -239,14 +284,15 @@ def main():
         if step % 100 == 0 or step+1 == args.steps:
             print(json.dumps({"step": step+1, "loss": losses[-1], "elapsed_s": round(time.perf_counter()-start, 1)}), flush=True)
     model.eval()
-    torch.save({"state_dict": model.state_dict(), "architecture": "dense-visible-role-v1", "seed": args.seed}, output/"targets.pt")
+    architecture = "mobilenet-v3-small-fpn-roles-v1" if args.backbone == "imagenet-mnv3" else "dense-visible-role-v1"
+    torch.save({"state_dict": model.state_dict(), "architecture": architecture, "seed": args.seed}, output/"targets.pt")
     onnx_path = output/"targets.onnx"
     torch.onnx.export(model, images[:1], onnx_path, input_names=["frame"], output_names=["scores", "boxes"],
                       opset_version=17, dynamo=False)
     graph = onnx.load(onnx_path)
     metadata = {
         "svai.contract": "target-roles-v1", "svai.preprocess": "full-rgb-bilinear-v1",
-        "svai.model_version": "visible-roles-experimental-v1", "svai.roles": "Wolf,Enemy",
+        "svai.model_version": "roles-"+args.backbone+"-"+digest(output/"targets.pt")[:12], "svai.roles": "Wolf,Enemy",
         "svai.training_status": "trained", "svai.semantic_supported": "true",
         "svai.production_validated": "false", "svai.score_threshold": "0.75",
         "svai.annotation_sha256": digest(args.annotations), "svai.annotation_review": "AI_VISUAL_REVIEW_NOT_HUMAN_GOLD",
@@ -276,6 +322,8 @@ def main():
               "annotation_sha256": digest(args.annotations), "onnx_sha256": digest(onnx_path),
               "training_steps": args.steps, "seed": args.seed, "parameters": sum(p.numel() for p in model.parameters()),
               "resume_checkpoint_sha256": digest(args.resume) if args.resume else None,
+              "architecture": architecture, "training_code_sha256": code_hashes,
+              "pretrained_weights": "TorchVision MobileNet_V3_Small_Weights.IMAGENET1K_V1" if args.backbone == "imagenet-mnv3" else None,
               "loss_first_50_mean": float(np.mean(losses[:50])), "loss_last_50_mean": float(np.mean(losses[-50:])),
               "fitting_metrics_only": metrics, "held_out_accuracy": None,
               "no_held_out_reason": "Initial review is one conservatively grouped source family; no random-frame leakage split was made.",

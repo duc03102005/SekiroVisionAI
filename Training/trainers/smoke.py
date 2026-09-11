@@ -73,6 +73,7 @@ def run(output, steps=80, frames=16, size=320):
                   "training_status": "synthetic_smoke", "trained_samples": 0, "supervised_epochs": 0,
                   "attack_supported": False, "threat_supported": False, "tti_supported": False,
                   "attack_direction_supported": False,
+                  "state_supported": False, "class_supported": False, "observed_direction_supported": False,
                   "auto_eligible": False, "sample_interval_ms": 1000/30,
                   "preprocess": "roi-rgb-bilinear-v1", "seed": 23,
                   "fixture_training_size": 64, "deployment_parity_size": size}

@@ -62,7 +62,7 @@ public:
         if(now<out.earliest_send_ms)return no("armed","WAIT_TTI_WINDOW");
         if(now-last_action_<c.cooldown_ms)return no("armed","COOLDOWN");
         // This first policy has no learned safe-direction evidence for sweeps/AOE.
-        if(p.attack_class==4 || p.attack_class==11)return no("armed","UNSUPPORTED_DODGE_GEOMETRY");
+        if(p.class_supported&&(p.attack_class==4 || p.attack_class==11))return no("armed","UNSUPPORTED_DODGE_GEOMETRY");
         consumed_=true;ready_=false;last_action_=now;out.decision.trigger=true;
         out.decision.state="consumed";out.decision.reason="MODEL_THREAT_READY";return out;
     }

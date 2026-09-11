@@ -102,8 +102,10 @@ def label_support(rows):
     directions = [r.get("labels", {}).get("attack_direction") for r in rows
                   if r.get("labels", {}).get("attack_direction_evidence") == "VISUAL_TRAJECTORY" and
                   r.get("labels", {}).get("attack_direction_space") == "SCREEN_WITH_WOLF_REFERENCE"]
+    categorical = {key: {name: sum(r.get("labels", {}).get(key) == name for r in rows) for name in names}
+                   for key, names in (("state", STATES), ("class", CLASSES), ("direction", DIRECTIONS))}
     return {"attack": binary("attack"), "threat": binary("threat"), "observed_tti": timing,
-            "attack_direction": {name: directions.count(name) for name in ATTACK_DIRECTIONS[:-1]}}
+            "attack_direction": {name: directions.count(name) for name in ATTACK_DIRECTIONS[:-1]}, **categorical}
 
 
 def train(args):
@@ -172,6 +174,9 @@ def train(args):
               "tti_supported": support["observed_tti"] > 0,
               "attack_supported": support["attack"]["positive"] > 0 and support["attack"]["negative"] > 0,
               "attack_direction_supported": sum(value > 0 for value in support["attack_direction"].values()) >= 2,
+              "state_supported": sum(support["state"].values()) > 0,
+              "class_supported": sum(support["class"].values()) > 0,
+              "observed_direction_supported": sum(support["direction"].values()) > 0,
               "states": STATES, "classes": CLASSES, "directions": DIRECTIONS,
               "direction_semantics": "observed screen action, not a safe action recommendation",
               "attack_directions": ATTACK_DIRECTIONS,
@@ -194,7 +199,7 @@ def train(args):
                "training_seconds": time.perf_counter()-started, "history": history,
                "environment": {"platform": platform.platform(), "torch": str(torch.__version__),
                                "device": str(device), "cpu_threads": args.cpu_threads},
-               "validation": summarize_predictions(validation_rows, thresholds)}
+               "validation": summarize_predictions(validation_rows, thresholds, supported_heads=config)}
     # Training/validation review queues can feed the next iteration. Held-out
     # test sources stay frozen; mining them into the next train set would require
     # explicitly retiring that test and creating a new independent holdout.
@@ -205,7 +210,7 @@ def train(args):
     for split in ("test", "heldout_boss"):
         data = datasets.get(split)
         predictions = evaluate(model, data, device) if data is not None and len(data) else []
-        metrics[split] = summarize_predictions(predictions, thresholds)
+        metrics[split] = summarize_predictions(predictions, thresholds, supported_heads=config)
         (args.output/f"{split}_predictions.jsonl").write_text("".join(json.dumps(row)+"\n" for row in predictions), encoding="utf-8")
     torch.save({"model": model.cpu().state_dict(), "config": config}, args.output/"checkpoint.pt")
     write_json(args.output/"config.json", config)

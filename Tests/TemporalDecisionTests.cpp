@@ -6,7 +6,7 @@ using namespace sekiro;
 void require(bool condition,const char* message){if(!condition)throw std::runtime_error(message);}
 ModelPrediction sample(double source,double attack=0.95,double threat=0.95,double tti=110) {
     ModelPrediction p;p.valid=p.trained=p.attack_supported=p.threat_supported=p.tti_supported=p.auto_eligible=true;
-    p.source_ms=source;p.attack_probability=attack;p.threat_probability=threat;p.tti_ms=tti;p.tti_uncertainty_ms=5;p.attack_class=0;return p;
+    p.source_ms=source;p.attack_probability=attack;p.threat_probability=threat;p.tti_ms=tti;p.tti_uncertainty_ms=5;p.attack_class=0;p.class_supported=true;return p;
 }
 void quiet(TemporalDecision& engine,double begin,const TemporalPolicy& policy){for(int i=0;i<8;++i)engine.step(sample(begin+i*33,0.01,0.01),begin+i*33+10,policy);}
 int main(){try {
@@ -36,6 +36,9 @@ int main(){try {
         if(mode==6)p.attack_class=4;
         require(!engine.step(p,1343,policy).decision.trigger,"Unsupported/untrained/late/uncertain/sweep must abstain");
     }
+    engine.reset();quiet(engine,1000,policy);engine.step(sample(1300),1310,policy);
+    auto unsupported_class=sample(1333);unsupported_class.class_supported=false;unsupported_class.attack_class=4;
+    require(engine.step(unsupported_class,1343,policy).decision.trigger,"Unsupported class logits cannot control the temporal action policy");
     engine.reset();quiet(engine,1000,policy);engine.step(sample(1300),1310,policy);
     require(!engine.step(sample(1300),1343,policy).decision.trigger,"Duplicate timestamps never advance dwell");
     require(!engine.step(sample(1800),1810,policy).decision.trigger,"Gap requires new quiet; no immediate action");

@@ -12,7 +12,7 @@ DirectionChoice choose_dodge_direction(const TargetState& targets,const ModelPre
         out.valid=true;out.direction=static_cast<DodgeDirection>(debug_override);
         out.reason="DEBUG_DIRECTION_OVERRIDE";return out;
     }
-    if(prediction.valid&&(prediction.attack_class==4||prediction.attack_class==11)) {
+    if(prediction.valid&&prediction.class_supported&&(prediction.attack_class==4||prediction.attack_class==11)) {
         out.reason="NO_DODGE_GEOMETRY_FOR_SWEEP_OR_AOE";return out;
     }
     if(prediction.valid&&prediction.attack_direction_supported&&prediction.attack_direction==6&&
@@ -56,12 +56,15 @@ struct CombatPipeline::Impl {
     ThreatTracker heuristic;
     std::uint64_t revision{},generation{},sequence{},lineage{};
     double source_ms{};
+    int manual_identity_samples{};
+    bool manual_identity_changed{};
     bool have_frame{},have_revision{};
     ModelPrediction last_prediction;
     void cancel() {temporal.cancel_candidate();heuristic.reset();}
     void reset() {
         targets.reset();motion.reset();model.reset_history();temporal.reset();heuristic.reset();
-        generation=sequence=lineage=0;source_ms=0;have_frame=false;have_revision=false;last_prediction={};
+        generation=sequence=lineage=0;source_ms=0;manual_identity_samples=0;manual_identity_changed=false;
+        have_frame=false;have_revision=false;last_prediction={};
     }
 };
 CombatPipeline::CombatPipeline():impl_(std::make_unique<Impl>()){}
@@ -107,12 +110,25 @@ CombatResult CombatPipeline::process(const SmallFrame& frame,const CombatContext
     out.roi=config.automatic_roi?out.targets.roi:config.roi;
     if(!out.roi.valid())return stop("INVALID_COMBAT_ROI");
     if(state.lineage&&out.targets.track_lineage&&state.lineage!=out.targets.track_lineage) {
-        state.model.reset_history();state.motion.reset();state.cancel();state.last_prediction={};
+        state.cancel();
+        if(config.automatic_roi) {
+            // Automatic crops belong to their actor association. Keep this
+            // conservative reset even when a weak detector repeatedly switches.
+            state.model.reset_history();state.motion.reset();state.last_prediction={};
+        } else {
+            // A Debug fixed image crop is independent of automatic assignments;
+            // retain its actual image history so diagnostics can run inference.
+            // Its actions still wait until every temporal sample can postdate
+            // the changed identity. This does not authorize mixed-actor input.
+            state.manual_identity_samples=0;state.manual_identity_changed=true;
+        }
     }
     if(out.targets.track_lineage)state.lineage=out.targets.track_lineage;
     out.motion=state.motion.process(frame,out.roi);
     if(config.detector_mode==1) {
         out.prediction=state.model.process(frame,out.roi);out.new_prediction=out.prediction.valid;
+        if(state.manual_identity_changed&&(out.new_prediction||out.prediction.reason=="TEMPORAL_WARMUP"))
+            state.manual_identity_samples=std::min(state.manual_identity_samples+1,state.model.status().temporal_length);
         if(out.prediction.reason=="MODEL_SAMPLE_INTERVAL"&&state.last_prediction.valid)out.prediction=state.last_prediction;
         else state.last_prediction=out.prediction;
     } else {
@@ -128,6 +144,8 @@ CombatResult CombatPipeline::process(const SmallFrame& frame,const CombatContext
     else if(!std::isfinite(out.decision_ms)||out.decision_ms<frame.source_ms||
             out.decision_ms-frame.source_ms>(config.detector_mode?config.temporal.max_age_ms:config.heuristic.max_age_ms))blocked="STALE_FRAME";
     else if(config.require_semantic_targets&&(!out.targets.identity_certain||!out.targets.wolf.valid||!out.targets.enemy.valid))blocked="TARGET_IDENTITY_UNCONFIRMED";
+    else if(!config.automatic_roi&&state.manual_identity_changed&&
+            state.manual_identity_samples<out.model.temporal_length)blocked="TARGET_IDENTITY_HISTORY_SETTLING";
     else if(!out.direction.valid)blocked=out.direction.reason;
     if(blocked) {state.cancel();out.action.decision.reason=blocked;out.action.decision.state="OBSERVING";return out;}
     if(config.detector_mode==1) {

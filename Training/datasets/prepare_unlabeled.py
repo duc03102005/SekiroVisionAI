@@ -39,10 +39,23 @@ def prepare(sources_path, output, frames=16, stride=8, max_width=1280, selection
             continue
         # End just after the final observation, without extending source video.
         start, end = timeline[0]["source_pts_ms"], timeline[-1]["source_pts_ms"] + 0.001
+        exclusions_path = media.parent/"training-exclusions.json"
+        selection_rules = json.loads(exclusions_path.read_text(encoding="utf-8")) if exclusions_path.exists() else {}
+        if selection_rules and selection_rules.get("source_id") != source["source_id"]:
+            raise ValueError("Training-exclusion provenance belongs to a different source")
         spans = [row for row in selections if row["source_id"] == source["source_id"]] if selections is not None else [
             {"start_ms": start, "end_ms": end}]
+        allowed_spans = selection_rules.get("candidate_intervals_ms", [])
+        if selections is None and allowed_spans:
+            spans = [{"start_ms": a, "end_ms": b} for a, b in allowed_spans]
         if any(not start <= row["start_ms"] < row["end_ms"] <= end for row in spans):
             raise ValueError("Selected interval must lie inside the actual source PTS extent")
+        if any(max(row["start_ms"], a) < min(row["end_ms"], b)
+               for row in spans for a, b in selection_rules.get("intervals_ms", [])):
+            raise ValueError("Selection intersects excluded non-game footage")
+        if allowed_spans and any(not any(a <= row["start_ms"] < row["end_ms"] <= b for a, b in allowed_spans)
+                                 for row in spans):
+            raise ValueError("Unreviewed long source must stay inside selected clean gameplay candidates")
         candidates = [Candidate(row["start_ms"], row["end_ms"], row["start_ms"], "UNLABELED_REPRESENTATION", 0) for row in spans]
         records = extract_candidates(source, candidates,
                                      output/"clips", fps=30, max_width=max_width, roi=(0.10, 0.05, 0.90, 0.87))
@@ -58,6 +71,9 @@ def prepare(sources_path, output, frames=16, stride=8, max_width=1280, selection
                     "duplicate_group_id": source.get("duplicate_group_id"), "boss": source.get("boss", "UNKNOWN"),
                     "source_sha256": source["sha256"], "source_url": source.get("url", ""),
                     "usage_basis": source["usage_basis"], "usage_evidence": source["usage_evidence"],
+                    "training_exclusions": selection_rules,
+                    "training_exclusions_sha256": sha256_file(exclusions_path) if selection_rules else None,
+                    "selected_gameplay_interval_ms": [clip["source_start_ms"], clip["source_end_ms"]],
                     "video_path": clip["video_path"], "fps": 30, "roi": clip["roi"],
                     "start_frame": anchor+1-frames, "end_frame": anchor+1,
                     "source_pts_ms": mapping[anchor]["source_pts_ms"],

@@ -25,12 +25,24 @@ def main() -> None:
             quadrant = (2 if y >= height // 2 else 0) + (1 if x >= width // 2 else 0)
             offset = (y * width + x) * 4
             pixels[offset : offset + 4] = bytes(colors[quadrant])
+    indexed_pixels = []
+    for index in range(frames):
+        current = bytearray(pixels)
+        # Five image-space bits identify the exact source frame through H.264
+        # B-frame reordering. Large monochrome squares tolerate lossy encoding.
+        for bit in range(5):
+            value = 255 if index & (1 << bit) else 0
+            for y in range(8, 24):
+                for x in range(8 + bit * 16, 24 + bit * 16):
+                    offset = (y * width + x) * 4
+                    current[offset : offset + 4] = bytes((value, value, value, 255))
+        indexed_pixels.append(bytes(current))
     raw_path = args.directory / "replay-fixture.svr"
     with raw_path.open("wb") as stream:
         stream.write(b"SVRRAW01" + struct.pack("<II", width, height))
         for index in range(frames):
             stream.write(struct.pack("<qQQ", round(index * 10_000_000 / fps), 1, index + 1))
-            stream.write(pixels)
+            stream.write(indexed_pixels[index])
     outputs = [raw_path]
     version = None
     if not args.svr_only:
@@ -43,9 +55,9 @@ def main() -> None:
         command = [executable, "-nostdin", "-v", "error", "-y", "-f", "rawvideo", "-pixel_format", "bgra",
                    "-video_size", f"{width}x{height}", "-framerate", str(fps), "-i", "pipe:0", "-an",
                    "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(mp4)]
-        subprocess.run(command, input=bytes(pixels) * frames, check=True, timeout=60, capture_output=True)
+        subprocess.run(command, input=b"".join(indexed_pixels), check=True, timeout=60, capture_output=True)
         outputs.append(mp4)
-    manifest = {"synthetic_only": True, "gameplay_frames": 0, "description": "Static RGB quadrants for native decoder orientation/color/PTS tests",
+    manifest = {"synthetic_only": True, "gameplay_frames": 0, "description": "RGB quadrants and five-bit original-frame index for native decoder orientation/color/PTS/B-frame ordering tests",
                 "width": width, "height": height, "frames": frames, "fps": fps, "ffmpeg": version,
                 "files": {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in outputs}}
     (args.directory / "replay-fixture.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")

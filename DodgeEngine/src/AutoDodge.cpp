@@ -29,13 +29,14 @@ MvpConfig read_config(const std::filesystem::path& path) {
     c.threat.cooldown_ms=std::clamp(get(L"detector",L"cooldown_ms",650),250,2000);
     c.threat.quiet_ms=std::clamp(get(L"detector",L"quiet_ms",220),120,1000);
     c.direction=std::clamp(get(L"input",L"direction",-1),-1,4);c.hold_ms=std::clamp(get(L"input",L"hold_ms",45),30,90);
-    c.automatic_roi=get(L"roi",L"automatic",1)!=0;
+    // Debug source/model/provider/ROI selection is session-local. A portable
+    // application may move between launches, so never restore its old absolute
+    // bundled path or silently resume a previously selected heuristic detector.
+    c.automatic_roi=true;
     c.preset=std::clamp(get(L"detector",L"preset",1),0,2);
-    c.detector_mode=std::clamp(get(L"model",L"mode",1),0,1);
-    std::wstring model_path(32768,L'\0');
-    model_path.resize(GetPrivateProfileStringW(L"model",L"path",bundled_model_path().c_str(),model_path.data(),static_cast<DWORD>(model_path.size()),path.c_str()));
-    c.model_path=model_path;
-    const int provider=get(L"model",L"provider",3);c.provider=provider==3?"Auto":provider==2?"CUDA":provider==1?"DirectML":"CPU";
+    c.detector_mode=1;
+    c.model_path=bundled_model_path();
+    c.provider="Auto";
     c.temporal.attack_threshold=std::clamp(get(L"model",L"attack_percent",80),50,99)/100.0;
     c.temporal.threat_threshold=std::clamp(get(L"model",L"threat_percent",80),50,99)/100.0;
     c.temporal.exit_threshold=std::clamp(get(L"model",L"exit_percent",35),5,45)/100.0;
@@ -53,7 +54,7 @@ bool save_config(const std::filesystem::path& path,const MvpConfig& c) {
         if(!WritePrivateProfileStringW(section,key,std::to_wstring(value).c_str(),path.c_str()))ok=false;
     };
     put(L"meta",L"schema_version",3);
-    put(L"roi",L"automatic",c.automatic_roi?1:0);
+    put(L"roi",L"automatic",1);
     put(L"roi",L"left_per_mille",static_cast<int>(std::lround(c.roi.left*1000)));put(L"roi",L"top_per_mille",static_cast<int>(std::lround(c.roi.top*1000)));
     put(L"roi",L"right_per_mille",static_cast<int>(std::lround(c.roi.right*1000)));put(L"roi",L"bottom_per_mille",static_cast<int>(std::lround(c.roi.bottom*1000)));
     put(L"detector",L"enter_percent",static_cast<int>(std::lround(c.threat.enter_score*100)));
@@ -62,8 +63,10 @@ bool save_config(const std::filesystem::path& path,const MvpConfig& c) {
     put(L"detector",L"arming_ms",static_cast<int>(c.threat.dwell_ms));put(L"detector",L"cooldown_ms",static_cast<int>(c.threat.cooldown_ms));
     put(L"detector",L"quiet_ms",static_cast<int>(c.threat.quiet_ms));put(L"detector",L"preset",c.preset);
     put(L"input",L"direction",c.direction);put(L"input",L"hold_ms",c.hold_ms);
-    put(L"model",L"mode",c.detector_mode);put(L"model",L"provider",c.provider=="Auto"?3:c.provider=="CUDA"?2:c.provider=="DirectML"?1:0);
-    if(!WritePrivateProfileStringW(L"model",L"path",c.model_path.c_str(),path.c_str()))ok=false;
+    put(L"model",L"mode",1);put(L"model",L"provider",3);
+    // Delete legacy/debug absolute paths. Recompute the managed path from the
+    // running executable on every launch while preserving input/threshold prefs.
+    if(!WritePrivateProfileStringW(L"model",L"path",nullptr,path.c_str()))ok=false;
     put(L"model",L"attack_percent",static_cast<int>(std::lround(c.temporal.attack_threshold*100)));
     put(L"model",L"threat_percent",static_cast<int>(std::lround(c.temporal.threat_threshold*100)));
     put(L"model",L"exit_percent",static_cast<int>(std::lround(c.temporal.exit_threshold*100)));

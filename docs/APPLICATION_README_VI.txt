@@ -1,36 +1,47 @@
-SekiroVisionAI - ban phat trien noi bo
+SekiroVisionAI — bản phát triển nội bộ
 
-TRANG THAI
-Chua phai ban Auto Dodge hoan chinh. Xem build-manifest.json va
-Models/production/manifest.json de biet model thuc su da duoc dong goi hay chua.
-Khong dung model synthetic/contract-test de cho phep Auto Dodge.
+TRẠNG THÁI
+Chưa phải bản Auto Dodge hoàn chỉnh. Gói hiện tại chưa kèm model production,
+nên Auto Dodge bằng temporal AI chưa khả dụng trong chế độ thông thường.
+Các model train từ video thật vẫn là ứng viên nghiên cứu: chưa hỗ trợ
+threat/TTI và chưa nhận diện boss đủ tốt. Model synthetic không được phép
+kích hoạt Auto Dodge.
 
-KHOI DONG UNG DUNG WINDOWS
-1. Giai nen toan bo thu muc, giu cac DLL canh SekiroVisionAI.exe.
-2. Mo Sekiro. Mo SekiroVisionAI.exe bang double-click.
-3. Bam Start. Ung dung tu tim sekiro.exe va tao ROI tu dong.
-4. Khi model du dieu kien, bam Auto Dodge roi quay ve game, hoac bam F8 trong game.
-5. F8 bat/tat. F9 tat khan cap va nha cac phim do ung dung dang giu.
-6. Stop dung capture va Auto Dodge. Alt-tab/focus loss cung tat Auto Dodge.
+KHỞI ĐỘNG ỨNG DỤNG WINDOWS
+1. Giải nén toàn bộ thư mục, giữ các DLL cạnh SekiroVisionAI.exe.
+2. Mở Sekiro rồi mở SekiroVisionAI.exe bằng double-click.
+3. Bấm Start. Ứng dụng tự tìm sekiro.exe và bắt đầu capture.
+4. Với model đủ điều kiện, bấm Auto Dodge rồi quay lại game, hoặc bấm F8.
+5. F8 bật/tắt Auto Dodge. F9 tắt khẩn cấp và nhả phím do ứng dụng giữ.
+6. Stop dừng capture và Auto Dodge. Mất focus game cũng tắt Auto Dodge.
 
-Khong can Python, terminal, Visual Studio, CMake hay CUDA Toolkit de khoi dong.
-Runtime DLL da kem theo. Khong xoa/le ra rieng file EXE.
-Full quality AI frame va preview mau co duong rieng; provider va frame age
-duoc hien theo so do thuc te. Debug cho phep xem chi tiet, ROI thu cong,
-model khac va heuristic CV. Heuristic khong phai temporal AI da train.
+Không cần Python, terminal, Visual Studio, CMake hay CUDA Toolkit để mở app.
+Runtime DLL đã kèm theo; không tách riêng EXE khỏi thư mục.
+Mỗi lần mở, app chọn model quản lý tại Models/production cạnh EXE hiện tại,
+provider Auto và ROI tự động. Cài đặt model/ROI/CV trong Advanced/Debug chỉ
+áp dụng cho phiên hiện tại. App luôn khởi động với Auto Dodge OFF.
+
+Frame màu ở độ phân giải nguồn dành cho AI được giữ riêng với preview nhỏ.
+Provider và frame age hiển thị theo số đo thực tế. Chế độ CV heuristic nằm
+trong Advanced/Debug và được ghi rõ trên màn hình; điểm CV không phải xác
+suất từ model AI. Hiện chưa có bằng chứng tự né thành công trong Sekiro.
 
 LOG
-Log JSONL tai %LocalAppData%/SekiroVisionAI/logs.
-THREAT_STATE / THREAT_READY: trang thai va quyet dinh threat.
-DODGE_REQUEST / DODGE_SENT: yeu cau va input da duoc Windows chap nhan.
-SendInput thanh cong chua phai bang chung Sekiro da ne thanh cong.
+Log JSONL tại %LocalAppData%/SekiroVisionAI/logs.
+THREAT_STATE / THREAT_READY: trạng thái và quyết định threat.
+DODGE_REQUEST / DODGE_SENT: yêu cầu và input đã được Windows chấp nhận.
+SendInput thành công chưa chứng minh nhân vật đã né tránh đòn đánh.
 
-KIEM THU NOI BO
-ReplayHarness.exe dung cung native CombatPipeline voi ung dung.
-Replay khong gui phim Windows. Trace ghi SIMULATED_INPUT_ACCEPTED.
-Huong dan day du trong ReplayHarness/README.md tren repository.
+REPLAY NỘI BỘ
+ReplayHarness.exe dùng cùng native CombatPipeline với ứng dụng.
+Replay không gửi phím Windows; trace ghi SIMULATED_INPUT_ACCEPTED.
+Số frame đã đọc, số inference thực sự chạy và số frame xác nhận mục tiêu
+được ghi riêng. Replay với ROI Debug không chứng minh ROI tự động hoạt động.
+Hướng dẫn kỹ thuật: ReplayHarness/README.md trong repository.
 
-GIOI HAN CHUA DUOC XAC NHAN
-Chua co ket qua tren RTX 3070 khi Sekiro dang render; khong suy ra tu CI.
-Theo doi chuyen dong tam thoi khong phai nhan dien semantic Wolf/boss.
-Bao phu boss, TTI va false Dodge phai duoc do tren gameplay co nhan phu hop.
+GIỚI HẠN CÒN LẠI
+Chưa có model threat/TTI, detector đủ rộng cho các boss hoặc số đo false
+Dodge trên gameplay độc lập. Chưa có phép đo khi Sekiro đang render trên
+RTX 3070. Đường capture AI hiện còn readback qua CPU; chưa phải zero-copy.
+Xem build-manifest.json và Models/production/manifest.json trong gói để biết
+chính xác trạng thái build và model đi kèm.

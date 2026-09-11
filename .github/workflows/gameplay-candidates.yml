@@ -1,0 +1,100 @@
+name: Real gameplay learning and Windows native replay
+
+on:
+  push:
+    branches: [feature/complete-application]
+    paths:
+      - '.github/workflows/gameplay-candidates.yml'
+      - 'Training/trainers/real_phase_seed.py'
+      - 'Training/configs/combat-review-intervals-v1.jsonl'
+      - 'Dataset/annotations/target-role-review-v1.jsonl'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gameplay-candidates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-video-training:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install developer video/training tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
+          .venv/bin/python -m pip install -r requirements-training.txt
+      - name: Acquire six actual licensed Sekiro videos with SHA256 and PTS verification
+        run: |
+          .venv/bin/python -m DatasetTools.downloader.acquire_catalog \
+            --source-id LIVE_YT_GAMING_SEKIRO_005 \
+            --source-id LIVE_YT_GAMING_SEKIRO_016 \
+            --source-id LIVE_YT_GAMING_SEKIRO_019 \
+            --source-id LIVE_YT_GAMING_SEKIRO_023 \
+            --source-id LIVE_YT_GAMING_SEKIRO_026 \
+            --source-id LIVE_YT_GAMING_SEKIRO_029
+      - name: Train actual motion representation and reviewed attack phases
+        run: .venv/bin/python -m Training.trainers.real_phase_seed data/source_manifest.jsonl artifacts/real-phase-seed --pretrain-epochs 2 --phase-epochs 3
+      - name: Train visible Wolf and enemy roles from reviewed original frames
+        run: .venv/bin/python -m Training.targets.train --sources data/source_manifest.jsonl --output artifacts/target-candidate --steps 1400
+      - name: Prepare immutable model candidates and a licensed real replay excerpt
+        run: |
+          .venv/bin/python tools/package_gameplay_candidates.py artifacts/real-phase-seed artifacts/target-candidate artifacts/gameplay-candidates data/source_manifest.jsonl
+      - name: Preserve development candidates and actual training evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: GAMEPLAY-CANDIDATES-NOT-PRODUCTION-${{ github.sha }}
+          path: artifacts/gameplay-candidates/
+          if-no-files-found: error
+          retention-days: 30
+
+  native-windows-replay:
+    needs: real-video-training
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: GAMEPLAY-CANDIDATES-NOT-PRODUCTION-${{ github.sha }}
+          path: out/gameplay-candidates
+      - name: Compile the actual Windows application and replay
+        run: |
+          cmake --preset windows-x64
+          cmake --build --preset windows-release --parallel
+      - name: Run real learned models on real gameplay through the native production pipeline
+        shell: pwsh
+        run: |
+          & out/build/windows-x64/Release/TargetDetectorTests.exe out/gameplay-candidates/targets.onnx
+          if ($LASTEXITCODE -ne 0) { throw 'Native learned target model contract failed' }
+          & out/build/windows-x64/Release/ReplayHarness.exe --video out/gameplay-candidates/real-sekiro-excerpt.mp4 --model out/gameplay-candidates/model.onnx --target-model out/gameplay-candidates/targets.onnx --provider CPU --out-dir out/real-native-replay/automatic
+          if ($LASTEXITCODE -ne 0) { throw 'Actual native gameplay replay failed' }
+          $report = Get-Content out/real-native-replay/automatic/run.json -Raw | ConvertFrom-Json
+          if (-not $report.gameplay_trained -or $report.processed_frames -lt 10) { throw 'Replay did not process a real learned model' }
+          if ($report.auto_eligible -or $report.real_os_input -or $report.simulated_input_accepted -ne 0) { throw 'Unsupported TTI/threat candidate was incorrectly permitted to Dodge' }
+          # A weak actor model may repeatedly lose the target and reset causal
+          # history. Preserve that automatic-mode failure; loading metadata is
+          # not evidence that temporal inference actually executed.
+          & out/build/windows-x64/Release/ReplayHarness.exe --video out/gameplay-candidates/real-sekiro-excerpt.mp4 --model out/gameplay-candidates/model.onnx --target-model out/gameplay-candidates/targets.onnx --provider CPU --roi '0.28,0.12,0.72,0.61' --out-dir out/real-native-replay/manual-roi-diagnostic
+          if ($LASTEXITCODE -ne 0) { throw 'Diagnostic temporal replay failed' }
+          $diagnostic = Get-Content out/real-native-replay/manual-roi-diagnostic/run.json -Raw | ConvertFrom-Json
+          if ($diagnostic.new_temporal_predictions -lt 1) { throw 'Real temporal inference did not execute' }
+          if ($diagnostic.auto_eligible -or $diagnostic.real_os_input -or $diagnostic.simulated_input_accepted -ne 0) { throw 'Diagnostic replay incorrectly permitted Dodge' }
+      - name: Preserve actual native replay trace and model evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: REAL-GAMEPLAY-NATIVE-REPLAY-${{ github.sha }}
+          path: out/real-native-replay/
+          if-no-files-found: warn
+          retention-days: 30

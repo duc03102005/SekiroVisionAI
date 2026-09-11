@@ -85,7 +85,8 @@ void acceptance(const Temporary& temp) {
 }
 ModelPrediction prediction(double source,double probability=0.95) {
     ModelPrediction out;out.valid=out.trained=out.attack_supported=out.threat_supported=out.tti_supported=out.auto_eligible=true;
-    out.source_ms=source;out.attack_probability=out.threat_probability=probability;out.tti_ms=110;out.tti_uncertainty_ms=5;out.attack_class=0;return out;
+    out.source_ms=source;out.attack_probability=out.threat_probability=probability;out.tti_ms=110;out.tti_uncertainty_ms=5;out.attack_class=0;
+    out.class_supported=true;return out;
 }
 void policy_and_direction() {
     TemporalPolicy policy;TemporalDecision engine;
@@ -100,6 +101,8 @@ void policy_and_direction() {
     targets.escape.right={true,0.8,0.9};const auto chosen=choose_dodge_direction(targets,p,false);
     require(chosen.valid&&chosen.geometry_verified&&chosen.direction==DodgeDirection::Right,"Shared chooser must use verified escape evidence");
     p.attack_class=4;require(!choose_dodge_direction(targets,p,true).valid,"Sweep must not select a spurious safe side");
+    p.class_supported=false;
+    require(choose_dodge_direction(targets,p,false).valid,"Unsupported class logits cannot control the shared direction policy");
 }
 SmallFrame color_frame(double source,std::uint64_t sequence) {
     auto color=std::make_shared<ColorFrame>();color->width=64;color->height=48;color->stride=256;color->bgra.resize(64*48*4);
@@ -139,6 +142,25 @@ void shared_model(const std::filesystem::path& fixture) {
     require(!result.request_dodge&&std::string(result.action.decision.reason)=="STALE_FRAME","3000 ms stale input must remain stale");
     result=pipeline.process(frame,context,[&]{return frame.source_ms+10;});
     require(!result.request_dodge&&std::string(result.action.decision.reason)=="OUT_OF_ORDER","Duplicate source must not advance dwell");
+
+    // Fixed-crop diagnostics must still execute the temporal model when an
+    // unrelated automatic assignment changes. Actions keep identity guards.
+    pipeline.configure(config);reference.load(fixture,"CPU");std::uint64_t prior_lineage=0;int changes=0,inferences=0;
+    for(std::uint64_t i=0;i<32;++i) {
+        const auto fixed=color_frame(3000+static_cast<double>(i)*35,i+1);
+        const std::array<TargetDetection,2> detections{{
+            {TargetRole::Enemy,{0.32,0.20,0.52,0.55},0.95,fixed.source_ms,fixed.sequence,1,i/3+1,true},
+            {TargetRole::Wolf,{0.55,0.58,0.72,0.86},0.95,fixed.source_ms,fixed.sequence,1,999,true}}};
+        const auto observed=pipeline.process(fixed,context,[&]{return fixed.source_ms+10;},detections);
+        const auto expected=reference.process(fixed,config.roi);
+        if(prior_lineage&&observed.targets.track_lineage&&prior_lineage!=observed.targets.track_lineage)++changes;
+        if(observed.targets.track_lineage)prior_lineage=observed.targets.track_lineage;
+        require(observed.model.history_size==reference.status().history_size,"Automatic target churn erased fixed-crop diagnostic history");
+        require(observed.prediction.valid==expected.valid,"Fixed-crop diagnostic model execution diverged under target churn");
+        if(observed.new_prediction)++inferences;
+        require(!observed.request_dodge,"Target churn or synthetic diagnostic model must not authorize an action");
+    }
+    require(changes>=2&&inferences>0,"Target churn regression did not exercise association changes and actual model inference");
 }
 #ifdef _WIN32
 void native_mp4(const std::filesystem::path& path) {
@@ -156,6 +178,13 @@ void native_mp4(const std::filesystem::path& path) {
             for(int channel=0;channel<3;++channel)require(std::abs(int(pixel[channel])-colors[quadrant][channel])<=12,"Native H264 decoding changed color channel or vertical orientation");
             require(pixel[3]==255,"Decoded RGB32 must normalize alpha to opaque");
         }
+        int decoded_index=0;
+        for(int bit=0;bit<5;++bit) {
+            const auto* pixel=frame.color->bgra.data()+16*frame.color->stride+(16+bit*16)*4;
+            if(pixel[0]>127&&pixel[1]>127&&pixel[2]>127)decoded_index|=1<<bit;
+        }
+        if(decoded_index!=count)throw std::runtime_error("Native H264 decoded wrong original-frame identity: expected="+
+            std::to_string(count)+" observed="+std::to_string(decoded_index)+" pts_ms="+std::to_string(frame.pts_ms));
         ++count;
     }
     std::ostringstream detail;
@@ -163,7 +192,14 @@ void native_mp4(const std::filesystem::path& path) {
           <<" span_ms="<<previous-first<<" source_sha256="<<sha256_file(path)<<" pts_ms=[";
     for(std::size_t i=0;i<timestamps.size();++i){if(i)detail<<',';detail<<timestamps[i];}detail<<']';
     std::cout<<detail.str()<<'\n';
-    if(count!=30||std::abs(previous-966.6667)>=0.2)throw std::runtime_error("Native H264 frame count or source PTS changed: "+detail.str());
+    require(count==30,"Native H264 lost or duplicated original frames");
+    // Source Reader's presentation clock need not begin at zero (the Windows
+    // H.264 fixture was observed to start at 133.333 ms with all 30 frames).
+    // Replay uses the same explicit first-PTS origin. Do not rewrite the native
+    // decoder timestamps; verify every interval and original image identity.
+    for(std::size_t i=0;i<timestamps.size();++i)
+        if(std::abs((timestamps[i]-first)-static_cast<double>(i)*1000/30)>=0.2)
+            throw std::runtime_error("Native H264 source PTS interval changed: "+detail.str());
 }
 #endif
 }

@@ -9,7 +9,7 @@
 namespace sekiro::replay {
 struct VideoFrame {
     std::shared_ptr<const ColorFrame> color;
-    double pts_ms{};
+    double pts_ms{}; // Preserved decoder presentation clock; not assumed zero-based.
     std::uint64_t sequence{}, generation{1};
 };
 class VideoReader {

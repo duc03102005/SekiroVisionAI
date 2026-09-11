@@ -208,6 +208,9 @@ void TemporalModel::load(const std::filesystem::path& path,const std::string& pr
         m.info.tti_supported=m.info.trained && metadata(meta,"svai.tti_supported")=="true";
         m.info.attack_direction_supported=m.info.trained && contract=="temporal-v2" &&
             metadata(meta,"svai.attack_direction_supported")=="true";
+        m.info.state_supported=m.info.trained && metadata(meta,"svai.state_supported")=="true";
+        m.info.class_supported=m.info.trained && metadata(meta,"svai.class_supported")=="true";
+        m.info.observed_direction_supported=m.info.trained && metadata(meta,"svai.observed_direction_supported")=="true";
         if(m.info.attack_direction_supported &&
            metadata(meta,"svai.attack_direction_semantics")!="visual_trajectory_screen_with_wolf_reference")
             throw std::runtime_error("Incompatible attack trajectory coordinate semantics");
@@ -246,6 +249,8 @@ ModelPrediction TemporalModel::process(const SmallFrame& frame,const CombatRoi& 
     out.attack_supported=m.info.attack_supported;out.auto_eligible=m.info.auto_eligible;
     out.threat_supported=m.info.threat_supported;out.tti_supported=m.info.tti_supported;out.reason=m.info.reason;
     out.attack_direction_supported=m.info.attack_direction_supported;
+    out.state_supported=m.info.state_supported;out.class_supported=m.info.class_supported;
+    out.observed_direction_supported=m.info.observed_direction_supported;
     if(!m.session)return out;
     if(!frame.color){out.reason="NO_COLOR_MODEL_INPUT";return out;}
     if(!std::isfinite(frame.source_ms)||frame.source_ms<=0){out.reason="INVALID_SOURCE_TIME";return out;}
@@ -276,7 +281,9 @@ ModelPrediction TemporalModel::process(const SmallFrame& frame,const CombatRoi& 
         out.attack_probability=results[0].GetTensorData<float>()[0];out.threat_probability=results[1].GetTensorData<float>()[0];
         out.tti_ms=results[2].GetTensorData<float>()[0];out.tti_uncertainty_ms=results[3].GetTensorData<float>()[0];
         auto best=[&](std::size_t i){const auto* values=results[i].GetTensorData<float>();return static_cast<int>(std::max_element(values,values+output_sizes[i])-values);};
-        out.state=best(4);out.attack_class=best(5);out.observed_direction=best(6);
+        if(out.state_supported)out.state=best(4);
+        if(out.class_supported)out.attack_class=best(5);
+        if(out.observed_direction_supported)out.observed_direction=best(6);
         if(out.attack_direction_supported) {
             out.attack_direction=best(7);
             const float* logits=results[7].GetTensorData<float>();

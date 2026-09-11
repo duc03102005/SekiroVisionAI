@@ -1,0 +1,64 @@
+{
+  "deployment_status": "EXPERIMENTAL_NOT_PRODUCTION_VALIDATED",
+  "trained_on_actual_gameplay": true,
+  "source_groups": [
+    "LIVE_YT_GAMING_SEKIRO_UNKNOWN_SESSION"
+  ],
+  "reviewed_frames": 41,
+  "annotation_method": "AI_VISUAL_REVIEW_NOT_INDEPENDENT_HUMAN_GOLD",
+  "source_commit": "488f1d0a6065e5a36e172d429633329544e88ff8",
+  "annotation_sha256": "83f2ca2cd98e1fee72ad8597c09cd27ba51bdc515ddfd38e480dec11c94b94d3",
+  "onnx_sha256": "4d8de7fcfa7470bf433d3e65f89f87b2f5cbce8838dff445085720f3bf588e65",
+  "training_steps": 2600,
+  "seed": 3070,
+  "parameters": 26802,
+  "resume_checkpoint_sha256": "738e5486a95966c124fdc5f131c549c66e82867a0418d21af318e59933efc757",
+  "loss_first_50_mean": 0.798511683344841,
+  "loss_last_50_mean": 0.2408785132318735,
+  "fitting_metrics_only": {
+    "Wolf": {
+      "tp": 33,
+      "fp": 0,
+      "fn": 5,
+      "precision": 1.0,
+      "recall": 0.868421052631579,
+      "mean_matched_iou": 0.8613771742487171
+    },
+    "Enemy": {
+      "tp": 26,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "mean_matched_iou": 0.8576698719663453
+    }
+  },
+  "held_out_accuracy": null,
+  "no_held_out_reason": "Initial review is one conservatively grouped source family; no random-frame leakage split was made.",
+  "cpu_model_ms_shared_development_host": {
+    "p50": 0.681703999362071,
+    "p95": 0.83406300018396,
+    "max": 0.8919299998524366
+  },
+  "pytorch_ort_parity_max_abs": [
+    1.0132789611816406e-06,
+    3.2782554626464844e-07,
+    4.917383193969727e-07
+  ],
+  "training_seconds": 289.2497694579997,
+  "versions": {
+    "torch": "2.8.0+cpu",
+    "onnxruntime": "1.22.1"
+  },
+  "thresholds": {
+    "score": 0.75,
+    "nms_iou": 0.4,
+    "matching_iou": 0.5
+  },
+  "limitations": [
+    "No all-boss coverage",
+    "No independent human ground truth",
+    "No RTX 3070 live-game benchmark",
+    "Scores uncalibrated"
+  ]
+}

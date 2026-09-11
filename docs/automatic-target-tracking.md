@@ -14,11 +14,13 @@ sequence and source timestamp. `semantic_supported` must be explicitly true
 only when a trained detector supports that role. Generic `person` detections,
 motion blobs and untrained model outputs are not Wolf or enemy annotations.
 
-This change supplies the tracking and detector integration contract; it does
-**not** ship trained Wolf/enemy detection weights or demonstrate all-boss
-recognition. Callers must not manufacture semantic detections from the fallback
-ROI. A production semantic detector still needs licensed training data, weights,
-export/runtime integration and held-out gameplay evaluation.
+The native `TargetDetection` runtime now supplies model observations, and
+`Training/targets` trains/export candidates from acquired gameplay with explicit
+AI-reviewed role boxes. The compact candidate does not generalize to the first
+Gyoubu source check; no current evidence demonstrates all-boss recognition.
+Callers must not manufacture semantic detections from the fallback ROI. See
+`Training/targets/README.md` for actual training, native parity and failure
+evidence. The tracker itself does not embed model weights.
 
 Only observations from the exact current generation and sequence are accepted;
 their timestamp must agree within 0.5 ms. A sparse or asynchronous detector must

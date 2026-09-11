@@ -73,6 +73,7 @@ def main():
               "model_version": args.output.name, "training_status": "self_supervised", "auto_eligible": False,
               "attack_supported": False, "threat_supported": False, "tti_supported": False,
               "attack_direction_supported": False,
+              "state_supported": False, "class_supported": False, "observed_direction_supported": False,
               "trained_samples": 0, "supervised_epochs": 0,
               "pretraining_temporal_weight": args.temporal_weight}
     config["code_provenance"] = code_provenance()
@@ -87,8 +88,12 @@ def main():
                "manifest_sha256": sha256(args.manifest),
                "source_groups": sorted({r.get("source_group_id", r["source_id"]) for r in data.rows}),
                "source_provenance": {r["source_id"]: {key: r.get(key) for key in
-                    ("source_sha256", "source_url", "source_group_id", "player_id", "session_id", "usage_basis", "usage_evidence")}
+                    ("source_sha256", "source_url", "source_group_id", "player_id", "session_id", "usage_basis", "usage_evidence",
+                     "training_exclusions", "training_exclusions_sha256")}
                     for r in data.rows},
+               "selected_gameplay_intervals": {source: sorted({tuple(r["selected_gameplay_interval_ms"]) for r in data.rows
+                    if r["source_id"] == source and r.get("selected_gameplay_interval_ms")})
+                    for source in sorted({r["source_id"] for r in data.rows})},
                "holdout_claim": "Pretraining exposure only; no attack labels or independent generalization test"})
     (args.output/"git_commit.txt").write_text(git_commit()+"\n", encoding="utf-8")
 

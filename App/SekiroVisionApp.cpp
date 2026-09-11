@@ -95,6 +95,7 @@ public:
     }
     void update(){
         const double now=qpc_ms();auto cap=capture.snapshot();const auto old_color=display_frame();latest=dodge.snapshot();const auto shown=display_frame();
+        const bool cv_mode=dodge.config().detector_mode==0;
         if(!cap.active&&now-last_discovery>=1500){discover();last_discovery=now;}
         if(shown&&(!old_color||old_color->width!=shown->width||old_color->height!=shown->height))layout();
         if(smoke&&!closing&&now-launched>3000){
@@ -111,13 +112,17 @@ public:
         text<<L"Game: "<<(game.hwnd?L"Sekiro detected":L"Waiting for Sekiro")
             <<L"\r\nCapture: "<<state_name(cap.state)<<L"   "<<number(cap.delivered_fps)<<L" FPS delivered"
             <<L"\r\nGPU: "<<cap.adapter
-            <<L"\r\nModel: "<<(latest.model.loaded?wide(latest.model.version):L"unavailable")
-            <<L"\r\nProvider: "<<wide(latest.model.provider)
+            <<L"\r\nDetector: "<<(cv_mode?L"CV heuristic (Debug)":latest.model.loaded?L"Temporal model":L"Temporal model unavailable")
+            <<L"\r\nModel: "<<(cv_mode?L"not in use":latest.model.loaded?wide(latest.model.version):L"unavailable")
+            <<L"\r\nProvider: "<<(cv_mode?L"not in use":wide(latest.model.provider))
             <<L"\r\nAuto Dodge: "<<(latest.input.enabled?L"ON":latest.input.arm_pending?L"pending game focus":L"OFF")
             <<L"\r\n"<<wide(latest.input.reason)
             <<L"\r\n\r\nTarget: "<<wide(latest.target_status);
         const auto& prediction=latest.prediction;
-        if(prediction.valid&&prediction.trained&&prediction.attack_supported&&fresh_at(prediction.source_ms,now,120)){
+        if(cv_mode){
+            text<<L"\r\nCV motion score / quality: "<<number(latest.motion.score,3)<<L" / "<<number(latest.motion.confidence,3)
+                <<L"\r\nAttack probability / TTI: unavailable (CV heuristic)";
+        }else if(prediction.valid&&prediction.trained&&prediction.attack_supported&&fresh_at(prediction.source_ms,now,120)){
             text<<L"\r\nAttack: "<<wide(attack_classes[prediction.attack_class])<<L" / "<<wide(movement_states[prediction.state])
                 <<L"\r\nAttack / threat scores: "<<number(prediction.attack_probability,3)<<L" / "<<(prediction.threat_supported?number(prediction.threat_probability,3):L"unavailable");
             if(prediction.tti_supported)text<<L"\r\nTTI now: "<<number(prediction.tti_ms-(now-prediction.source_ms),0)<<L" +/- "<<number(prediction.tti_uncertainty_ms,0)<<L" ms";
@@ -158,7 +163,10 @@ public:
             SelectObject(dc,old_brush);SelectObject(dc,old_pen);DeleteObject(pen);
         }
         RECT note=preview;note.top=preview.bottom+px(10);note.bottom=note.top+px(42);
-        DrawTextW(dc,L"F8 toggles Auto Dodge in Sekiro. F9 immediately stops it.\r\nAutomatic actions require a supported gameplay model.",-1,&note,DT_LEFT|DT_WORDBREAK);
+        const auto readiness=config.detector_mode==0?L"Debug CV heuristic active; scores are not model probabilities.":
+            latest.input.detector_ready?L"Arming requires game foreground and fresh capture.":L"Auto Dodge unavailable: gameplay model missing or unsupported.";
+        const auto note_text=std::wstring(L"F8 toggles Auto Dodge in Sekiro. F9 immediately stops it.\r\n")+readiness;
+        DrawTextW(dc,note_text.c_str(),-1,&note,DT_LEFT|DT_WORDBREAK);
         SelectObject(dc,old_font);EndPaint(window,&ps);
     }
     POINT bound(POINT p)const{p.x=std::clamp(p.x,preview.left,preview.right);p.y=std::clamp(p.y,preview.top,preview.bottom);return p;}

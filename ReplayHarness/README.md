@@ -31,7 +31,10 @@ Windows editions lacking Media Foundation/codecs report the native error.
 
 ## Time and output contract
 
-Original media PTS are recorded. Replay time zero is the first decoded PTS; an
+Decoder presentation timestamps are preserved and the first decoder PTS is
+recorded. Media Foundation and FFprobe can expose different constant clock
+origins for the same frame; frame zero, then the preserved relative intervals,
+defines the annotation timeline. Replay time zero is the first decoded PTS; an
 internal monotonic origin of 1000 ms permits the same positive-time contracts as
 live QPC. A bounded latest-frame mailbox replaces frames that arrive while
 inference is busy. Future frames do not enter model history early.
@@ -122,10 +125,17 @@ The little-endian fixture format is `SVRRAW01`, `uint32 width,height`, then repe
 The stream has no invented duration or inferred frame timestamps.
 
 `tools/make_replay_fixture.py out/testdata` generates declared synthetic RGB
-quadrants as both `.svr` and H.264 MP4. Native tests check real MP4 decode, color
-channels/orientation, PTS, identical model preprocessing/history, non-gameplay
+quadrants with a five-bit original-frame index as both `.svr` and H.264 MP4.
+Native tests check real MP4 decode, color channels/orientation, exact original
+frame order through H.264 reordering, every relative PTS, identical model
+preprocessing/history, non-gameplay
 model rejection, cancellation/duplicate suppression, source staleness and
-five-way acceptance. These are software/codec tests, not gameplay measurements.
+five-way acceptance. The decoder's original presentation clock is preserved;
+it need not begin at zero. [Windows CI run 34543602025](https://github.com/duc03102005/SekiroVisionAI/actions/runs/34543602025)
+observed all 30 frames, first PTS 133.333 ms, last PTS 1100 ms and the expected
+966.667 ms span. This evidence invalidated an earlier test's zero-origin
+assumption. No decoder timestamp was changed to repair that test. These are
+software/codec tests, not gameplay measurements.
 
 Microsoft references: [Source Reader processing](https://learn.microsoft.com/en-us/windows/win32/medfound/processing-media-data-with-the-source-reader),
 [Lock2D row orientation](https://learn.microsoft.com/en-us/windows/win32/api/mfobjects/nf-mfobjects-imf2dbuffer-lock2d),

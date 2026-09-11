@@ -95,15 +95,17 @@ int run(const std::vector<std::filesystem::path>& args) {
     std::ofstream trace(opt.output/"trace.jsonl");if(!trace)throw std::runtime_error("Cannot write replay trace");
     trace.imbue(std::locale::classic());trace<<std::setprecision(12);
     trace<<"{\"event\":\"REPLAY_BEGIN\",\"contract\":\"svai-shared-native-replay-v1\",\"source_sha256\":"<<json_string(video_hash)
-       <<",\"model_sha256\":"<<json_string(model_hash)<<",\"first_original_pts_ms\":"<<first_pts
+       <<",\"model_sha256\":"<<json_string(model_hash)<<",\"first_decoder_pts_ms\":"<<first_pts
        <<",\"target_model_sha256\":"<<json_string(target_hash)
+       <<",\"decoder_clock\":"<<json_string(opt.video.extension()==".svr"?"PRESERVED_SVR_PTS":"WINDOWS_MEDIA_FOUNDATION_PRESENTATION")
        <<",\"clock_origin_ms\":"<<base<<",\"real_os_input\":false,\"capture_latency_ms_assumption\":"<<opt.capture_latency
        <<",\"input_latency_ms_assumption\":"<<opt.input_latency<<",\"provisional_targets_debug\":"<<(opt.allow_provisional?"true":"false")
        <<",\"manual_roi_debug\":"<<(opt.manual_roi?"true":"false")<<",\"processing_clock\":"
        <<json_string(opt.deterministic_processing?"DETERMINISTIC_CONTRACT_FIXTURE":"MEASURED_NATIVE_PROCESSING")<<"}\n";
     CombatContext context{true,true,true,1};DispatchGuard input_guard;
     std::vector<AcceptedDodge> accepted;std::vector<double> processing,age;
-    std::uint64_t processed=0,dropped=0,decoded=1,rejected=0;double available=base,last_pts=0;
+    std::uint64_t processed=0,dropped=0,decoded=1,rejected=0,new_temporal_predictions=0,semantic_confirmed_frames=0;
+    double available=base,last_pts=0;
     bool have_next=true;
     while(have_next) {
         // Model a one-slot latest-frame mailbox: all decoded frames that arrived
@@ -124,6 +126,8 @@ int run(const std::vector<std::filesystem::path>& args) {
             return begin+std::chrono::duration<double,std::milli>(Steady::now()-wall_begin).count();
         };
         const auto result=pipeline.process(frame,context,clock);available=result.decision_ms;
+        if(!opt.cv_debug&&result.new_prediction)++new_temporal_predictions;
+        if(result.targets.identity_certain)++semantic_confirmed_frames;
         processing.push_back(result.processing_ms);age.push_back(result.decision_ms-frame.source_ms);
         const auto& p=result.prediction;
         trace<<"{\"event\":\"PREDICTION\",\"sequence\":"<<frame.sequence<<",\"generation\":"<<frame.generation
@@ -134,10 +138,14 @@ int run(const std::vector<std::filesystem::path>& args) {
             <<",\"target_model_reason\":"<<json_string(result.target_model.reason)
             <<",\"gameplay_trained\":"<<(p.trained?"true":"false")<<",\"auto_eligible\":"<<(p.auto_eligible?"true":"false")
             <<",\"new_prediction\":"<<(result.new_prediction?"true":"false")<<",\"target_lineage\":"<<result.targets.track_lineage
+            <<",\"temporal_history_size\":"<<result.model.history_size<<",\"temporal_length\":"<<result.model.temporal_length
+            <<",\"prediction_source_ms\":";optional_number(trace,p.valid,p.source_ms);
+        trace<<",\"prediction_sequence\":"<<(p.valid?p.sequence:0)
             <<",\"semantic_targets_confirmed\":"<<(result.targets.identity_certain?"true":"false")
             <<",\"target_reason\":"<<json_string(result.targets.reason)<<",\"roi\":["<<result.roi.left<<','<<result.roi.top<<','<<result.roi.right<<','<<result.roi.bottom<<']'
-            <<",\"attack_class\":"<<json_string(p.valid?attack_classes[std::clamp(p.attack_class,0,13)]:"UNKNOWN")
-            <<",\"attack_state\":"<<json_string(p.valid?movement_states[std::clamp(p.state,0,8)]:"UNKNOWN")
+            <<",\"attack_class\":"<<json_string(p.valid&&p.trained&&p.class_supported?attack_classes[std::clamp(p.attack_class,0,13)]:"UNKNOWN_ATTACK")
+            <<",\"attack_state\":"<<json_string(p.valid&&p.trained&&p.state_supported?movement_states[std::clamp(p.state,0,8)]:"UNKNOWN_STATE")
+            <<",\"class_supported\":"<<(p.class_supported?"true":"false")<<",\"state_supported\":"<<(p.state_supported?"true":"false")
             <<",\"attack_probability\":";optional_number(trace,p.valid&&p.trained&&p.attack_supported,p.attack_probability);
         trace<<",\"threat_probability\":";optional_number(trace,p.valid&&p.trained&&p.threat_supported,p.threat_probability);
         trace<<",\"tti_ms\":";optional_number(trace,p.valid&&p.trained&&p.tti_supported,p.tti_ms);
@@ -165,7 +173,8 @@ int run(const std::vector<std::filesystem::path>& args) {
                 <<",\"video_timestamp_ms\":"<<dispatch-base<<",\"direction\":"<<json_string(dodge_direction_name(result.direction.direction))
                 <<",\"reason\":"<<json_string(rejection?rejection:"SHADOW_TOKEN_CONSUMED")<<"}\n";
             if(rejection)++rejected;
-            else accepted.push_back({dispatch-base,frame.sequence,result.action.decision.episode,static_cast<int>(result.direction.direction),p.valid?attack_classes[std::clamp(p.attack_class,0,13)]:"CV_HEURISTIC"});
+            else accepted.push_back({dispatch-base,frame.sequence,result.action.decision.episode,static_cast<int>(result.direction.direction),
+                opt.cv_debug?"CV_HEURISTIC":p.valid&&p.trained&&p.class_supported?attack_classes[std::clamp(p.attack_class,0,13)]:"UNKNOWN_ATTACK"});
         }
     }
     if(!trace)throw std::runtime_error("Writing replay trace failed");
@@ -175,9 +184,13 @@ int run(const std::vector<std::filesystem::path>& args) {
     report<<"{\"contract\":\"svai-shared-native-replay-v1\",\"video\":"<<json_string(utf8(opt.video.filename()))
         <<",\"source_sha256\":"<<json_string(video_hash)<<",\"model_sha256\":"<<json_string(model_hash)
         <<",\"target_model_sha256\":"<<json_string(target_hash)
+        <<",\"first_decoder_pts_ms\":"<<first_pts<<",\"annotation_time_origin\":\"FIRST_DECODED_FRAME\""
+        <<",\"decoder_clock\":"<<json_string(opt.video.extension()==".svr"?"PRESERVED_SVR_PTS":"WINDOWS_MEDIA_FOUNDATION_PRESENTATION")
         <<",\"model_version\":"<<json_string(status.version)<<",\"provider\":"<<json_string(status.provider)
         <<",\"gameplay_trained\":"<<(status.trained?"true":"false")<<",\"auto_eligible\":"<<(status.auto_eligible?"true":"false")
         <<",\"real_os_input\":false,\"decoded_frames\":"<<decoded<<",\"processed_frames\":"<<processed
+        <<",\"new_temporal_predictions\":"<<new_temporal_predictions<<",\"semantic_confirmed_frames\":"<<semantic_confirmed_frames
+        <<",\"manual_roi_debug\":"<<(opt.manual_roi?"true":"false")<<",\"provisional_targets_debug\":"<<(opt.allow_provisional?"true":"false")
         <<",\"latest_mailbox_dropped_frames\":"<<dropped<<",\"last_video_pts_ms\":"<<last_pts
         <<",\"simulated_input_accepted\":"<<accepted.size()<<",\"simulated_input_rejected\":"<<rejected
         <<",\"processing_ms_p50\":"<<quantile(processing,0.5)<<",\"processing_ms_p95\":"<<quantile(processing,0.95)

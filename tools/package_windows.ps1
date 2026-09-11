@@ -5,6 +5,16 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 if (-not $SourceSha) { $SourceSha = (git rev-parse HEAD) }
+# A reused package can silently retain an older model or DLL even when the
+# current manifest excludes it. Never ship leftovers or delete a caller's path.
+if (Test-Path $OutputDirectory) {
+    if (-not (Test-Path $OutputDirectory -PathType Container)) {
+        throw 'Package output path must be a directory'
+    }
+    if (Get-ChildItem -LiteralPath $OutputDirectory -Force | Select-Object -First 1) {
+        throw 'Package output directory must be empty; choose a new output directory to prevent stale models or runtime files'
+    }
+}
 New-Item -ItemType Directory -Force $OutputDirectory | Out-Null
 foreach ($name in @('Models/production', 'Runtime', 'Config', 'LICENSES')) {
     New-Item -ItemType Directory -Force "$OutputDirectory/$name" | Out-Null

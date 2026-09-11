@@ -17,17 +17,24 @@ def binary_metrics(targets, probabilities, threshold):
             "brier": float(np.mean((np.asarray(probabilities)-y)**2))}
 
 
-def summarize_predictions(rows, thresholds=None, include_groups=True):
+def summarize_predictions(rows, thresholds=None, include_groups=True, supported_heads=None):
     thresholds = thresholds or {"attack": 0.8, "threat": 0.85}
     result = {"metric_unit": "reviewed clip anchor; not live events", "sample_count": len(rows)}
     for head in ("attack", "threat"):
         usable = [r for r in rows if r.get("labels", {}).get(head) is not None]
-        result[head] = binary_metrics([r["labels"][head] for r in usable], [r[f"{head}_probability"] for r in usable], thresholds[head])
+        supported = supported_heads is None or bool(supported_heads.get(head+"_supported"))
+        result[head] = binary_metrics([r["labels"][head] for r in usable] if supported else [],
+                                     [r[f"{head}_probability"] for r in usable] if supported else [], thresholds[head])
+        result[head].update(model_head_supported=supported, available_label_count=len(usable))
     timing = [r for r in rows if r.get("labels", {}).get("tti_ms") is not None
               and not r["labels"].get("tti_censored", True)
               and r["labels"].get("impact_evidence") == "OBSERVED_CONTACT"]
+    timing_supported = supported_heads is None or bool(supported_heads.get("tti_supported"))
+    if not timing_supported:
+        timing = []
     error = np.asarray([r["tti_ms"]-r["labels"]["tti_ms"] for r in timing])
     result["tti"] = {"observed_samples": len(timing), "censored_or_unsupported_samples": len(rows)-len(timing),
+                     "model_head_supported": timing_supported,
                      "mae_ms": float(np.abs(error).mean()) if timing else None,
                      "p90_absolute_error_ms": float(np.quantile(np.abs(error), 0.90)) if timing else None,
                      "signed_bias_ms": float(error.mean()) if timing else None,
@@ -36,8 +43,12 @@ def summarize_predictions(rows, thresholds=None, include_groups=True):
     directions = [r for r in rows if r.get("labels", {}).get("attack_direction") not in (None, "UNKNOWN")
                   and r["labels"].get("attack_direction_evidence") == "VISUAL_TRAJECTORY"
                   and r["labels"].get("attack_direction_space") == "SCREEN_WITH_WOLF_REFERENCE"]
+    direction_supported = supported_heads is None or bool(supported_heads.get("attack_direction_supported"))
+    if not direction_supported:
+        directions = []
     result["attack_direction"] = {
         "observed_trajectory_samples": len(directions),
+        "model_head_supported": direction_supported,
         "accuracy": sum(r.get("attack_direction_prediction") == r["labels"]["attack_direction"]
                         for r in directions)/len(directions) if directions else None,
         "semantics": "Visual attack path; this is not a safe Dodge-direction success metric"}
@@ -51,7 +62,7 @@ def summarize_predictions(rows, thresholds=None, include_groups=True):
             for row in rows:
                 key = row.get("boss", "UNKNOWN") if field == "boss" else row.get("labels", {}).get("class") or "UNKNOWN"
                 groups.setdefault(key, []).append(row)
-            result[f"per_{field}"] = {key: summarize_predictions(group, thresholds, False) for key, group in groups.items()}
+            result[f"per_{field}"] = {key: summarize_predictions(group, thresholds, False, supported_heads) for key, group in groups.items()}
     return result
 
 

@@ -130,7 +130,7 @@ class CausalLucasKanade(nn.Module):
     Solve the brightness-constancy normal equations over a 5x5 neighborhood at
     40x40 resolution. This is a small-displacement, single-level Lucas-Kanade
     estimate, not learned pose, a weapon tracker or large-motion ground truth.
-    Texture confidence suppresses aperture/flat-region instability. Subtract
+    Regularization limits aperture/flat-region instability. Subtract
     spatial mean flow before feature fusion to remove uniform translation;
     rotation/parallax/zoom still require hard negatives. Only t-1 and t are read.
     All operators export inside ONNX, so native and training use the same flow.
